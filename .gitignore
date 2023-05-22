@@ -1,0 +1,8 @@
+*.pyc
+*.DS_Store
+analysed_repositories/
+output/codeable_models/*
+output/logs/*
+output/png/*
+output/results/*
+output/traceability/*
