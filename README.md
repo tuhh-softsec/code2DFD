@@ -1,9 +1,26 @@
 ## Code2DFD
 
-
 Code2DFD can automatically extract dataflow diagrams (DFDs) that are enriched with security-relevant annotations from the source code of microservice applications.
 It is structured as a framework, where the *technology-specific extractors* in `technology_specific_extractors/` are executed and detect evidence for DFD items in the code.
 They use some general functionality from `core/`.
+
+The tool and underlying approach are presented in a publication in the Journal of Systems and Software (JSS).
+You can find the paper on [arXiv](https://arxiv.org/abs/2304.12769) or the publisher's [website](https://www.sciencedirect.com/science/article/abs/pii/S0164121223001176).
+If you use the tool in a scientific context, please cite as:
+
+```bibtex
+@inproceedings{Code2DFD23,
+  title = {Automatic Extraction of Security-Rich Dataflow Diagrams for Microservice Applications written in Java},
+  journal = {Journal of Systems and Software},
+  volume = {202},
+  pages = {111722},
+  year = {2023},
+  issn = {0164-1212},
+  doi = {https://doi.org/10.1016/j.jss.2023.111722},
+  author = {Simon Schneider and Riccardo Scandariato},
+  keywords = {Dataflow diagram, Automatic extraction, Security, Microservices, Architecture reconstruction, Feature detection}
+}
+```
 
 
 ##### 1. Installation and configuration
@@ -11,6 +28,7 @@ Before running the tool, [Python](https://www.python.org/downloads/) version 3.x
 The path to the application that is to be analysed can be written in the `config/config.ini` file or given as parameter (see 2.).
 A number of repositories is already given in that file, for all of which a manually created DFD exists [here](https://github.com/tuhh-softsec/microSecEnD).
 The corresponding path only needs to be un-commented for analysis (all others have to be commented out with a ";")
+
 
 ##### 2. Running the tool
 To start the tool via the terminal, simply enter `python3 code2DFD.py` in a command line opened in the root directory.

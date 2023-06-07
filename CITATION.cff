@@ -1,0 +1,46 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Code2DFD
+message: 'If you use this tool, please cite it as below.'
+type: software
+authors:
+  - given-names: Simon
+    family-names: Schneider
+    orcid: 'https://orcid.org/0000-0001-8605-615X'
+  - given-names: Riccardo
+    family-names: Scandariato
+    orcid: 'https://orcid.org/0000-0003-3591-7671'
+abstract: >-
+  Dataflow diagrams (DFDs) are a valuable asset for securing
+  applications, as they are the starting point for many
+  security assessment techniques. Their creation, however,
+  is often done manually, which is time-consuming and
+  introduces problems concerning their correctness.
+  Furthermore, as applications are continuously extended and
+  modified in CI/CD pipelines, the DFDs need to be kept in
+  sync, which is also challenging. In this paper, we present
+  a novel, tool-supported technique to automatically extract
+  DFDs from the implementation code of microservices. The
+  technique parses source code and configuration files in
+  search for keywords that are used as evidence for the
+  model extraction. Our approach uses a novel technique that
+  iteratively detects new keywords, thereby snowballing
+  through an application's codebase. Coupled with other
+  detection techniques, it produces a fully-fledged DFD
+  enriched with security-relevant annotations. The extracted
+  DFDs further provide full traceability between model items
+  and code snippets. We evaluate our approach and the
+  accompanying prototype for applications written in Java on
+  a manually curated dataset of 17 open-source applications.
+  In our testing set of applications, we observe an overall
+  precision of 93% and recall of 85%. 
+keywords:
+  - Dataflow diagram
+  - Automatic extraction
+  - Security
+  - Microservices
+  - Architecture reconstruction
+  - Feature detection
+license: Apache-2.0
