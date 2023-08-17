@@ -1,5 +1,6 @@
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
+import output_generators.traceability as traceability
 
 
 def detect_local_logging(microservices: dict, information_flows: dict) -> dict:
@@ -36,6 +37,15 @@ def detect_loggerfactory(microservices: dict) -> dict:
                                         except:
                                             microservices[m]["stereotype_instances"] = ["local_logging"]
                                         found = True
+
+                                        trace = dict()
+                                        trace["parent_item"] = microservices[m]["servicename"]
+                                        trace["item"] = "local_logging"
+                                        trace["file"] = results[r]["path"]
+                                        trace["line"] = results[r]["line_nr"]
+                                        trace["span"] = results[r]["span"]
+                                        traceability.add_trace(trace)
+
                                         break
                                     if found: break
                             if found: break
@@ -79,5 +89,12 @@ def detect_lombok(microservices: dict) -> dict:
                             microservices[m]["tagged_values"].append(("Logging Technology", "Lombok"))
                         except:
                             microservices[m]["tagged_values"] = [("Logging Technology", "Lombok")]
+                        trace = dict()
+                        trace["parent_item"] = microservices[m]["servicename"]
+                        trace["item"] = "local_logging"
+                        trace["file"] = results[r]["path"]
+                        trace["line"] = results[r]["line_nr"]
+                        trace["span"] = results[r]["span"]
+                        traceability.add_trace(trace)
 
     return microservices

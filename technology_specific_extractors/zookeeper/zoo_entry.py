@@ -1,3 +1,5 @@
+import output_generators.traceability as traceability
+
 
 def detect_zookeeper(microservices: dict, information_flows: dict) -> dict:
     """Detects ZooKeeper config services.

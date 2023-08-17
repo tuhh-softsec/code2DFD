@@ -26,7 +26,6 @@ def detect_server_docker(microservices: dict, information_flows: dict) -> dict:
 
         for m in microservices.keys():
             if microservices[m]["servicename"] == prometheus_server:
-                microservices[m]["type"] = "infrastructural_service"
                 if "stereotype_instances" in microservices[m]:
                     microservices[m]["stereotype_instances"].append("metrics_server")
                 else:
@@ -46,7 +45,6 @@ def detect_server_docker(microservices: dict, information_flows: dict) -> dict:
             microservices[id] = dict()
             microservices[id]["servicename"] = "prometheus_server"
             microservices[id]["image"] = results[r]["path"]
-            microservices[id]["type"] = "infrastructural"
             microservices[id]["stereotype_instances"] = ["metrics_server"]
             microservices[id]["tagged_values"] = [("Metrics Server", "Prometheus")]
 
@@ -87,8 +85,8 @@ def detect_connections(microservices: dict, information_flows: dict, dockerfile,
                                         if prop[0] == "Port":
                                             if str(prop[1]) == str(part):
                                                 target_service = microservices[m]["servicename"]
-                                except Exception as e:
-                                    print(e)
+                                except:
+                                    print("failed tagged_values for" + microservices[m]["servicename"])
                     else:
                         parts = line.split(":")
                         for part in parts:

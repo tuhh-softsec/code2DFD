@@ -38,7 +38,6 @@ def detect_config_server(microservices: dict):
 
         for m in microservices.keys():
             if microservices[m]["servicename"] == config_server:
-                microservices[m]["type"] = "infrastructural_service"
                 try:
                     microservices[m]["stereotype_instances"].append("configuration_server")
                 except:
@@ -68,6 +67,23 @@ def detect_config_server(microservices: dict):
                         config_file_path = prop[1]
                     elif prop[0] == "config_repo_uri":
                         config_repo_uri = prop[1]
+
+                        trace = dict()
+                        trace["item"] = "github-repository"
+                        trace["file"] = prop[2][0]
+                        trace["line"] = prop[2][1]
+                        trace["span"] = prop[2][2]
+
+                        traceability.add_trace(trace)
+
+                        trace = dict()
+                        trace["item"] = "github-repository -> " + config_server
+                        trace["file"] = prop[2][0]
+                        trace["line"] = prop[2][1]
+                        trace["span"] = prop[2][2]
+
+                        traceability.add_trace(trace)
+
                     elif prop[0] == "config_file_path_local":
                         config_file_path_local = prop[1]
                     elif prop[0] == "port":
@@ -80,6 +96,7 @@ def detect_config_clients(microservices: dict, information_flows: dict, config_s
     """
 
     config_id = False
+    trace_file = False
 
     for m in microservices.keys():
         if microservices[m]["servicename"] == config_server:
@@ -98,8 +115,14 @@ def detect_config_clients(microservices: dict, information_flows: dict, config_s
                 trace_span = prop[2][2]
             elif prop[0] == "config_username":
                 config_username = env.resolve_env_var(prop[1])
+                trace_file = prop[2][0]
+                trace_line = prop[2][1]
+                trace_span = prop[2][2]
             elif prop[0] == "config_password":
                 config_password = env.resolve_env_var(prop[1])
+                trace_file = prop[2][0]
+                trace_line = prop[2][1]
+                trace_span = prop[2][2]
         # pw & user
 
         if not config_connected and config_uri:
@@ -126,12 +149,13 @@ def detect_config_clients(microservices: dict, information_flows: dict, config_s
             information_flows[id]["receiver"] = microservices[m]["servicename"]
             information_flows[id]["stereotype_instances"] = ["restful_http"]
 
-            trace = dict()
-            trace["item"] = config_server + " -> " + microservices[m]["servicename"]
-            trace["file"] = trace_file
-            trace["line"] = trace_line
-            trace["span"] = trace_span
-            traceability.add_trace(trace)
+            if trace_file:
+                trace = dict()
+                trace["item"] = config_server + " -> " + microservices[m]["servicename"]
+                trace["file"] = trace_file
+                trace["line"] = trace_line
+                trace["span"] = trace_span
+                traceability.add_trace(trace)
 
             if config_username:
                 information_flows[id]["stereotype_instances"].append("plaintext_credentials_link")
@@ -145,6 +169,16 @@ def detect_config_clients(microservices: dict, information_flows: dict, config_s
                         microservices[config_id]["tagged_values"].append(("Username", config_username))
                     else:
                         microservices[config_id]["tagged_values"] = [("Username", config_username)]
+
+                    if trace_file:
+                        trace = dict()
+                        trace["parent_item"] = microservices[config_id]["servicename"]
+                        trace["item"] = "plaintext_credentials"
+                        trace["file"] = trace_file
+                        trace["line"] = trace_line
+                        trace["span"] = trace_span
+                        traceability.add_trace(trace)
+
             if config_password:
                 information_flows[id]["stereotype_instances"].append("plaintext_credentials_link")
                 if config_id:
@@ -157,6 +191,15 @@ def detect_config_clients(microservices: dict, information_flows: dict, config_s
                         microservices[config_id]["tagged_values"].append(("Password", config_password))
                     else:
                         microservices[config_id]["tagged_values"] = [("Password", config_password)]
+
+                    if trace_file:
+                        trace = dict()
+                        trace["parent_item"] = microservices[config_id]["servicename"]
+                        trace["item"] = "plaintext_credentials"
+                        trace["file"] = trace_file
+                        trace["line"] = trace_line
+                        trace["span"] = trace_span
+                        traceability.add_trace(trace)
 
     return microservices, information_flows
 

@@ -143,6 +143,14 @@ def detect_nginx(microservices: dict, information_flows: dict, external_componen
                 microservices[id]["tagged_values"] = [("Web Application", "Nginx")]
                 correct_id = id
 
+                trace = dict()
+                trace["item"] = service_name
+                trace["file"] = results[r]["path"]
+                trace["line"] = results[r]["line_nr"]
+                trace["span"] = results[r]["span"]
+
+                traceability.add_trace(trace)
+
             # Look for config file
             config_name = False
             for line in results[r]["content"]:

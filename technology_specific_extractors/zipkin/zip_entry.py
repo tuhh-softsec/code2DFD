@@ -94,10 +94,10 @@ def detect_zipkin_server(microservices: dict, information_flows: dict, iterative
         microservices[id] = dict()
         microservices[id]["servicename"] = "zipkin-server"
         microservices[id]["image"] = "placeholder_image"
-        microservices[id]["type"] = "infrastructural"
         microservices[id]["properties"] = [("port", port, ("file", "line", "span"))]
-        microservices[id]["stereotype_instances"] = ["infrastructural", "tracing_server"]
+        microservices[id]["stereotype_instances"] = ["tracing_server"]
         microservices[id]["tagged_values"] = [("Tracing Server", "Zipkin")]
+
 
         if not iterative:
             microservices, information_flows = detect_zipkin_server(microservices, information_flows, True)

@@ -133,8 +133,8 @@ def get_outgoing_endpoints(routings: set) -> set:
                                         try:
                                             exchange = parameters[i]
                                             routingKey = parameters[i + 1]
-                                        except Exception as e:
-                                            print(e)
+                                        except:
+                                            print("Could not extract exchange and routing key from sending-statement")
                                         found = True
                                 i += 1
 
@@ -326,6 +326,15 @@ def detect_rabbitmq_server(microservices: dict) -> dict:
                         if microservices[m]["servicename"] == s:
                             microservices[m]["stereotype_instances"].append("message_broker")
                             microservices[m]["tagged_values"].append(("Message Broker", "RabbitMQ"))
+
+                            trace = dict()
+                            trace["parent_item"] = microservices[m]["servicename"]
+                            trace["item"] = "message_broker"
+                            trace["file"] = "heuristic, based on image in Docker Compose"
+                            trace["line"] = "heuristic, based on image in Docker Compose"
+                            trace["span"] = "heuristic, based on image in Docker Compose"
+                            traceability.add_trace(trace)
+
             except:
                 pass
             try:
@@ -335,6 +344,14 @@ def detect_rabbitmq_server(microservices: dict) -> dict:
                         if microservices[m]["servicename"] == s:
                             microservices[m]["stereotype_instances"].append("message_broker")
                             microservices[m]["tagged_values"].append(("Message Broker", "RabbitMQ"))
+
+                            trace = dict()
+                            trace["parent_item"] = microservices[m]["servicename"]
+                            trace["item"] = "message_broker"
+                            trace["file"] = "heuristic, based on image in Docker Compose"
+                            trace["line"] = "heuristic, based on image in Docker Compose"
+                            trace["span"] = "heuristic, based on image in Docker Compose"
+                            traceability.add_trace(trace)
             except:
                 pass
     else:
@@ -346,6 +363,14 @@ def detect_rabbitmq_server(microservices: dict) -> dict:
                         if microservices[m]["servicename"] == s:
                             microservices[m]["stereotype_instances"].append("message_broker")
                             microservices[m]["tagged_values"].append(("Message Broker", "RabbitMQ"))
+
+                            trace = dict()
+                            trace["parent_item"] = m
+                            trace["item"] = "message_broker"
+                            trace["file"] = "heuristic"
+                            trace["line"] = "heuristic"
+                            trace["span"] = "heuristic"
+                            traceability.add_trace(trace)
             except:
                 pass
             try:
@@ -355,6 +380,14 @@ def detect_rabbitmq_server(microservices: dict) -> dict:
                         if microservices[m]["servicename"] == s:
                             microservices[m]["stereotype_instances"].append("message_broker")
                             microservices[m]["tagged_values"].append(("Message Broker", "RabbitMQ"))
+
+                            trace = dict()
+                            trace["parent_item"] = m
+                            trace["item"] = "message_broker"
+                            trace["file"] = "heuristic"
+                            trace["line"] = "heuristic"
+                            trace["span"] = "heuristic"
+                            traceability.add_trace(trace)
             except:
                 pass
 

@@ -1,5 +1,6 @@
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
+import output_generators.traceability as traceability
 
 
 def detect_authentication_scopes(microservices: dict) -> dict:
@@ -56,7 +57,7 @@ def detect_configurations():
                         if "{" in configuration:
                             configuration = configuration.split("{")[1]
                         if object + "." in configuration:
-                            configurations.add(configuration)
+                            configurations.add((configuration, results[r]["path"], results[r]["line_nr"], results[r]["span"]))
             configuration_tuples.append((microservice, configurations))
 
     return configuration_tuples
@@ -70,29 +71,62 @@ def interpret_configurations(microservices: dict, configuration_tuples: list) ->
         stereotypes, tagged_values = list(), list()
         # create stereotypes and tagged_values
         for configuration in configuration_tuple[1]:
+
             scope_restricted = False
             # CSRF
-            if "csrf().disable()" in configuration or "csrf.disable()" in configuration:
+            if "csrf().disable()" in configuration[0] or "csrf.disable()" in configuration[0]:
                 stereotypes.append("csrf_disabled")
+
+                trace = dict()
+                trace["parent_item"] = configuration_tuple[0]
+                trace["item"] = "csrf_disabled"
+                trace["file"] = configuration[1]
+                trace["line"] = configuration[2]
+                trace["span"] = configuration[3]
+                traceability.add_trace(trace)
             # unauthenticated access
-            if "permitAll()" in configuration:
+            if "permitAll()" in configuration[0]:
                 scope_restricted = True
             # Basic atuhentication
-            if "httpBasic()" in configuration:
+            if "httpBasic()" in configuration[0]:
                 stereotypes.append("basic_authentication")
+
+                trace = dict()
+                trace["parent_item"] = configuration_tuple[0]
+                trace["item"] = "basic_authentication"
+                trace["file"] = configuration[1]
+                trace["line"] = configuration[2]
+                trace["span"] = configuration[3]
+                traceability.add_trace(trace)
             # In Memory authentication
-            if "inMemoryAuthentication()" in configuration:
+            if "inMemoryAuthentication()" in configuration[0]:
                 stereotypes.append("in_memory_authentication")
+
+                trace = dict()
+                trace["parent_item"] = configuration_tuple[0]
+                trace["item"] = "in_memory_authentication"
+                trace["file"] = configuration[1]
+                trace["line"] = configuration[2]
+                trace["span"] = configuration[3]
+                traceability.add_trace(trace)
             # Authentication credentials
-            if "withUser(" in configuration:
-                username = configuration.split("withUser(")[1].split(")")[0].strip("\" ")
+            if "withUser(" in configuration[0]:
+                username = configuration[0].split("withUser(")[1].split(")")[0].strip("\" ")
                 tagged_values.append(("Username", username))
-            if "password(" in configuration:
-                password = configuration.split("password(")[1].split(")")[0].strip("\" ")
+            if "password(" in configuration[0]:
+                password = configuration[0].split("password(")[1].split(")")[0].strip("\" ")
                 tagged_values.append(("Password", password))
             # Authentication scope
-            if "anyRequest().authenticated()" in configuration and not scope_restricted:
+            if "anyRequest().authenticated()" in configuration[0] and not scope_restricted:
                 stereotypes.append("authentication_scope_all_requests")
+
+                trace = dict()
+                trace["parent_item"] = configuration_tuple[0]
+                trace["item"] = "authentication_scope_all_requests"
+                trace["file"] = configuration[1]
+                trace["line"] = configuration[2]
+                trace["span"] = configuration[3]
+                traceability.add_trace(trace)
 
         for m in microservices.keys():
             if microservices[m]["servicename"] == configuration_tuple[0]:

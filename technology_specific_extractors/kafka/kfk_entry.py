@@ -20,10 +20,12 @@ def set_information_flows() -> set:
     else:
         information_flows = dict()
 
+
     microservices = tech_sw.get_microservices()
 
     incoming_endpoints = get_incoming_endpoints()
     outgoing_endpoints = get_outgoing_endpoints()
+
     new_information_flows = match_incoming_to_outgoing_endpoints(microservices, incoming_endpoints, outgoing_endpoints)
 
     # merge old and new flows
@@ -37,6 +39,7 @@ def set_information_flows() -> set:
     information_flows = detect_stream_binders(microservices, information_flows)
 
     tmp.tmp_config.set("DFD", "information_flows", str(information_flows))
+
     return information_flows
 
 
@@ -235,7 +238,8 @@ def match_incoming_to_outgoing_endpoints(microservices: dict, incoming_endpoints
 
             # Traceability
             trace = dict()
-            trace["item"] = str(kafka_server) + " -> " + str(i[1])
+
+            trace["item"] = str(o[1]) + " -> " + str(kafka_server)
             trace["file"] = o[3][0]
             trace["line"] = o[3][1]
             trace["span"] = o[3][2]
@@ -243,7 +247,7 @@ def match_incoming_to_outgoing_endpoints(microservices: dict, incoming_endpoints
             traceability.add_trace(trace)
 
             trace = dict()
-            trace["parent_item"] = str(kafka_server) + " -> " + str(i[1])
+            trace["parent_item"] = str(o[1]) + " -> " + str(kafka_server)
             trace["item"] = "message_producer_kafka"
             trace["file"] = o[3][0]
             trace["line"] = o[3][1]
@@ -323,7 +327,6 @@ def detect_kafka_server(microservices: dict) -> dict:
                     for id in microservices.keys():
                         if microservices[id]["servicename"] == s:
                             kafka_server = microservices[id]["servicename"]
-                            microservices[id]["type"] = "infrastructural_service"
                             try:
                                 microservices[id]["stereotype_instances"].append("message_broker")
                             except:
@@ -332,6 +335,15 @@ def detect_kafka_server(microservices: dict) -> dict:
                                 microservices[id]["tagged_values"].append(("Message Broker", "Kafka"))
                             except:
                                 microservices[id]["tagged_values"] = [("Message Broker", "Kafka")]
+
+                            trace = dict()
+                            trace["parent_item"] = microservices[id]["servicename"]
+                            trace["item"] = "message_broker"
+                            trace["file"] = "heuristic, based on image in Docker Compose"
+                            trace["line"] = "heuristic, based on image in Docker Compose"
+                            trace["span"] = "heuristic, based on image in Docker Compose"
+
+                            traceability.add_trace(trace)
             except:
                 pass
     else:
@@ -342,7 +354,6 @@ def detect_kafka_server(microservices: dict) -> dict:
                     for id in microservices.keys():
                         if microservices[id]["servicename"] == s:
                             kafka_server = microservices[id]["servicename"]
-                            microservices[id]["type"] = "infrastructural_service"
                             try:
                                 microservices[id]["stereotype_instances"].append("message_broker")
                             except:
@@ -351,6 +362,15 @@ def detect_kafka_server(microservices: dict) -> dict:
                                 microservices[id]["tagged_values"].append(("Message Broker", "Kafka"))
                             except:
                                 microservices[id]["tagged_values"] = [("Message Broker", "Kafka")]
+
+                            trace = dict()
+                            trace["parent_item"] = microservices[id]["servicename"]
+                            trace["item"] = "message_broker"
+                            trace["file"] = "heuristic, based on image in Docker Compose"
+                            trace["line"] = "heuristic, based on image in Docker Compose"
+                            trace["span"] = "heuristic, based on image in Docker Compose"
+
+                            traceability.add_trace(trace)
             except:
                 pass
     return microservices

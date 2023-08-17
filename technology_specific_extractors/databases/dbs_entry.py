@@ -1,5 +1,5 @@
 import core.file_interaction as fi
-
+import output_generators.traceability as traceability
 
 def detect_databases(microservices: dict) -> dict:
     """Detects databases.
@@ -23,6 +23,14 @@ def detect_databases(microservices: dict) -> dict:
                 microservices[m]["tagged_values"].append(("Database", database))
             else:
                 microservices[m]["tagged_values"] = [("Database", database)]
+
+            trace = dict()
+            trace["parent_item"] = microservices[m]["servicename"]
+            trace["item"] = "database"
+            trace["file"] = "heuristic, based on image"
+            trace["line"] = "heuristic, based on image"
+            trace["span"] = "heuristic, based on image"
+            traceability.add_trace(trace)
         else:
             microservices = detect_via_docker(microservices, m)
 
@@ -54,5 +62,12 @@ def detect_via_docker(microservices: dict, m: int) -> dict:
             microservices[m]["tagged_values"].append(("Database", database))
         except:
             microservices[m]["tagged_values"] = [("Database", database)]
+        trace = dict()
+        trace["parent_item"] = microservices[m]["servicename"]
+        trace["item"] = "database"
+        trace["file"] = "heuristic, based on Dockerfile base image"
+        trace["line"] = "heuristic, based on Dockerfile base image"
+        trace["span"] = "heuristic, based on Dockerfile base image"
+        traceability.add_trace(trace)
 
     return microservices

@@ -1,9 +1,11 @@
 import ast
 from datetime import datetime
 
+import output_generators.calculate_metrics as calculate_metrics
 import output_generators.codeable_model as codeable_model
 import core.technology_switch as tech_sw
 import tmp.tmp as tmp
+import output_generators.json_architecture as json_architecture
 import output_generators.traceability as traceability
 import output_generators.visualizer as visualizer
 from technology_specific_extractors.apache_httpd.aph_entry import detect_apachehttpd_webserver
@@ -40,6 +42,8 @@ from technology_specific_extractors.turbine.trb_entry import detect_turbine
 from technology_specific_extractors.zipkin.zip_entry import detect_zipkin_server
 from technology_specific_extractors.zookeeper.zoo_entry import detect_zookeeper
 from technology_specific_extractors.zuul.zul_entry import detect_zuul
+
+import check_traceability
 
 
 def dev_print(message: str):
@@ -115,7 +119,9 @@ def perform_analysis():
     print("\nFinished extraction. Results:\n")
     repo_path = repo_path.replace("/", "_")
     filename = "./output/results/" + repo_path + ".txt"
+    filename_dict = "./output/results/dict_" + repo_path + ".txt"
     output_file = open(filename, "w")
+    output_file_dict = open(filename_dict, "w")
 
     if information_flows:
         print("\nInformation Flows:")
@@ -141,6 +147,15 @@ def perform_analysis():
             print("\t", external_components[e])
             output_file.write("\n" + str(external_components[e]))
 
+    # Writing dict for calculating metrics
+    complete = dict()
+    complete["microservices"] = microservices
+    complete["information_flows"] = information_flows
+    complete["external_components"] = external_components
+
+    output_file_dict.write(str(complete))
+
+    output_file_dict.close()
     output_file.close()
 
     # Saving
@@ -151,6 +166,11 @@ def perform_analysis():
     codeable_models, codeable_models_path = codeable_model.output_codeable_model(microservices, information_flows, external_components)
     traceability_content = traceability.output_traceability()
     visualizer.output_png(codeable_models_path)
+    json_architecture.generate_json_architecture(microservices, information_flows, external_components)
+
+    calculate_metrics.calculate_single_system(repo_path)
+
+    check_traceability.check_traceability(microservices, information_flows, external_components, traceability_content)
 
     return codeable_models, traceability_content
 
@@ -275,6 +295,30 @@ def detect_miscellaneous(microservices: dict, information_flows: dict, external_
 
                     traceability.add_trace(trace)
 
+                    trace["parent_item"] = "mail-server"
+                    trace["item"] = "entrypoint"
+                    trace["file"] = "heuristic"
+                    trace["line"] = "heuristic"
+                    trace["span"] = "heuristic"
+
+                    traceability.add_trace(trace)
+
+                    trace["parent_item"] = "mail-server"
+                    trace["item"] = "exitpoint"
+                    trace["file"] = "heuristic"
+                    trace["line"] = "heuristic"
+                    trace["span"] = "heuristic"
+
+                    traceability.add_trace(trace)
+
+                    trace["parent_item"] = "mail-server"
+                    trace["item"] = "mail_server"
+                    trace["file"] = "heuristic"
+                    trace["line"] = "heuristic"
+                    trace["span"] = "heuristic"
+
+                    traceability.add_trace(trace)
+
                     # create connection
                     try:
                         id2 = max(information_flows.keys()) + 1
@@ -316,6 +360,30 @@ def detect_miscellaneous(microservices: dict, information_flows: dict, external_
 
                     traceability.add_trace(trace)
 
+                    trace["parent_item"] = "external-website"
+                    trace["item"] = "entrypoint"
+                    trace["file"] = "heuristic"
+                    trace["line"] = "heuristic"
+                    trace["span"] = "heuristic"
+
+                    traceability.add_trace(trace)
+
+                    trace["parent_item"] = "external-website"
+                    trace["item"] = "exitpoint"
+                    trace["file"] = "heuristic"
+                    trace["line"] = "heuristic"
+                    trace["span"] = "heuristic"
+
+                    traceability.add_trace(trace)
+
+                    trace["parent_item"] = "external-website"
+                    trace["item"] = "external_website"
+                    trace["file"] = "heuristic"
+                    trace["line"] = "heuristic"
+                    trace["span"] = "heuristic"
+
+                    traceability.add_trace(trace)
+
                     # create connection
                     try:
                         id2 = max(information_flows.keys()) + 1
@@ -347,6 +415,14 @@ def detect_miscellaneous(microservices: dict, information_flows: dict, external_
                                 information_flows[id]["sender"] = microservices[m2]["servicename"]
                                 information_flows[id]["receiver"] = microservices[m]["servicename"]
                                 information_flows[id]["stereotype_instances"] = ["restful_http"]
+
+                                trace = dict()
+                                trace["item"] = microservices[m2]["servicename"] + " -> " + microservices[m]["servicename"]
+                                trace["file"] = prop[2][0]
+                                trace["line"] = prop[2][1]
+                                trace["span"] = prop[2][2]
+
+                                traceability.add_trace(trace)
     return microservices, information_flows, external_components
 
 

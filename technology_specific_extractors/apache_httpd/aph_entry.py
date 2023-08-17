@@ -97,13 +97,11 @@ def mark_server(microservices: dict, microservice: str) -> dict:
             id = 0
         microservices[id] = dict()
         microservices[id]["servicename"] = microservice
-        microservices[id]["type"] = "infrastructural_service"
         microservices[id]["stereotype_instances"] = ["web_server"]
         microservices[id]["tagged_values"] = [("Web Server", "Apache httpd")]
     else:
         for m in microservices.keys():
             if microservices[m]["servicename"] == microservice: # this is the service
-                microservices[m]["type"] = "infrastructural_service"
                 try:
                     microservices[m]["stereotype_instances"].append("web_server")
                 except:

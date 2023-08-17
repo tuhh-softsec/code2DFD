@@ -114,19 +114,6 @@ def extract_variable(line, submodule):
     return new_keyword
 
 
-def find_keywords(file_as_lines, file_path):
-    """Searches lines containing any of the keywords in a file.
-    Returns tuples (keyword, line nr, line, file_path) for each occurence.
-    """
-
-    lines = []
-    for k in ast.literal_eval(tmp.tmp_config["Analysis Profile"]["keywords_temp"]):
-        for line in range(len(file_as_lines)):
-            if k.casefold() in file_as_lines[line].casefold():
-                lines.append([k, line + 1, file_as_lines[line], file_path])
-    return lines
-
-
 def search_keywords(keywords: str):
     """Searches keywords locally using grep.
     """
@@ -178,25 +165,6 @@ def search_keywords(keywords: str):
                         results[id]["span"] = str(span)
             except Exception as e:
                 dev_print(e)
-    return results
-
-
-def convert_results(pagList):
-    """Takes paginated list object returned from GitHub API and converts it.
-    Output is tuple (keyword, line nr, line, file path, file name, config, import, comment, service) for each occurence.
-    """
-
-    results = list()
-    for p in pagList:   # paginated list format of objects received from GitHub API
-        containing_files_URLs = extract_downloadURL(p)
-        for file in containing_files_URLs.keys():             # adds found occurences to dictionary; f: path, URL, name
-            f = containing_files_URLs[file]
-            lines = file_as_lines(f["download_url"])
-            for r in find_keywords(lines, f["path"]):
-                entry = {"Keyword": r[0], "Line Nr.": r[1], "Line": r[2], "Path": r[3], "Filename": f["name"]}
-                results.append(entry)
-    microservices = tech_sw.get_microservices()
-    results = enrich_output(results, microservices)
     return results
 
 

@@ -1,4 +1,4 @@
-
+import output_generators.traceability as traceability
 
 def detect_kibana(microservices: dict, information_flows: dict) -> dict:
     """Detects logstash services.
@@ -14,5 +14,12 @@ def detect_kibana(microservices: dict, information_flows: dict) -> dict:
                 microservices[m]["tagged_values"].append(("Monitoring Dashboard", "Kibana"))
             except:
                 microservices[m]["tagged_values"] = [("Monitoring Dashboard", "Kibana")]
+            trace = dict()
+            trace["parent_item"] = microservices[m]["servicename"]
+            trace["item"] = "monitoring_dashboard"
+            trace["file"] = "heuristic, based on image"
+            trace["line"] = "heuristic, based on image"
+            trace["span"] = "heuristic, based on image"
+            traceability.add_trace(trace)
 
     return microservices, information_flows

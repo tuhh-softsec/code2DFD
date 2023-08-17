@@ -84,14 +84,14 @@ def check_properties(microservices: dict, information_flows: dict, external_comp
             information_flows[id]["stereotype_instances"] = ["jdbc"]
             if password:
                 try:
-                    information_flows[id]["tagged_values"].append(("Password", password))
+                    information_flows[id]["tagged_values"].append(("Password", password.strip()))
                 except:
-                    information_flows[id]["tagged_values"] = [("Password", password)]
+                    information_flows[id]["tagged_values"] = [("Password", password.strip())]
             if username:
                 try:
-                    information_flows[id]["tagged_values"].append(("Username", username))
+                    information_flows[id]["tagged_values"].append(("Username", username.strip()))
                 except:
-                    information_flows[id]["tagged_values"] = [("Username", username)]
+                    information_flows[id]["tagged_values"] = [("Username", username.strip())]
             if username or password:
                 information_flows[id]["stereotype_instances"].append("plaintext_credentials_link")
 
@@ -115,15 +115,15 @@ def check_properties(microservices: dict, information_flows: dict, external_comp
                     if password:
                         microservices[id]["stereotype_instances"].append("plaintext_credentials")
                         if "tagged_values" in microservices[id]:
-                            microservices[id]["tagged_values"].append(("Password", password))
+                            microservices[id]["tagged_values"].append(("Password", password.strip()))
                         else:
-                            microservices[id]["tagged_values"] = [("Password", password)]
+                            microservices[id]["tagged_values"] = [("Password", password.strip())]
                     if username:
                         microservices[id]["stereotype_instances"].append("plaintext_credentials")
                         if "tagged_values" in microservices[id]:
-                            microservices[id]["tagged_values"].append(("Username", username))
+                            microservices[id]["tagged_values"].append(("Username", username.strip()))
                         else:
-                            microservices[id]["tagged_values"] = [("Username", username)]
+                            microservices[id]["tagged_values"] = [("Username", username.strip())]
 
             # check if information flow in other direction exists (can happen faultely in docker-compose)
             for i in information_flows.keys():
@@ -162,6 +162,15 @@ def check_properties(microservices: dict, information_flows: dict, external_comp
             external_components[id]["name"] = "database-" + str(microservices[m]["servicename"])
             external_components[id]["type"] = "external_component"
             external_components[id]["stereotype_instances"] = ["entrypoint", "exitpoint", "external_database"]
+
+            trace = dict()
+            trace["item"] = "database-" + str(microservices[m]["servicename"])
+            trace["file"] = trace_info[0]
+            trace["line"] = trace_info[1]
+            trace["span"] = trace_info[2]
+
+            traceability.add_trace(trace)
+
             if database_type:
                 external_components[id]["tagged_values"] = [("Database", database_type)]
 
@@ -173,18 +182,18 @@ def check_properties(microservices: dict, information_flows: dict, external_comp
 
             if password:
                 if "tagged_values" in external_components[id]:
-                    external_components[id]["tagged_values"].append(("Password", password))
+                    external_components[id]["tagged_values"].append(("Password", password.strip()))
                 else:
-                    external_components[id]["tagged_values"] = [("Password", password)]
+                    external_components[id]["tagged_values"] = [("Password", password.strip())]
                 if "stereotype_instances" in external_components[id]:
                     external_components[id]["stereotype_instances"].append("plaintext_credentials")
                 else:
                     external_components[id]["stereotype_instances"] = ["plaintext_credentials"]
             if username:
                 try:
-                    external_components[id]["tagged_values"].append(("Username", username))
+                    external_components[id]["tagged_values"].append(("Username", username.strip()))
                 except:
-                    external_components[id]["tagged_values"] = [("Username", username)]
+                    external_components[id]["tagged_values"] = [("Username", username.strip())]
                 try:
                     external_components[id]["stereotype_instances"].append("plaintext_credentials")
                 except:
@@ -204,12 +213,12 @@ def check_properties(microservices: dict, information_flows: dict, external_comp
                 information_flows[id]["stereotype_instances"].append("plaintext_credentials_link")
 
             if password:
-                information_flows[id]["tagged_values"] = [("Password", password)]
+                information_flows[id]["tagged_values"] = [("Password", password.strip())]
             if username:
                 try:
-                    information_flows[id]["tagged_values"].append(("Username", username))
+                    information_flows[id]["tagged_values"].append(("Username", username.strip()))
                 except:
-                    information_flows[id]["tagged_values"] = [("Username", username)]
+                    information_flows[id]["tagged_values"] = [("Username", username.strip())]
 
             tmp.tmp_config.set("DFD", "external_components", str(external_components))
 

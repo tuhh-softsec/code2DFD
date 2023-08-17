@@ -16,7 +16,6 @@ def detect_spring_cloud_gateway(microservices: dict, information_flows: dict, ex
             for m in microservices.keys():
                 if microservices[m]["servicename"] == microservice:
                     server = microservice
-                    microservices[m]["type"] = "infrastructural_service"
                     try:
                         microservices[m]["stereotype_instances"].append("gateway")
                     except:

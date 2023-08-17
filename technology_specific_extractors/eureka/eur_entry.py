@@ -16,7 +16,6 @@ def detect_eureka(microservices: dict, information_flows: dict) -> dict:
 
         for m in microservices.keys():
             if microservices[m]["servicename"] == eureka_server:        # this is the eureka server
-                microservices[m]["type"] = "infrastructural_service"
                 try:
                     microservices[m]["stereotype_instances"].append("service_discovery")
                 except:
@@ -43,33 +42,41 @@ def detect_eureka(microservices: dict, information_flows: dict) -> dict:
         for k in keywords:
             results = fi.search_keywords(k)
             for r in results.keys():
-                result_paths.add(results[r]["path"])
+                result_paths.add((results[r]["path"], results[r]["line_nr"], results[r]["span"]))
 
         if not information_flows:
             information_flows = dict()
 
         participants = set()
         for result_path in result_paths:
-            service = tech_sw.detect_microservice(result_path)
+            service = tech_sw.detect_microservice(result_path[0])
             for m in microservices.keys():
                 if microservices[m]["servicename"] == service:
-                    participants.add(microservices[m]["servicename"])
+                    participants.add((microservices[m]["servicename"], result_path[0], result_path[1], result_path[2]))
 
         for m in microservices.keys():
             for prop in microservices[m]["properties"]:
                 if prop[0] == "eureka_connected" and microservices[m]["servicename"] not in participants:
-                    participants.add(microservices[m]["servicename"])
+                    participants.add((microservices[m]["servicename"], prop[2][0], prop[2][1], prop[2][2]))
 
         for participant in participants:
-            if not participant == eureka_server:
+            if not participant[0] == eureka_server:
                 try:
                     id = max(information_flows.keys()) + 1
                 except:
                     id = 0
                 information_flows[id] = dict()
-                information_flows[id]["sender"] = participant
+                information_flows[id]["sender"] = participant[0]
                 information_flows[id]["receiver"] = eureka_server
                 information_flows[id]["stereotype_instances"] = ["restful_http"]
+
+                trace = dict()
+                trace["item"] = participant[0] + " -> " + eureka_server
+                trace["file"] = participant[1]
+                trace["line"] = participant[2]
+                trace["span"] = participant[3]
+
+                traceability.add_trace(trace)
 
     return microservices, information_flows
 
@@ -98,7 +105,6 @@ def detect_eureka_server_only(microservices: dict):
     for e in eureka_servers:
         for m in microservices.keys():
             if microservices[m]["servicename"] == e:        # this is the eureka server
-                microservices[m]["type"] = "infrastructural_service"
                 try:
                     microservices[m]["stereotype_instances"].append("service_discovery")
                 except:

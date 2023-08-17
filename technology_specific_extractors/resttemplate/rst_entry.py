@@ -1,8 +1,9 @@
 import ast
 
 import core.file_interaction as fi
-import output_generators.logger as logger
 import core.technology_switch as tech_sw
+import output_generators.logger as logger
+import output_generators.traceability as traceability
 import tmp.tmp as tmp
 
 
@@ -48,6 +49,7 @@ def get_incoming_endpoints() -> list:
     files = fi.search_keywords("RequestMapping")
 
     for file in files.keys():
+
         f = files[file]
         if f["name"].split(".")[-1] != "java":
             continue
@@ -82,8 +84,8 @@ def get_incoming_endpoints() -> list:
 
                 # adds new endpoint
                     complete_endpoint = "/" + ("".join(current_parts).strip("/"))
-                    if not complete_endpoint in [a for (a, b, c) in endpoints if b == service]:
-                        endpoints.add((complete_endpoint, service, method))
+                    if not complete_endpoint in [a for (a, b, c, d, e, f) in endpoints if b == service]:
+                        endpoints.add((complete_endpoint, service, method, files[file]["path"], files[file]["line_nr"], files[file]["span"]))
 
                     last_bc = bracket_count
 
@@ -95,7 +97,7 @@ def get_incoming_endpoints() -> list:
 
 def extract_endpoint_part(line: str) -> str:
     endpoint_part = ""
-    if "path" in line:          # not found in documentation, but used in piggyMetrics to name endpoint
+    if "path" in line:          # not found in documentation, but used in piggy to name endpoint
         endpoint_part = line.split("path")[1].split(",")[0].split('\"')[1]
     elif "value" in line:       # usual keyword to describe path
         endpoint_part = line.split("value")[1].split(",")[0].split('\"')[1]
@@ -174,7 +176,7 @@ def get_outgoing_endpoints(information_flows: dict) -> set:
 
                     new_outgoing_endpoint, information_flows = find_rst_variable(new_outgoing_endpoint, f, line_nr, information_flows, microservice)
                     if new_outgoing_endpoint:
-                        outgoing_endpoints.add((new_outgoing_endpoint, microservice))
+                        outgoing_endpoints.add((new_outgoing_endpoint, microservice,  files[file]["path"], files[file]["line_nr"], files[file]["span"]))
                     else:
                         logger.write_log_message("\t\tSomething didn't work", "debug")
 
@@ -196,6 +198,13 @@ def find_rst_variable(parameter: str, file: dict, line_nr: int, information_flow
             information_flows[id]["sender"] = microservice
             information_flows[id]["receiver"] = microservices[m]["servicename"]
             information_flows[id]["stereotype_instances"] = ["restful_http"]
+
+            trace = dict()
+            trace["item"] = microservice + " -> " + microservices[m]["servicename"]
+            trace["file"] = file["path"]
+            trace["line"] = file["line_nr"]
+            trace["span"] = file["span"]
+            traceability.add_trace(trace)
 
     variable = False
     if "+" in parameter:    # string consisting of multiple parts
@@ -234,7 +243,7 @@ def find_rst_variable(parameter: str, file: dict, line_nr: int, information_flow
                                     parameters[p] = fc["content"][linec + i].split("=")[1].strip().strip(";").strip().strip("\"")
                                     print("\t\tFound " + str(parameters[p]) + " in file " + str(correct_file))
                                     if parameters[p][0] != "\"" or parameters[p][-1] != "\"":
-                                        parameters[p] = find_rst_variable(parameters[p], fc, linec)     # recursive step
+                                        parameters[p], x = find_rst_variable(parameters[p], fc, linec)     # recursive step
             except:
                 print("\tCould not find a definition for " + str(parameters[p]) + ".")
                 return False, information_flows
@@ -248,7 +257,7 @@ def find_rst_variable(parameter: str, file: dict, line_nr: int, information_flow
                     parameters[p] = file["content"][line].split("=")[1].strip().strip(";").strip()
                     if parameters[p].strip("\"").strip() != "":
                         if parameters[p][0] != "\"" or parameters[p][-1] != "\"":
-                            parameters[p] = find_rst_variable(parameters[p], file, line)      # recursive step
+                            parameters[p], x = find_rst_variable(parameters[p], file, line)      # recursive step
                         if parameters[p] != False:
                             parameters[p] = parameters[p].strip("\"").strip()
                             logger.write_log_message("\t\tFound " + str(parameters[p]) + " in this file.", "info")
@@ -256,6 +265,7 @@ def find_rst_variable(parameter: str, file: dict, line_nr: int, information_flow
                 # Var injection via @Value
                 elif parameter_variable in file["content"][line]:
                     if "@Value" in file["content"][line - 1]:
+                        # injected = file["content"][line - 1].split("@Value(")[1].strip(")")
                         # look in config file
                         pass
 
@@ -307,6 +317,13 @@ def match_incoming_to_outgoing_endpoints(incoming_endpoints: list, outgoing_endp
             if i[0] in o[0] and i[1] in o[0]:
                 information_flows_set.add((o[1], i[1], i[0]))       # (sending service, receiving service, receving endpoint)
 
+                trace = dict()
+                trace["item"] = o[0] + " -> " + i[1]
+                trace["file"] = o[2]
+                trace["line"] = o[3]
+                trace["span"] = o[4]
+                traceability.add_trace(trace)
+
     # turn it into dict
     for i in information_flows_set:
 
@@ -343,5 +360,7 @@ def match_incoming_to_outgoing_endpoints(incoming_endpoints: list, outgoing_endp
         if stereotype_instances:
             information_flows[id]["stereotype_instances"] = stereotype_instances
             information_flows[id]["tagged_values"] = tagged_values
+
+
 
     return information_flows

@@ -22,6 +22,30 @@ def add_user(external_components: dict) -> dict:
 
     traceability.add_trace(trace)
 
+    trace["parent_item"] = "user"
+    trace["item"] = "user_stereotype"
+    trace["file"] = "implicit"
+    trace["line"] = "implicit"
+    trace["span"] = "implicit"
+
+    traceability.add_trace(trace)
+
+    trace["parent_item"] = "user"
+    trace["item"] = "entrypoint"
+    trace["file"] = "heuristic"
+    trace["line"] = "heuristic"
+    trace["span"] = "heuristic"
+
+    traceability.add_trace(trace)
+
+    trace["parent_item"] = "user"
+    trace["item"] = "exitpoint"
+    trace["file"] = "heuristic"
+    trace["line"] = "heuristic"
+    trace["span"] = "heuristic"
+
+    traceability.add_trace(trace)
+
     return external_components
 
 

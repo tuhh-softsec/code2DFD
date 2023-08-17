@@ -2,6 +2,7 @@ import ast
 
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
+import output_generators.traceability as traceability
 import tmp.tmp as tmp
 
 
@@ -41,6 +42,14 @@ def set_information_flows():
                                     information_flows[id]["sender"] = microservice
                                     information_flows[id]["receiver"] = microservices[m]["servicename"]
                                     information_flows[id]["stereotype_instances"] = stereotypes
+
+                                    trace = dict()
+                                    trace["item"] = microservice + " -> " + microservices[m]["servicename"]
+                                    trace["file"] = results[r]["path"]
+                                    trace["line"] = results[r]["line_nr"]
+                                    trace["span"] = results[r]["span"]
+                                    traceability.add_trace(trace)
+
                 except:
                     pass
     tmp.tmp_config.set("DFD", "information_flows", str(information_flows))

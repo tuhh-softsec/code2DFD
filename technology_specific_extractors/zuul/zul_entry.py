@@ -25,7 +25,6 @@ def detect_zuul(microservices: dict, information_flows: dict, external_component
         zuul_server = tech_sw.detect_microservice(results[r]["path"])
         for m in microservices.keys():
             if microservices[m]["servicename"] == zuul_server:    # this is the Zuul server
-                microservices[m]["type"] = "infrastructural_service"
                 try:
                     microservices[m]["stereotype_instances"] += ["gateway", "load_balancer"]
                 except:

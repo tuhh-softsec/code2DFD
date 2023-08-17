@@ -27,7 +27,6 @@ def detect_authorization_server(microservices: dict) -> dict:
         authorization_server = tech_sw.detect_microservice(results[r]["path"])
         for m in microservices.keys():
             if microservices[m]["servicename"] == authorization_server:
-                microservices[m]["type"] = "infrastructural_service"
                 if "stereotype_instances" in microservices[m]:
                     microservices[m]["stereotype_instances"].append("authorization_server")
                 else:
@@ -61,7 +60,6 @@ def detect_resource_servers(microservices: dict) -> dict:
         resource_server = tech_sw.detect_microservice(results[r]["path"])
         for m in microservices.keys():
             if microservices[m]["servicename"] == resource_server:
-                microservices[m]["type"] = "infrastructural_service"
                 try:
                     microservices[m]["stereotype_instances"].append("resource_server")
                 except:
@@ -103,11 +101,18 @@ def detect_token_server(microservices: dict, information_flows: dict) -> dict:
                 if token_server:
                     for m2 in microservices.keys():
                         if microservices[m2]["servicename"] == token_server:
-                            microservices[m2]["type"] = "infrastructural_service"
                             if "stereotype_instances" in microservices[m2]:
                                 microservices[m2]["stereotype_instances"].append("token_server")
                             else:
                                 microservices[m2]["stereotype_instances"] = ["token_server"]
+                            trace = dict()
+                            trace["parent_item"] = microservices[m2]["servicename"]
+                            trace["item"] = "token_server"
+                            trace["file"] = prop[2][0]
+                            trace["line"] = prop[2][1]
+                            trace["span"] = prop[2][2]
+
+                            traceability.add_trace(trace)
 
                     try:
                         id = max(information_flows.keys()) + 1
