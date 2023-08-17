@@ -48,7 +48,7 @@ An internet connection is needed for this, otherwise no PNG will be created.
 - A machine-readable version of the DFD is created in JSON format in `output/json/`
 - Additionally, a version in [CodeableModels](https://github.com/uzdun/CodeableModels) format is created in `output/codeable_models/`, if you want a more flexible format for further work.
 To render these, you need to install CodeableModels as described on their site.
-Further, our metamodel is needed for that, which can be found in the [repository of our dataset](https://anonymous.4open.science/r/dataset-submission-592E)
+Further, our metamodel `microservice_dfds_metamodel.py` is needed for that.
 If interoperability with other software or further processing of the models is of no concern, this offers no advantages.
 The DFDs rendered by CodeableModels do not follow standard DFD-notation.
 - A textual version of the results (list of microservices, external entities, and information flows) is created in `output/results/`.
