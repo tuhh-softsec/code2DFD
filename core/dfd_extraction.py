@@ -1,7 +1,7 @@
 import ast
 from datetime import datetime
 
-import output_generators.calculate_metrics as calculate_metrics
+#import output_generators.calculate_metrics as calculate_metrics
 import output_generators.codeable_model as codeable_model
 import core.technology_switch as tech_sw
 import tmp.tmp as tmp
@@ -43,7 +43,7 @@ from technology_specific_extractors.zipkin.zip_entry import detect_zipkin_server
 from technology_specific_extractors.zookeeper.zoo_entry import detect_zookeeper
 from technology_specific_extractors.zuul.zul_entry import detect_zuul
 
-import check_traceability
+#import check_traceability
 
 
 def dev_print(message: str):
@@ -168,9 +168,9 @@ def perform_analysis():
     visualizer.output_png(codeable_models_path)
     json_architecture.generate_json_architecture(microservices, information_flows, external_components)
 
-    calculate_metrics.calculate_single_system(repo_path)
+    #calculate_metrics.calculate_single_system(repo_path)
 
-    check_traceability.check_traceability(microservices, information_flows, external_components, traceability_content)
+    #check_traceability.check_traceability(microservices, information_flows, external_components, traceability_content)
 
     return codeable_models, traceability_content
 
@@ -278,7 +278,6 @@ def detect_miscellaneous(microservices: dict, information_flows: dict, external_
                         id = 0
                     external_components[id] = dict()
                     external_components[id]["name"] = "mail-server"
-                    external_components[id]["type"] = "external_component"
                     external_components[id]["stereotype_instances"] = ["mail_server", "entrypoint", "exitpoint"]
                     external_components[id]["tagged_values"] = [("Host", prop[1])]
                     if mail_password:
@@ -348,7 +347,6 @@ def detect_miscellaneous(microservices: dict, information_flows: dict, external_
                         id = 0
                     external_components[id] = dict()
                     external_components[id]["name"] = "external-website"
-                    external_components[id]["type"] = "external_component"
                     external_components[id]["stereotype_instances"] = ["external_website", "entrypoint", "exitpoint"]
                     external_components[id]["tagged_values"] = [("URL", prop[1])]
 

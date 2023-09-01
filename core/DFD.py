@@ -1,4 +1,6 @@
-
+from core.service import CService
+from core.external_entity import CExternalEntity
+from core.information_flow import CInformationFlow
 
 
 class CDFD:
@@ -7,9 +9,13 @@ class CDFD:
 
     def __init__(self, name):
         self.name = name
+        self.services = list(CService)
+        self.external_entities = list(CExternalEntity)
+        self.information_flows = list(CInformationFlow)
+        self.traceability = dict()
 
     def __str__(self):
-        return f"DFD {name}"
+        return f"DFD {self.name}"
 
     def add_service(self, service):
         pass
@@ -18,4 +24,13 @@ class CDFD:
         pass
 
     def add_information_flow(self, information_flow):
+        pass
+
+    def create_png(self):
+        pass
+    
+    def create_json(self):
+        pass
+
+    def add_traceability(self, model_item, item_type, file, line):
         pass
