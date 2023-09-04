@@ -10,7 +10,7 @@ def output_png(codeable_models_path: str, repo_path: str):
     """Converts CodeableModels output into different PlantUML graphics and renders it as PNG.
     """
 
-    new_plantuml, new_plantuml_path = codeable_models_to_plantuml.convert(codeable_models_path, repo_path)
+    new_plantuml, new_plantuml_path = codeable_models_to_plantuml.convert(codeable_models_path)
 
     generator = plantuml.PlantUML(url = "http://www.plantuml.com/plantuml/img/")
     try:

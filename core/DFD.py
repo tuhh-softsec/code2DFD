@@ -9,15 +9,17 @@ class CDFD:
 
     def __init__(self, name):
         self.name = name
-        self.services = list(CService)
-        self.external_entities = list(CExternalEntity)
-        self.information_flows = list(CInformationFlow)
+        self.services = [CService]
+        #self.external_entities = list(CExternalEntity)
+        #self.information_flows = list(CInformationFlow)
         self.traceability = dict()
+        print("Initialization")
 
     def __str__(self):
         return f"DFD {self.name}"
 
     def add_service(self, service):
+        self.services.append(service)
         pass
 
     def add_external_entity(self, external_entity):

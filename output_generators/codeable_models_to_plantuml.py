@@ -107,7 +107,7 @@ def add_database(line: str):
         tagged_values = line.split("tagged_values =")[1].split("}")[0].split("{")[1].split(",")
 
     # Create new line
-    new_line = "        " + name + " [label = \"|{Process: " + name + " | "
+    new_line = "        " + name + " [label = \"|{Service: " + name + " | "
     for stereotype in stereotypes:
         new_line += "--" + stereotype.strip() + "--\\n"
     for tagged_value in tagged_values:
@@ -136,7 +136,7 @@ def add_service(line: str):
         tagged_values = line.split("tagged_values =")[1].split("}")[0].split("{")[1].split(",")
 
     # Create new line
-    new_line = "        " + name + " [label = \"{Process: " + name + " | "
+    new_line = "        " + name + " [label = \"{Service: " + name + " | "
     for stereotype in stereotypes:
         new_line += "--" + stereotype.strip() + "--\\n"
     for tagged_value in tagged_values:
