@@ -10,8 +10,8 @@ class CDFD:
     def __init__(self, name):
         self.name = name
         self.services = [CService]
-        #self.external_entities = list(CExternalEntity)
-        #self.information_flows = list(CInformationFlow)
+        self.external_entities = [CExternalEntity]
+        self.information_flows = [CInformationFlow]
         self.traceability = dict()
         print("Initialization")
 
@@ -19,14 +19,26 @@ class CDFD:
         return f"DFD {self.name}"
 
     def add_service(self, service):
-        self.services.append(service)
-        pass
+        if not service.name in [s.name for s in self.services]:
+            self.services.append(service)
+        else:
+            # merge stereotypes
+            pass
+        
 
     def add_external_entity(self, external_entity):
-        pass
+        if not external_entity.name in [e.name for e in self.external_entities]:
+            self.external_entities.append(external_entity)
+        else:
+            # merge stereotypes
+            pass
 
     def add_information_flow(self, information_flow):
-        pass
+        if not information_flow.name in [i.name for i in self.information_flows]:
+            self.information_flows.append(information_flow)
+        else:
+            # merge stereotypes
+            pass
 
     def create_png(self):
         pass

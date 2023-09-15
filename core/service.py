@@ -8,7 +8,10 @@ class CService:
         self.tagged_values = list()
 
     def add_stereotype(self, stereotype):
-        self.stereotypes = list(set(self.stereotypes.append(stereotype)))
+        if not stereotype in self.stereotypes:
+            self.stereotypes.append(stereotype)
         
     def add_tagged_value(self, tagged_value):
-        self.tagged_values = list(set(self.tagged_values.append(tagged_value)))
+        if not tagged_value in self.tagged_values:
+            self.tagged_values.append(tagged_value)
+    
