@@ -52,6 +52,8 @@ def dev_print(message: str):
     """Prints messages only if development_mode is set to True.
     """
 
+    # TODO delete this, not needed
+
     development_mode = bool(ast.literal_eval(tmp.tmp_config["Analysis Settings"]["development_mode"]))
 
     if development_mode:
@@ -126,29 +128,29 @@ def perform_analysis():
     output_file = open(filename, "w")
     output_file_dict = open(filename_dict, "w")
 
-    if information_flows:
-        print("\nInformation Flows:")
-        output_file.write("\n\nInformation Flows:\n")
-        for i in information_flows.keys():
-            print("\t", information_flows[i])
-            output_file.write("\n" + str(information_flows[i]))
+    # if information_flows:
+    #     print("\nInformation Flows:")
+    #     output_file.write("\n\nInformation Flows:\n")
+    #     for i in information_flows.keys():
+    #         print("\t", information_flows[i])
+    #         output_file.write("\n" + str(information_flows[i]))
 
-    if microservices:
-        print("\nMicroservices:")
-        output_file.write("\n\nMicroservices:\n")
-        for m in microservices.keys():
-            print("\t", microservices[m])
-            microservices[m].pop("image", None)
-            microservices[m].pop("pom_path", None)
-            microservices[m].pop("properties", None)
-            output_file.write("\n" + str(microservices[m]))
+    # if microservices:
+    #     print("\nMicroservices:")
+    #     output_file.write("\n\nMicroservices:\n")
+    #     for m in microservices.keys():
+    #         print("\t", microservices[m])
+    #         microservices[m].pop("image", None)
+    #         microservices[m].pop("pom_path", None)
+    #         microservices[m].pop("properties", None)
+    #         output_file.write("\n" + str(microservices[m]))
 
-    if external_components:
-        print("\nExternal Components:")
-        output_file.write("\n\nExternal Components:\n")
-        for e in external_components.keys():
-            print("\t", external_components[e])
-            output_file.write("\n" + str(external_components[e]))
+    # if external_components:
+    #     print("\nExternal Components:")
+    #     output_file.write("\n\nExternal Components:\n")
+    #     for e in external_components.keys():
+    #         print("\t", external_components[e])
+    #         output_file.write("\n" + str(external_components[e]))
 
     # Writing dict for calculating metrics
     complete = dict()

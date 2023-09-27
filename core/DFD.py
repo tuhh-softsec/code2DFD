@@ -18,7 +18,7 @@ class CDFD:
     def __str__(self):
         return f"DFD {self.name}"
 
-    def add_service(self, service):
+    def add_service(self, service: CService):
         if not service.name in [s.name for s in self.services]:
             self.services.append(service)
         else:

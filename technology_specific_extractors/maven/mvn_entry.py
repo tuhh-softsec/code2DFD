@@ -9,6 +9,7 @@ import core.technology_switch as tech_sw
 import technology_specific_extractors.docker.dcr_entry as dcr
 import tmp.tmp as tmp
 import output_generators.traceability as traceability
+from core.service import CService
 
 
 def set_microservices() -> dict:
@@ -56,6 +57,7 @@ def set_microservices() -> dict:
                 else:
                     microservices[id]["tagged_values"] = list()
 
+                new_service = CService(microservice[0], )
                 try:
                     trace = dict()
                     name = microservice[0]
