@@ -6,7 +6,7 @@ import output_generators.traceability as traceability
 import tmp.tmp as tmp
 
 
-def set_information_flows():
+def set_information_flows(dfd):
     """Looks for connections between services via html sites / href's.
     """
 
@@ -31,7 +31,7 @@ def set_information_flows():
                     for address_part in address_parts:
                         for m in microservices.keys():
                             if address_part == microservices[m]["servicename"]:
-                                microservice = tech_sw.detect_microservice(results[r]["path"])
+                                microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
                                 if microservice:
                                     try:
                                         id = max(information_flows.keys()) + 1

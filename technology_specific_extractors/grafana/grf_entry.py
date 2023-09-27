@@ -3,7 +3,7 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_grafana(microservices: dict, information_flows: dict) -> dict:
+def detect_grafana(microservices: dict, information_flows: dict, dfd) -> dict:
     """Detects grafana server and connections.
     """
 
@@ -11,7 +11,7 @@ def detect_grafana(microservices: dict, information_flows: dict) -> dict:
     results = fi.search_keywords("grafana/grafana")
 
     for r in results.keys():
-        grafana_server = tech_sw.detect_microservice(results[r]["path"])
+        grafana_server = tech_sw.detect_microservice(results[r]["path"], dfd)
         for m in microservices.keys():
             if microservices[m]["servicename"] == grafana_server:
                 if "stereotype_instances" in microservices[m]:

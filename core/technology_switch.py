@@ -14,7 +14,7 @@ import technology_specific_extractors.resttemplate.rst_entry as rst
 import tmp.tmp as tmp
 
 
-def get_microservices() -> dict:
+def get_microservices(dfd) -> dict:
     """Calls get_microservices from correct container technology or returns existing list.
     """
 
@@ -23,14 +23,14 @@ def get_microservices() -> dict:
     else:
         logger.write_log_message("Microservices not set yet, start extraction", "info")
 
-        mvn.set_microservices()
+        mvn.set_microservices(dfd)
         grd.set_microservices()
         dcm.set_microservices()
         if tmp.tmp_config.has_option("DFD", "microservices"):
             return ast.literal_eval(tmp.tmp_config["DFD"]["microservices"])
 
 
-def get_information_flows() -> dict:
+def get_information_flows(dfd) -> dict:
     """Calls get_information_flows from correct communication technology.
     """
 
@@ -40,17 +40,17 @@ def get_information_flows() -> dict:
         logger.write_log_message("Information flows not set yet, start extraction", "info")
         communication_techs_list = ast.literal_eval(tmp.tmp_config["Technology Profiles"]["communication_techs_list"])
         for com_tech in communication_techs_list:
-            eval(com_tech[1]).set_information_flows()
+            eval(com_tech[1]).set_information_flows(dfd)
 
         if tmp.tmp_config.has_option("DFD", "information_flows"):
             return ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])
 
 
-def detect_microservice(file_path: str) -> str:
+def detect_microservice(file_path: str, dfd) -> str:
     """Calls detect_microservices from correct microservice detection technology.
     """
 
-    microservice = mvn.detect_microservice(file_path)
+    microservice = mvn.detect_microservice(file_path, dfd)
     if not microservice:
         microservice = grd.detect_microservice(file_path)
     if not microservice:

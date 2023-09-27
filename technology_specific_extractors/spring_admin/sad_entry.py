@@ -3,14 +3,14 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_spring_admin_server(microservices: dict, information_flows: dict) -> dict:
+def detect_spring_admin_server(microservices: dict, information_flows: dict, dfd) -> dict:
     """Detects Spring Admin Servers.
     """
 
     results = fi.search_keywords("@EnableAdminServer")
     admin_server = False
     for r in results.keys():
-        admin_server = tech_sw.detect_microservice(results[r]["path"])
+        admin_server = tech_sw.detect_microservice(results[r]["path"], dfd)
         for m in microservices.keys():
             if microservices[m]["servicename"] == admin_server:
                 try:

@@ -11,7 +11,7 @@ import output_generators.traceability as traceability
 kafka_server = str()
 
 
-def set_information_flows() -> set:
+def set_information_flows(dfd) -> set:
     """Connects incoming endpoints, outgoing endpoints, and routings to information flows
     """
 
@@ -23,8 +23,8 @@ def set_information_flows() -> set:
 
     microservices = tech_sw.get_microservices()
 
-    incoming_endpoints = get_incoming_endpoints()
-    outgoing_endpoints = get_outgoing_endpoints()
+    incoming_endpoints = get_incoming_endpoints(dfd)
+    outgoing_endpoints = get_outgoing_endpoints(dfd)
 
     new_information_flows = match_incoming_to_outgoing_endpoints(microservices, incoming_endpoints, outgoing_endpoints)
 
@@ -43,7 +43,7 @@ def set_information_flows() -> set:
     return information_flows
 
 
-def get_incoming_endpoints() -> set:
+def get_incoming_endpoints(dfd) -> set:
     """Finds incoming streams, i.e. instances of KafkaListener
     """
 
@@ -66,11 +66,11 @@ def get_incoming_endpoints() -> set:
                         new_listening_topics = ast.literal_eval(new_listening_topic)
                         for topic in new_listening_topics:
                             new_listening_topic = fi.find_variable(new_listening_topic, f)
-                            microservice = tech_sw.detect_microservice(file["path"])
+                            microservice = tech_sw.detect_microservice(file["path"], dfd)
                             listening_topics.add((new_listening_topic, microservice))
                     else:
                         new_listening_topic = fi.find_variable(new_listening_topic, f)
-                        microservice = tech_sw.detect_microservice(file["path"])
+                        microservice = tech_sw.detect_microservice(file["path"], dfd)
 
                         span = re.search("@KafkaListener", file["content"][line])
                         trace = (file["name"], line, span)
@@ -88,7 +88,7 @@ def is_list(variable: str) -> bool:
         return False
 
 
-def get_outgoing_endpoints() -> set:
+def get_outgoing_endpoints(dfd) -> set:
     """Finds points where messages are sent to exchanges via kafkatemplate.send
     """
 
@@ -104,7 +104,7 @@ def get_outgoing_endpoints() -> set:
                 if "README" in f["name"]:
                     pass
                 else:
-                    microservice = tech_sw.detect_microservice(f["path"])
+                    microservice = tech_sw.detect_microservice(f["path"], dfd)
                     for line in range(len(f["content"])):
                         if (template + "." + command) in f["content"][line]:    #found correct (starting) line
                             topic = str()
@@ -376,7 +376,7 @@ def detect_kafka_server(microservices: dict) -> dict:
     return microservices
 
 
-def detect_stream_binders(microservices: dict, information_flows: dict) -> dict:
+def detect_stream_binders(microservices: dict, information_flows: dict, dfd) -> dict:
     """Detects connections to kafka via stream bindings.
     """
 
@@ -399,7 +399,7 @@ def detect_stream_binders(microservices: dict, information_flows: dict) -> dict:
             # Outgoing
             results = fi.search_keywords("@SendTo")
             for r in results.keys():
-                if tech_sw.detect_microservice(results[r]["path"]) == microservices[m]["servicename"]:
+                if tech_sw.detect_microservice(results[r]["path"], dfd) == microservices[m]["servicename"]:
                     try:
                         id = max(information_flows.keys()) + 1
                     except:
@@ -433,7 +433,7 @@ def detect_stream_binders(microservices: dict, information_flows: dict) -> dict:
             # Incoming
             results = fi.search_keywords("@StreamListener")
             for r in results.keys():
-                if tech_sw.detect_microservice(results[r]["path"]) == microservices[m]["servicename"]:
+                if tech_sw.detect_microservice(results[r]["path"], dfd) == microservices[m]["servicename"]:
 
                     try:
                         id = max(information_flows.keys()) + 1

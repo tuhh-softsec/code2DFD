@@ -2,14 +2,14 @@ import core.file_interaction as fi
 import core.technology_switch as tech_sw
 
 
-def detect_endpoints(microservices: dict) -> dict:
+def detect_endpoints(microservices: dict, dfd) -> dict:
     """Detects endpoints offered via @RepositoryRestResource
     """
 
     results = fi.search_keywords("@RepositoryRestResource")
     for r in results.keys():
         endpoints = set()
-        microservice = tech_sw.detect_microservice(results[r]["path"])
+        microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
         for line in results[r]["content"]:
             if "@RepositoryRestResource" in line:
                 if "path" in line:

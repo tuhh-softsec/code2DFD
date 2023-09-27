@@ -2,18 +2,18 @@ import core.file_interaction as fi
 import core.technology_switch as tech_sw
 
 
-def detect_spring_encryption(microservices: dict, information_flows: dict) -> dict:
+def detect_spring_encryption(microservices: dict, information_flows: dict, dfd) -> dict:
     """Detects use of Spring's crypto module encryption functions.
     """
 
-    microservices = detect_passwordEncoder(microservices)
-    microservices = detect_bytesEncryptor(microservices)
-    microservices = detect_keyGenerator(microservices)
+    microservices = detect_passwordEncoder(microservices, dfd)
+    microservices = detect_bytesEncryptor(microservices, dfd)
+    microservices = detect_keyGenerator(microservices, dfd)
 
     return microservices, information_flows
 
 
-def detect_passwordEncoder(microservices: dict) -> dict:
+def detect_passwordEncoder(microservices: dict, dfd) -> dict:
     """Detetcs encryption with BCryptPasswordEncoder.
     """
 
@@ -31,7 +31,7 @@ def detect_passwordEncoder(microservices: dict) -> dict:
     for encoder in encoders:
         results = fi.search_keywords(encoder)
         for r in results.keys():
-            microservice = tech_sw.detect_microservice(results[r]["path"])
+            microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
             for line in results[r]["content"]:
                 if encoder + ".encode" in line:
                     for m in microservices.keys():
@@ -44,7 +44,7 @@ def detect_passwordEncoder(microservices: dict) -> dict:
     return microservices
 
 
-def detect_bytesEncryptor(microservices: dict) -> dict:
+def detect_bytesEncryptor(microservices: dict, dfd) -> dict:
     """Detects uses of Spring Security's BytesEncryptor.
     """
 
@@ -53,7 +53,7 @@ def detect_bytesEncryptor(microservices: dict) -> dict:
         results = fi.search_keywords("Encryptors " + type)
         for r in results.keys():
             stereotypes, tagged_values = False, False
-            microservice = tech_sw.detect_microservice(results[r]["path"])
+            microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
             for line in results[r]["content"]:
                 if "Encryptors." + type in line:
                     stereotypes = ["encryption"]
@@ -77,7 +77,7 @@ def detect_bytesEncryptor(microservices: dict) -> dict:
     return microservices
 
 
-def detect_keyGenerator(microservices: dict) -> dict:
+def detect_keyGenerator(microservices: dict, dfd) -> dict:
     """Detetcs Spring Security's KeyGenerators.
     """
 
@@ -92,7 +92,7 @@ def detect_keyGenerator(microservices: dict) -> dict:
                 if "Keygenerator." + command in line:
                     # Direct use
                     if "Keygenerator." + command + "().generateKey" in line:
-                        microservice = tech_sw.detect_microservice(results[r]["path"])
+                        microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
                         for m in microservices.keys():
                             if microservices[m]["servicename"] == microservice:
                                 try:
@@ -107,7 +107,7 @@ def detect_keyGenerator(microservices: dict) -> dict:
     for keygenerator in keygenerators:
         results = fi.search_keywords(keygenerator + ".generateKey")
         for r in results.keys():
-            microservice = tech_sw.detect_microservice(results[r]["path"])
+            microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
             for m in microservices.keys():
                 if microservices[m]["servicename"] == microservice:
                     try:

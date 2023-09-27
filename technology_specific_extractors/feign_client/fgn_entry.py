@@ -6,7 +6,7 @@ import tmp.tmp as tmp
 import output_generators.traceability as traceability
 
 
-def set_information_flows() -> dict:
+def set_information_flows(dfd) -> dict:
     """Detects uses of Feign Client in the code.
     """
 
@@ -20,7 +20,7 @@ def set_information_flows() -> dict:
     # check for circuit breaker
     results = fi.search_keywords("@EnableFeignClients")     # content, name, path
     for id in results.keys():
-        microservice = tech_sw.detect_microservice(results[id]["path"])
+        microservice = tech_sw.detect_microservice(results[id]["path"], dfd)
         for line in results[id]["content"]:
             if "@EnableCircuitBreaker" in line:
                 for m in microservices.keys():
@@ -32,7 +32,7 @@ def set_information_flows() -> dict:
 
     results = fi.search_keywords("@FeignClient")     # content, name, path
     for id in results.keys():
-        microservice = tech_sw.detect_microservice(results[id]["path"])
+        microservice = tech_sw.detect_microservice(results[id]["path"], dfd)
 
         # setting correct load balancer and checking for circuit breaker
         stereotype_instances = ["load_balanced_link", "restful_http", "feign_connection"]

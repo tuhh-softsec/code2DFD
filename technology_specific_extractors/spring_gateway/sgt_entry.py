@@ -4,14 +4,14 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_spring_cloud_gateway(microservices: dict, information_flows: dict, external_components: dict) -> dict:
+def detect_spring_cloud_gateway(microservices: dict, information_flows: dict, external_components: dict, dfd) -> dict:
     """Detetcs Spring Cloud Gateway.
     """
 
     server = False
     results = fi.search_keywords("spring-cloud-starter-gateway")
     for r in results.keys():
-        microservice = tech_sw.detect_microservice(results[r]["path"])
+        microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
         if microservice:
             for m in microservices.keys():
                 if microservices[m]["servicename"] == microservice:

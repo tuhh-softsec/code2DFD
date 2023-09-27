@@ -12,7 +12,7 @@ import output_generators.traceability as traceability
 from core.service import CService
 
 
-def set_microservices() -> dict:
+def set_microservices(dfd) -> dict:
     """Extracts the list of services from pom.xml files and sets the variable in the tmp-file.
     """
 
@@ -287,7 +287,7 @@ def in_comment(file:list, line_nr: str) -> bool:
 
 count = 0
 
-def detect_microservice(file_path):
+def detect_microservice(file_path, dfd):
     """Detects which microservice a file belongs to by looking for next pom.xml.
     """
 
@@ -295,7 +295,7 @@ def detect_microservice(file_path):
         return False
 
     microservice = [False, False]
-    microservices = tech_sw.get_microservices()
+    microservices = tech_sw.get_microservices(dfd)
 
     repo_path = tmp.tmp_config["Repository"]["path"]
 

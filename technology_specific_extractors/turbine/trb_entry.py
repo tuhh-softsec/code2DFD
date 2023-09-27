@@ -17,13 +17,13 @@ def detect_turbine(microservices: dict, information_flows: dict) -> dict:
     return microservices, information_flows
 
 
-def detect_turbine_server(microservices: dict) -> dict:
+def detect_turbine_server(microservices: dict, dfd) -> dict:
     """Detects standard turbine servers.
     """
 
     results = fi.search_keywords("@EnableTurbine")     # content, name, path
     for r in results.keys():
-        microservice = tech_sw.detect_microservice(results[r]["path"])
+        microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
         for line in results[r]["content"]:
             if "@EnableTurbine" in line:
                 for m in microservices.keys():
@@ -48,13 +48,13 @@ def detect_turbine_server(microservices: dict) -> dict:
     return microservices
 
 
-def detect_turbineamqp(microservices: dict, information_flows: dict) -> dict:
+def detect_turbineamqp(microservices: dict, information_flows: dict, dfd) -> dict:
     """Detects turbine servers implementes via EnableTurbineAmqp annotation.
     """
 
     results = fi.search_keywords("@EnableTurbineAmqp")     # content, name, path
     for r in results.keys():
-        microservice = tech_sw.detect_microservice(results[r]["path"])
+        microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
         for line in results[r]["content"]:
             if "@EnableTurbineAmqp" in line:
                 for m in microservices.keys():
@@ -117,7 +117,7 @@ def detect_turbineamqp(microservices: dict, information_flows: dict) -> dict:
     return microservices, information_flows
 
 
-def detect_turbine_stream(microservices: dict, information_flows: dict) -> dict:
+def detect_turbine_stream(microservices: dict, information_flows: dict, dfd) -> dict:
     """Detects Tubrine servers via EnableTurbineStream annotation.
     """
 
@@ -127,7 +127,7 @@ def detect_turbine_stream(microservices: dict, information_flows: dict) -> dict:
     results = fi.search_keywords("EnableTurbineStream")     # content, name, path
     for r in results.keys():
         trace_info = (False, False, False)
-        microservice = tech_sw.detect_microservice(results[r]["path"])
+        microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
         for line in results[r]["content"]:
             if "@EnableTurbineStream" in line:
                 for id in microservices.keys():
@@ -226,7 +226,7 @@ def detect_turbine_stream(microservices: dict, information_flows: dict) -> dict:
     if uses_rabbit and rabbitmq:
         results = fi.search_keywords("spring-cloud-netflix-hystrix-stream")     # content, name, path
         for r in results.keys():
-            microservice = tech_sw.detect_microservice(results[r]["path"])
+            microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
             try:
                 id = max(information_flows.keys()) + 1
             except:

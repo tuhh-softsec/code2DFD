@@ -3,13 +3,13 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_load_balancers(microservices: dict, information_flows: dict) -> dict:
+def detect_load_balancers(microservices: dict, information_flows: dict, dfd) -> dict:
     """Find load balancers.
     """
 
     results = fi.search_keywords("@LoadBalanced")     # content, name, path
     for r in results.keys():
-        microservice = tech_sw.detect_microservice(results[r]["path"])
+        microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
 
         correct_id = False
         for m in microservices.keys():

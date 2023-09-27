@@ -2,22 +2,22 @@ import core.file_interaction as fi
 import core.technology_switch as tech_sw
 
 
-def detect_ribbon_load_balancers(microservices: dict, information_flows: dict) -> dict:
+def detect_ribbon_load_balancers(microservices: dict, information_flows: dict, dfd) -> dict:
     """Detects load balancing via Ribbon.
     """
 
-    microservices = detect_client_side(microservices)
+    microservices = detect_client_side(microservices, dfd)
 
     return microservices, information_flows
 
 
-def detect_client_side(microservices: dict) -> dict:
+def detect_client_side(microservices: dict, dfd) -> dict:
     """Detects client side load balncing.
     """
 
     results = fi.search_keywords("RibbonClient")     # content, name, path
     for r in results.keys():
-        microservice = tech_sw.detect_microservice(results[r]["path"])
+        microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
         for line in results[r]["content"]:
             if "@RibbonClient" in line:
                 for m in microservices.keys():

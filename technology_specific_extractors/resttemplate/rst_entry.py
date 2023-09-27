@@ -7,7 +7,7 @@ import output_generators.traceability as traceability
 import tmp.tmp as tmp
 
 
-def set_information_flows() -> dict:
+def set_information_flows(dfd) -> dict:
     """Goes through outgoing endpoints and matches them against incoming ones.
     """
 
@@ -19,9 +19,9 @@ def set_information_flows() -> dict:
     else:
         information_flows = dict()
 
-    incoming_endpoints = get_incoming_endpoints()
+    incoming_endpoints = get_incoming_endpoints(dfd)
     add_endpoints_tagged_values(incoming_endpoints)
-    outgoing_endpoints, information_flows = get_outgoing_endpoints(information_flows)
+    outgoing_endpoints, information_flows = get_outgoing_endpoints(information_flows, dfd)
     new_information_flows = match_incoming_to_outgoing_endpoints(incoming_endpoints, outgoing_endpoints)
 
     for ni in new_information_flows.keys():
@@ -41,7 +41,7 @@ def used_in_application():
     return False
 
 
-def get_incoming_endpoints() -> list:
+def get_incoming_endpoints(dfd) -> list:
     """Returns incoming API-endpoints of a repository using RestTemplate. Detection based on keywords '@[Request, Post, Get, Patch, Delete, Put]Mapping'
     """
 
@@ -54,7 +54,7 @@ def get_incoming_endpoints() -> list:
         if f["name"].split(".")[-1] != "java":
             continue
         else:
-            service = tech_sw.detect_microservice(f["path"])
+            service = tech_sw.detect_microservice(f["path"], dfd)
 
             bracket_count = 0               # variable for number of curly brackets to detect nested @RequestMappings
             current_parts = []              # list of "parts" of the path (e.g. /a/b/c -> ["a", "b", "c"])
@@ -138,7 +138,7 @@ def add_endpoints_tagged_values(endpoint_tuples: list):
     tmp.tmp_config.set("DFD", "microservices", str(microservices))
 
 
-def get_outgoing_endpoints(information_flows: dict) -> set:
+def get_outgoing_endpoints(information_flows: dict, dfd) -> set:
     """Finds API calls from one service to another if restTemplate.exchange() is used in the application.
     """
 
@@ -157,7 +157,7 @@ def get_outgoing_endpoints(information_flows: dict) -> set:
             f = files[file]
             if "README" in f["name"] or "test" in f["path"].casefold():
                 continue
-            microservice = tech_sw.detect_microservice(f["path"])
+            microservice = tech_sw.detect_microservice(f["path"], dfd)
             for line in range(len(f["content"])):
                 if command in f["content"][line]:
                     func_inp = f["content"][line].split(command)[1]

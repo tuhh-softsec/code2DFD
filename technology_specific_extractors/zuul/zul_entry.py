@@ -5,7 +5,7 @@ import tmp.tmp as tmp
 import output_generators.traceability as traceability
 
 
-def detect_zuul(microservices: dict, information_flows: dict, external_components: dict) -> dict:
+def detect_zuul(microservices: dict, information_flows: dict, external_components: dict, dfd) -> dict:
     """Detects Zuul gateway if there is one.
     """
 
@@ -22,7 +22,7 @@ def detect_zuul(microservices: dict, information_flows: dict, external_component
         results[id] = new_results[r]
     zuul_server = str()
     for r in results.keys():
-        zuul_server = tech_sw.detect_microservice(results[r]["path"])
+        zuul_server = tech_sw.detect_microservice(results[r]["path"], dfd)
         for m in microservices.keys():
             if microservices[m]["servicename"] == zuul_server:    # this is the Zuul server
                 try:

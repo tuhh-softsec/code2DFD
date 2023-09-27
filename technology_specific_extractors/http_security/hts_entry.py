@@ -3,17 +3,17 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_authentication_scopes(microservices: dict) -> dict:
+def detect_authentication_scopes(microservices: dict, dfd) -> dict:
     """Detects authentication scopes via HttpSecurity configurations.
     """
 
-    configuration_tuples = detect_configurations()
+    configuration_tuples = detect_configurations(dfd)
     microservices = interpret_configurations(microservices, configuration_tuples)
 
     return microservices
 
 
-def detect_configurations():
+def detect_configurations(dfd):
     """Finds httpSecurity configurations.
     """
 
@@ -22,7 +22,7 @@ def detect_configurations():
     for c_class in configuration_classes:
         results = fi.search_keywords(c_class)
         for r in results.keys():
-            microservice = tech_sw.detect_microservice(results[r]["path"])
+            microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
             configurations = set()
             objects = list()
             for line in results[r]["content"]:

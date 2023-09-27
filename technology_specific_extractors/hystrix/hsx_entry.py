@@ -3,13 +3,13 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_hystrix_dashboard(microservices: dict, information_flows: dict) -> dict:
+def detect_hystrix_dashboard(microservices: dict, information_flows: dict, dfd) -> dict:
     """Detects hystrix monitoring dashboards .
     """
 
     results = fi.search_keywords("@EnableHystrixDashboard")     # content, name, path
     for r in results.keys():
-        microservice = tech_sw.detect_microservice(results[r]["path"])
+        microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
         for line in results[r]["content"]:
             if "@EnableHystrixDashboard" in line:
                 for m in microservices.keys():
@@ -34,13 +34,13 @@ def detect_hystrix_dashboard(microservices: dict, information_flows: dict) -> di
     return microservices, information_flows
 
 
-def detect_hystrix_circuit_breakers(microservices: dict, information_flows: dict) -> dict:
+def detect_hystrix_circuit_breakers(microservices: dict, information_flows: dict, dfd) -> dict:
     """Detects HystrixCommand.
     """
 
     results = fi.search_keywords("@EnableHystrix")     # content, name, path
     for r in results.keys():
-        microservice = tech_sw.detect_microservice(results[r]["path"])
+        microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
         for line in results[r]["content"]:
             if "@EnableHystrix" in line and not "@EnableHystrixDashboard" in line:
                 for m in microservices.keys():

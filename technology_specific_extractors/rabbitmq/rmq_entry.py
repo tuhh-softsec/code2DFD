@@ -9,7 +9,7 @@ import tmp.tmp as tmp
 import output_generators.traceability as traceability
 
 
-def set_information_flows() -> set:
+def set_information_flows(dfd) -> set:
     """Connects incoming endpoints, outgoing endpoints, and routings to information flows
     """
 
@@ -24,8 +24,8 @@ def set_information_flows() -> set:
     new_information_flows = dict()
 
     routings = get_routings()
-    incoming_endpoints = get_incoming_endpoints()
-    outgoing_endpoints = get_outgoing_endpoints(routings)
+    incoming_endpoints = get_incoming_endpoints(dfd)
+    outgoing_endpoints = get_outgoing_endpoints(routings, dfd)
     new_information_flows = match_incoming_to_outgoing_endpoints(incoming_endpoints, outgoing_endpoints)
 
     # merge old and new flows
@@ -67,7 +67,7 @@ def get_routings() -> set:
     return routings
 
 
-def get_incoming_endpoints() -> set:
+def get_incoming_endpoints(dfd) -> set:
     """Finds Incoming queues, i.e. instances of RabbitListener
     """
 
@@ -78,7 +78,7 @@ def get_incoming_endpoints() -> set:
         if "README" in f["name"]:
             pass
         else:
-            microservice = tech_sw.detect_microservice(f["path"])
+            microservice = tech_sw.detect_microservice(f["path"], dfd)
             for line in range(len(f["content"])):
                 if "@RabbitListener" in f["content"][line]:
                     new_incoming_queue = f["content"][line].split("queues")[1].split("=")[1].strip().strip(")")
@@ -91,7 +91,7 @@ def get_incoming_endpoints() -> set:
     return incoming_queues
 
 
-def get_outgoing_endpoints(routings: set) -> set:
+def get_outgoing_endpoints(routings: set, dfd) -> set:
     """Finds points where messages are sent to exchanges via rabbitTemplate.exchange
     """
     outgoing_endpoints = set()
@@ -105,7 +105,7 @@ def get_outgoing_endpoints(routings: set) -> set:
                 if "README" in f["name"]:
                     pass
                 else:
-                    microservice = tech_sw.detect_microservice(f["path"])
+                    microservice = tech_sw.detect_microservice(f["path"], dfd)
                     for line in range(len(f["content"])):
                         if ("rabbitTemplate." + command) in f["content"][line]: #found correct (starting) line
                             exchange = None

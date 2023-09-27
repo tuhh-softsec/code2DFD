@@ -3,7 +3,7 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_eureka(microservices: dict, information_flows: dict) -> dict:
+def detect_eureka(microservices: dict, information_flows: dict, dfd) -> dict:
     """Detects Eureka servers if there are any.
     """
 
@@ -12,7 +12,7 @@ def detect_eureka(microservices: dict, information_flows: dict) -> dict:
 
     eureka_server = False
     for r in results.keys():
-        eureka_server = tech_sw.detect_microservice(results[r]["path"])
+        eureka_server = tech_sw.detect_microservice(results[r]["path"], dfd)
 
         for m in microservices.keys():
             if microservices[m]["servicename"] == eureka_server:        # this is the eureka server
@@ -49,7 +49,7 @@ def detect_eureka(microservices: dict, information_flows: dict) -> dict:
 
         participants = set()
         for result_path in result_paths:
-            service = tech_sw.detect_microservice(result_path[0])
+            service = tech_sw.detect_microservice(result_path[0], dfd)
             for m in microservices.keys():
                 if microservices[m]["servicename"] == service:
                     participants.add((microservices[m]["servicename"], result_path[0], result_path[1], result_path[2]))
@@ -95,12 +95,12 @@ def is_eureka(microservice: tuple) -> bool:
     return False
 
 
-def detect_eureka_server_only(microservices: dict):
+def detect_eureka_server_only(microservices: dict, dfd):
 
     results = fi.search_keywords("@EnableEurekaServer")
     eureka_servers = set()
     for r in results.keys():
-        eureka_servers.add(tech_sw.detect_microservice(results[r]["path"]))
+        eureka_servers.add(tech_sw.detect_microservice(results[r]["path"], dfd))
 
     for e in eureka_servers:
         for m in microservices.keys():

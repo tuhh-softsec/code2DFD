@@ -3,17 +3,17 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_local_logging(microservices: dict, information_flows: dict) -> dict:
+def detect_local_logging(microservices: dict, information_flows: dict, dfd) -> dict:
     """Detects if a service performs local logging.
     """
 
-    microservices = detect_loggerfactory(microservices)
-    microservices = detect_lombok(microservices)
+    microservices = detect_loggerfactory(microservices, dfd)
+    microservices = detect_lombok(microservices, dfd)
 
     return microservices, information_flows
 
 
-def detect_loggerfactory(microservices: dict) -> dict:
+def detect_loggerfactory(microservices: dict, dfd) -> dict:
     """Detects logging directly via loggerfactory.
     """
 
@@ -22,7 +22,7 @@ def detect_loggerfactory(microservices: dict) -> dict:
         found = False
         if "test" in results[r]["path"].casefold():
             continue
-        microservice = tech_sw.detect_microservice(results[r]["path"])
+        microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
         for line in results[r]["content"]:
             if "LoggerFactory" in line:
                 if "LoggerFactory.getLogger" in line and "=" in line:
@@ -55,7 +55,7 @@ def detect_loggerfactory(microservices: dict) -> dict:
     return microservices
 
 
-def detect_lombok(microservices: dict) -> dict:
+def detect_lombok(microservices: dict, dfd) -> dict:
     """Detects logging with Lombok.
     """
 
@@ -78,7 +78,7 @@ def detect_lombok(microservices: dict) -> dict:
                             use_found = True
 
             if annotation_found and use_found:
-                microservice = tech_sw.detect_microservice(results[r]["path"])
+                microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
                 for m in microservices.keys():
                     if microservices[m]["servicename"] == microservice:
                         try:

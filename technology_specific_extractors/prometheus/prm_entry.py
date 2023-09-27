@@ -4,16 +4,16 @@ import tmp.tmp as tmp
 import output_generators.traceability as traceability
 
 
-def detect_prometheus_server(microservices: dict, information_flows: dict) -> dict:
+def detect_prometheus_server(microservices: dict, information_flows: dict, dfd) -> dict:
     """Detects prometheus server and adds information flows.
     """
 
-    microservices, information_flows = detect_server_docker(microservices, information_flows)
+    microservices, information_flows = detect_server_docker(microservices, information_flows, dfd)
 
     return microservices, information_flows
 
 
-def detect_server_docker(microservices: dict, information_flows: dict) -> dict:
+def detect_server_docker(microservices: dict, information_flows: dict, dfd) -> dict:
     """Detects prometheus servers via dockerfiles.
     """
 
@@ -22,7 +22,7 @@ def detect_server_docker(microservices: dict, information_flows: dict) -> dict:
 
     for r in results.keys():
         found = False
-        prometheus_server = tech_sw.detect_microservice(results[r]["path"]) # check if any of the builds correspond to this path. If yes, that's the service
+        prometheus_server = tech_sw.detect_microservice(results[r]["path"], dfd) # check if any of the builds correspond to this path. If yes, that's the service
 
         for m in microservices.keys():
             if microservices[m]["servicename"] == prometheus_server:

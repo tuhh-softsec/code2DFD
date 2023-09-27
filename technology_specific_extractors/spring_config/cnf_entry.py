@@ -6,12 +6,12 @@ import tmp.tmp as tmp
 import output_generators.traceability as traceability
 
 
-def detect_spring_config(microservices: dict, information_flows: dict, external_components: dict) -> dict:
+def detect_spring_config(microservices: dict, information_flows: dict, external_components: dict, dfd) -> dict:
     """Detects Spring Cloud Config server and connections to it. And parses config files.
     """
 
     config_server, config_path = False, False
-    microservices, config_server, config_path, config_file_path, config_repo_uri, config_server_ports, config_file_path_local = detect_config_server(microservices)
+    microservices, config_server, config_path, config_file_path, config_repo_uri, config_server_ports, config_file_path_local = detect_config_server(microservices, dfd)
     if config_file_path or config_repo_uri or config_file_path_local:
         microservices, information_flows, external_components = parse_config_files(config_server, config_path, config_file_path, config_file_path_local, config_repo_uri, microservices, information_flows, external_components)
     microservices, information_flows = detect_config_clients(microservices, information_flows, config_server, config_server_ports)
@@ -19,7 +19,7 @@ def detect_spring_config(microservices: dict, information_flows: dict, external_
     return microservices, information_flows, external_components
 
 
-def detect_config_server(microservices: dict):
+def detect_config_server(microservices: dict, dfd):
     """Finds config server and sets needed variables
     """
 
@@ -34,7 +34,7 @@ def detect_config_server(microservices: dict):
     if len(results) > 1:
         print("More than one config server. Picking first one found.")
     for r in results.keys():
-        config_server = tech_sw.detect_microservice(results[r]["path"])
+        config_server = tech_sw.detect_microservice(results[r]["path"], dfd)
 
         for m in microservices.keys():
             if microservices[m]["servicename"] == config_server:

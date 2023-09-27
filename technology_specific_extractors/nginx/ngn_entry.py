@@ -53,7 +53,7 @@ class MyConstructor(ruamel.yaml.constructor.RoundTripConstructor):
 # end of external code
 
 
-def detect_nginx(microservices: dict, information_flows: dict, external_components: dict) -> dict:
+def detect_nginx(microservices: dict, information_flows: dict, external_components: dict, dfd) -> dict:
     """Detects nginx web applications.
     """
 
@@ -78,7 +78,7 @@ def detect_nginx(microservices: dict, information_flows: dict, external_componen
     if not web_app:
         results = fi.search_keywords("FROM nginx:")
         for r in results:
-            web_service = tech_sw.detect_microservice(results[r]["path"])
+            web_service = tech_sw.detect_microservice(results[r]["path"], dfd)
             if web_service:
                 for m in microservices.keys():
                     if microservices[m]["servicename"] == web_service:

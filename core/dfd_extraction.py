@@ -73,7 +73,7 @@ def perform_analysis():
 
     microservices, information_flows, external_components = dict(), dict(), dict()
 
-    microservices = tech_sw.get_microservices()
+    microservices = tech_sw.get_microservices(dfd)
     
     microservices = detect_databases(microservices)
     microservices = overwrite_port(microservices)
@@ -81,8 +81,8 @@ def perform_analysis():
     print("Extracted services from build- and IaC-files")
 
     # Parse internal and external configuration files
-    microservices, information_flows, external_components = detect_spring_config(microservices, information_flows, external_components)
-    microservices = detect_eureka_server_only(microservices)
+    microservices, information_flows, external_components = detect_spring_config(microservices, information_flows, external_components, dfd)
+    microservices = detect_eureka_server_only(microservices, dfd)
     microservices = overwrite_port(microservices)
 
     # Classify brokers (needed for information flows)
@@ -90,13 +90,13 @@ def perform_analysis():
     dev_print("got brokers")
 
     # Check authentication information of services
-    microservices = detect_authentication_scopes(microservices)
+    microservices = detect_authentication_scopes(microservices, dfd)
     tmp.tmp_config.set("DFD", "microservices", str(microservices))
 
     # Get information flows
     tmp.tmp_config.set("DFD", "external_components", str(external_components))
 
-    new_information_flows = tech_sw.get_information_flows()
+    new_information_flows = tech_sw.get_information_flows(dfd)
     external_components = ast.literal_eval(tmp.tmp_config["DFD"]["external_components"])
 
     # Merge old and new
@@ -110,7 +110,7 @@ def perform_analysis():
     print("Extracted information flows from API-calls, message brokers, and database connections")
 
     # Detect everything else / execute all technology implementations
-    microservices = tech_sw.get_microservices()
+    microservices = tech_sw.get_microservices(dfd)
     microservices, information_flows, external_components = classify_microservices(microservices, information_flows, external_components)
 
     # Merging

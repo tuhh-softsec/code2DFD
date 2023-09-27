@@ -4,19 +4,19 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_spring_oauth(microservices: dict, information_flows: dict) -> dict:
+def detect_spring_oauth(microservices: dict, information_flows: dict, dfd) -> dict:
     """Detect Spring OAuth Server and connections to it.
     """
 
-    microservices = detect_authorization_server(microservices)
-    microservices = detect_resource_servers(microservices)
+    microservices = detect_authorization_server(microservices, dfd)
+    microservices = detect_resource_servers(microservices, dfd)
     microservices, information_flows = detect_token_server(microservices, information_flows)
-    microservices = detect_preauthorized_methods(microservices)
+    microservices = detect_preauthorized_methods(microservices, dfd)
 
     return microservices, information_flows
 
 
-def detect_authorization_server(microservices: dict) -> dict:
+def detect_authorization_server(microservices: dict, dfd) -> dict:
     """Detects an authorization server.
     """
 
@@ -24,7 +24,7 @@ def detect_authorization_server(microservices: dict) -> dict:
 
     authorization_server = str()
     for r in results.keys():
-        authorization_server = tech_sw.detect_microservice(results[r]["path"])
+        authorization_server = tech_sw.detect_microservice(results[r]["path"], dfd)
         for m in microservices.keys():
             if microservices[m]["servicename"] == authorization_server:
                 if "stereotype_instances" in microservices[m]:
@@ -49,7 +49,7 @@ def detect_authorization_server(microservices: dict) -> dict:
     return microservices
 
 
-def detect_resource_servers(microservices: dict) -> dict:
+def detect_resource_servers(microservices: dict, dfd) -> dict:
     """Detects resource servers.
     """
 
@@ -57,7 +57,7 @@ def detect_resource_servers(microservices: dict) -> dict:
 
     resource_server = str()
     for r in results.keys():
-        resource_server = tech_sw.detect_microservice(results[r]["path"])
+        resource_server = tech_sw.detect_microservice(results[r]["path"], dfd)
         for m in microservices.keys():
             if microservices[m]["servicename"] == resource_server:
                 try:
@@ -136,14 +136,14 @@ def detect_token_server(microservices: dict, information_flows: dict) -> dict:
     return microservices, information_flows
 
 
-def detect_preauthorized_methods(microservices: dict) -> dict:
+def detect_preauthorized_methods(microservices: dict, dfd) -> dict:
     """Detects methods annotated as pre-authroized.
     """
 
     results = fi.search_keywords("@PreAuthorize")
 
     for r in results.keys():
-        microservice = tech_sw.detect_microservice(results[r]["path"])
+        microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
         if not "readme" in results[r]["path"].casefold() and not "test" in results[r]["path"].casefold():
             # Try extracting endpoints
             tagged_values = set()

@@ -6,17 +6,17 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_apachehttpd_webserver(microservices: dict, information_flows: dict, external_components: dict) -> dict:
+def detect_apachehttpd_webserver(microservices: dict, information_flows: dict, external_components: dict, dfd) -> dict:
     """Detects apachehttpd webservers and routes if possible.
     """
 
-    microservices, information_flows, external_components = detect_via_docker(microservices, information_flows, external_components)
-    microservices, information_flows, external_components = detect_via_proxypass(microservices, information_flows, external_components)
+    microservices, information_flows, external_components = detect_via_docker(microservices, information_flows, external_components, dfd)
+    microservices, information_flows, external_components = detect_via_proxypass(microservices, information_flows, external_components, dfd)
 
     return microservices, information_flows, external_components
 
 
-def detect_via_docker(microservices: dict, information_flows: dict, external_components: dict):
+def detect_via_docker(microservices: dict, information_flows: dict, external_components: dict, dfd):
     """Looks for Dockerfile that starts Apache httpd. Then Extracts server and routes.
     """
 
@@ -24,7 +24,7 @@ def detect_via_docker(microservices: dict, information_flows: dict, external_com
 
     results = fi.search_keywords("apache2ctl")     # content, name, path
     for r in results.keys():
-        microservice = tech_sw.detect_microservice(results[r]["path"])
+        microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
         trace_info = (results[r]["path"], results[r]["line_nr"], results[r]["span"])
 
         for line_nr in range(len(results[r]["content"])):
@@ -47,13 +47,13 @@ def detect_via_docker(microservices: dict, information_flows: dict, external_com
     return microservices, information_flows, external_components
 
 
-def detect_via_proxypass(microservices: dict, information_flows: dict, external_components: dict):
+def detect_via_proxypass(microservices: dict, information_flows: dict, external_components: dict, dfd):
     """Searches for keyword ProxyPass to detect server. For cases where config file has to be handled manually by user, detection is still possible this way.
     """
 
     results = fi.search_keywords("ProxyPass")     # content, name, path
     for r in results.keys():
-        microservice = tech_sw.detect_microservice(results[r]["path"])
+        microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
         trace_info = (results[r]["path"], results[r]["line_nr"], results[r]["span"])
         mark_server(microservices, microservice)
         information_flows, external_components = add_user(information_flows, external_components, microservice, trace_info)
