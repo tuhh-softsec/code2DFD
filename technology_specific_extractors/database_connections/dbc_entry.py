@@ -6,7 +6,7 @@ import tmp.tmp as tmp
 import output_generators.traceability as traceability
 
 
-def set_information_flows() -> set:
+def set_information_flows(dfd) -> set:
     """Goes through services and checks if there are connections to databases.
     """
 
@@ -20,7 +20,7 @@ def set_information_flows() -> set:
     else:
         external_components = dict()
 
-    microservices = tech_sw.get_microservices()
+    microservices = tech_sw.get_microservices(dfd)
 
     microservices, information_flows, external_components = check_properties(microservices, information_flows, external_components)
 

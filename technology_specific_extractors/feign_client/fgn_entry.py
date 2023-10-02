@@ -10,7 +10,7 @@ def set_information_flows(dfd) -> dict:
     """Detects uses of Feign Client in the code.
     """
 
-    microservices = tech_sw.get_microservices()
+    microservices = tech_sw.get_microservices(dfd)
 
     if tmp.tmp_config.has_option("DFD", "information_flows"):
         information_flows = ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])
@@ -61,7 +61,7 @@ def set_information_flows(dfd) -> dict:
                     target_service = line.split("value")[1].split(",")[0].strip().strip("=)\"").strip()
                 else:
                     target_service = line.split("FeignClient(")[1].split(",")[0].strip().strip(")").strip().strip("\"").strip()
-                if not is_microservice(target_service):
+                if not is_microservice(target_service, dfd):
                     target_service = False
                 if not target_service and "url" in line:
                     target_url = line.split("url")[1].split("=")[1].split(",")[0].strip().strip("\"")
@@ -98,12 +98,12 @@ def set_information_flows(dfd) -> dict:
     return information_flows
 
 
-def is_microservice(service: str) -> bool:
+def is_microservice(service: str, dfd) -> bool:
     """Checks if input service is in the list of microservices.
     """
 
     is_microservice = False
-    microservices = tech_sw.get_microservices()
+    microservices = tech_sw.get_microservices(dfd)
     for m in microservices.keys():
         if service.casefold() == microservices[m]["servicename"].casefold():
             is_microservice = True

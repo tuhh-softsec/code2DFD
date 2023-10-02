@@ -21,7 +21,7 @@ def set_information_flows(dfd) -> set:
         information_flows = dict()
 
 
-    microservices = tech_sw.get_microservices()
+    microservices = tech_sw.get_microservices(dfd)
 
     incoming_endpoints = get_incoming_endpoints(dfd)
     outgoing_endpoints = get_outgoing_endpoints(dfd)
@@ -36,7 +36,7 @@ def set_information_flows(dfd) -> set:
             id = 0
         information_flows[id] = new_information_flows[ni]
 
-    information_flows = detect_stream_binders(microservices, information_flows)
+    information_flows = detect_stream_binders(microservices, information_flows, dfd)
 
     tmp.tmp_config.set("DFD", "information_flows", str(information_flows))
 

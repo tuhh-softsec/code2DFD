@@ -111,7 +111,7 @@ def perform_analysis():
 
     # Detect everything else / execute all technology implementations
     microservices = tech_sw.get_microservices(dfd)
-    microservices, information_flows, external_components = classify_microservices(microservices, information_flows, external_components)
+    microservices, information_flows, external_components = classify_microservices(microservices, information_flows, external_components, dfd)
 
     # Merging
     print("Merging duplicate items")
@@ -190,37 +190,37 @@ def classify_brokers(microservices: dict) -> dict:
     return microservices
 
 
-def classify_microservices(microservices: dict, information_flows: dict, external_components: dict) -> dict:
+def classify_microservices(microservices: dict, information_flows: dict, external_components: dict, dfd) -> dict:
     """Tries to determine the microservice's funcitonality.
     """
 
     print("Classifying all services")
-    microservices, information_flows = detect_eureka(microservices, information_flows)
-    microservices, information_flows, external_components = detect_zuul(microservices, information_flows, external_components)
-    microservices, information_flows, external_components = detect_spring_cloud_gateway(microservices, information_flows, external_components)
-    microservices, information_flows = detect_spring_oauth(microservices, information_flows)
-    microservices, information_flows = detect_consul(microservices, information_flows)
-    microservices, information_flows = detect_hystrix_dashboard(microservices, information_flows)
-    microservices, information_flows = detect_turbine(microservices, information_flows)
-    microservices, information_flows = detect_local_logging(microservices, information_flows)
-    microservices, information_flows = detect_zipkin_server(microservices, information_flows)
-    microservices, information_flows = detect_spring_admin_server(microservices, information_flows)
-    microservices, information_flows = detect_prometheus_server(microservices, information_flows)
-    microservices, information_flows = detect_circuit_breakers(microservices, information_flows)
-    microservices, information_flows = detect_load_balancers(microservices, information_flows)
-    microservices, information_flows = detect_ribbon_load_balancers(microservices, information_flows)
-    microservices, information_flows = detect_hystrix_circuit_breakers(microservices, information_flows)
-    microservices, information_flows = detect_zookeeper(microservices, information_flows)
-    microservices, information_flows = detect_kibana(microservices, information_flows)
-    microservices, information_flows = detect_elasticsearch(microservices, information_flows)
-    microservices, information_flows, external_components = detect_logstash(microservices, information_flows, external_components)
-    microservices, information_flows, external_components = detect_nginx(microservices, information_flows, external_components)
-    microservices, information_flows = detect_grafana(microservices, information_flows)
-    microservices, information_flows = detect_spring_encryption(microservices, information_flows)
-    microservices = detect_endpoints(microservices)
+    microservices, information_flows = detect_eureka(microservices, information_flows, dfd)
+    microservices, information_flows, external_components = detect_zuul(microservices, information_flows, external_components, dfd)
+    microservices, information_flows, external_components = detect_spring_cloud_gateway(microservices, information_flows, external_components, dfd)
+    microservices, information_flows = detect_spring_oauth(microservices, information_flows, dfd)
+    microservices, information_flows = detect_consul(microservices, information_flows, dfd)
+    microservices, information_flows = detect_hystrix_dashboard(microservices, information_flows, dfd)
+    microservices, information_flows = detect_turbine(microservices, information_flows, dfd)
+    microservices, information_flows = detect_local_logging(microservices, information_flows, dfd)
+    microservices, information_flows = detect_zipkin_server(microservices, information_flows, dfd)
+    microservices, information_flows = detect_spring_admin_server(microservices, information_flows, dfd)
+    microservices, information_flows = detect_prometheus_server(microservices, information_flows, dfd)
+    microservices, information_flows = detect_circuit_breakers(microservices, information_flows, dfd)
+    microservices, information_flows = detect_load_balancers(microservices, information_flows, dfd)
+    microservices, information_flows = detect_ribbon_load_balancers(microservices, information_flows, dfd)
+    microservices, information_flows = detect_hystrix_circuit_breakers(microservices, information_flows, dfd)
+    microservices, information_flows = detect_zookeeper(microservices, information_flows, dfd)
+    microservices, information_flows = detect_kibana(microservices, information_flows, dfd)
+    microservices, information_flows = detect_elasticsearch(microservices, information_flows, dfd)
+    microservices, information_flows, external_components = detect_logstash(microservices, information_flows, external_components, dfd)
+    microservices, information_flows, external_components = detect_nginx(microservices, information_flows, external_components, dfd)
+    microservices, information_flows = detect_grafana(microservices, information_flows, dfd)
+    microservices, information_flows = detect_spring_encryption(microservices, information_flows, dfd)
+    microservices = detect_endpoints(microservices, dfd)
 
     microservices, information_flows, external_components = detect_miscellaneous(microservices, information_flows, external_components)
-    microservices, information_flows, external_components = detect_apachehttpd_webserver(microservices, information_flows, external_components)
+    microservices, information_flows, external_components = detect_apachehttpd_webserver(microservices, information_flows, external_components, dfd)
     microservices = classify_internal_infrastructural(microservices)
     microservices = set_plaintext_credentials(microservices)
 

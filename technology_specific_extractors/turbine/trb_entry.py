@@ -6,13 +6,13 @@ import tmp.tmp as tmp
 import output_generators.traceability as traceability
 
 
-def detect_turbine(microservices: dict, information_flows: dict) -> dict:
+def detect_turbine(microservices: dict, information_flows: dict, dfd) -> dict:
     """Detects turbine server.
     """
 
-    microservices = detect_turbine_server(microservices)
-    microservices, information_flows = detect_turbineamqp(microservices, information_flows)
-    microservices, information_flows = detect_turbine_stream(microservices, information_flows)
+    microservices = detect_turbine_server(microservices, dfd)
+    microservices, information_flows = detect_turbineamqp(microservices, information_flows, dfd)
+    microservices, information_flows = detect_turbine_stream(microservices, information_flows, dfd)
 
     return microservices, information_flows
 

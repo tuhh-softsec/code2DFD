@@ -24,8 +24,8 @@ def get_microservices(dfd) -> dict:
         logger.write_log_message("Microservices not set yet, start extraction", "info")
 
         mvn.set_microservices(dfd)
-        grd.set_microservices()
-        dcm.set_microservices()
+        grd.set_microservices(dfd)
+        dcm.set_microservices(dfd)
         if tmp.tmp_config.has_option("DFD", "microservices"):
             return ast.literal_eval(tmp.tmp_config["DFD"]["microservices"])
 
@@ -52,7 +52,7 @@ def detect_microservice(file_path: str, dfd) -> str:
 
     microservice = mvn.detect_microservice(file_path, dfd)
     if not microservice:
-        microservice = grd.detect_microservice(file_path)
+        microservice = grd.detect_microservice(file_path, dfd)
     if not microservice:
-        microservice = dcm.detect_microservice(file_path)
+        microservice = dcm.detect_microservice(file_path, dfd)
     return microservice

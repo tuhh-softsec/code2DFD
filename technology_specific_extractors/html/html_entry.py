@@ -10,7 +10,7 @@ def set_information_flows(dfd):
     """Looks for connections between services via html sites / href's.
     """
 
-    microservices = tech_sw.get_microservices()
+    microservices = tech_sw.get_microservices(dfd)
 
     if tmp.tmp_config.has_option("DFD", "information_flows"):
         information_flows = ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])

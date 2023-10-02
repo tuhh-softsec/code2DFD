@@ -9,7 +9,7 @@ import tmp.tmp as tmp
 import output_generators.traceability as traceability
 
 
-def set_microservices() -> dict:
+def set_microservices(dfd) -> dict:
     """Extracts the list of services from build.gradle files and sets the variable in the tmp-file.
     """
 
@@ -126,7 +126,7 @@ def parse_properties_file(gradle_path: str):
     return microservice, properties
 
 
-def detect_microservice(file_path):
+def detect_microservice(file_path, dfd):
     """Detects which microservice a file belongs to by looking for next build.gradle.
     """
 

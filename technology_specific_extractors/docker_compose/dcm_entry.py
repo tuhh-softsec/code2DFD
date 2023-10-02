@@ -11,7 +11,7 @@ import output_generators.traceability as traceability
 docker_compose_content = False
 
 
-def set_microservices() -> None:
+def set_microservices(dfd) -> None:
     """Reads microservices out of a .yml file, only returns ones defined in this repo.
     """
 
@@ -27,7 +27,7 @@ def set_microservices() -> None:
         if len(raw_files) == 0:
             raw_files = fi.get_file_as_yaml("docker-compose*")
         if len(raw_files) == 0:
-            microservices = tech_sw.get_microservices()
+            microservices = tech_sw.get_microservices(dfd)
             microservices = clean_pom_names(microservices)
             tmp.tmp_config.set("DFD", "microservices", str(microservices))
             return
@@ -109,7 +109,7 @@ def dictionarify(elements_set: set, properties_dict: dict) -> dict:
     return elements
 
 
-def set_information_flows():
+def set_information_flows(dfd):
     """Adds information flows based on "links" parameter in docker-compose.
     """
 
@@ -120,7 +120,7 @@ def set_information_flows():
     else:
         information_flows = dict()
 
-    microservices = tech_sw.get_microservices()
+    microservices = tech_sw.get_microservices(dfd)
 
     # Download docker-compose file
     if not docker_compose_content:
@@ -168,11 +168,11 @@ def check_image(image: str):
     return tuple
 
 
-def detect_microservice(file_path: str) -> str:
+def detect_microservice(file_path: str, dfd) -> str:
     """Detects, which service a file belongs to based on image given in docker-compose file and dockerfile belonging to file given as input.
     """
 
-    microservices = tech_sw.get_microservices()
+    microservices = tech_sw.get_microservices(dfd)
     microservice = False
     dockerfile_path = False
 

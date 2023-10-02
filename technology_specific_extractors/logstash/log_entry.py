@@ -1,7 +1,7 @@
 import output_generators.traceability as traceability
 
 
-def detect_logstash(microservices: dict, information_flows: dict, external_components: dict) -> dict:
+def detect_logstash(microservices: dict, information_flows: dict, external_components: dict, dfd) -> dict:
     """Detects logstash services.
     """
 

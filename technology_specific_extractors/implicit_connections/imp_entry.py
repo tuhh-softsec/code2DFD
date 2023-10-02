@@ -10,7 +10,7 @@ import tmp.tmp as tmp
 import output_generators.traceability as traceability
 
 
-def set_information_flows() -> dict:
+def set_information_flows(dfd) -> dict:
     """Adds connections based on parsed config files.
     """
 
@@ -19,7 +19,7 @@ def set_information_flows() -> dict:
     else:
         information_flows = dict()
 
-    microservices = tech_sw.get_microservices()
+    microservices = tech_sw.get_microservices(dfd)
 
     # Weavescope
     new_information_flows = weavescope(microservices)
