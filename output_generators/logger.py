@@ -1,5 +1,6 @@
 """Logger implemented here. Other methods call this one when writing messages to log to have a single logger."""
 
+import os
 import logging
 from datetime import date, datetime
 
@@ -7,8 +8,11 @@ log_level = "DEBUG"
 
 numeric_level = getattr(logging, log_level.upper(), 10)
 LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
+LOG_PATH = "./output/logs/"
+os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+
 #filename = "./output/logs/test.log"
-file = "./output/logs/" + date.today().strftime("%b-%d-%Y") + "--" + datetime.now().strftime("%H-%M-%S") + ".log"
+file = LOG_PATH + date.today().strftime("%b-%d-%Y") + "--" + datetime.now().strftime("%H-%M-%S") + ".log"
 logger = logging.getLogger("tool")
 logging.basicConfig(filename = file, level = numeric_level, format = LOG_FORMAT)
 
