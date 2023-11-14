@@ -256,11 +256,11 @@ def file_as_lines(raw_file):
     return file_as_lines
 
 
-def detect_microservice(file_path):
+def detect_microservice(file_path, dfd):
     """Finds microservice that a file belongs to.
     """
 
-    microservices_set = tech_sw.get_microservices()
+    microservices_set = tech_sw.get_microservices(dfd)
     microservices = [microservices_set[x]["servicename"] for x in microservices_set.keys()]
 
     file_path_parts = file_path.split("/")
@@ -360,11 +360,11 @@ def find_instances(class_of_interest: str) -> set:
     return instances
 
 
-def resolve_url(url: str, microservice: str) -> str:
+def resolve_url(url: str, microservice: str, dfd) -> str:
     """Tries to resolve a url into one of the microserices.
     """
 
-    microservices = tech_sw.get_microservices()
+    microservices = tech_sw.get_microservices(dfd)
     target_service = False
 
     if "http" in url:

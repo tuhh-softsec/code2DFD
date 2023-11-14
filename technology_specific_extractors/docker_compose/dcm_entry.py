@@ -36,7 +36,7 @@ def set_microservices(dfd) -> None:
     microservices_set, properties_dict = dcm_parser.extract_microservices(docker_compose_content, raw_files[0]["path"])
 
     if not microservices_set:
-        microservices = tech_sw.get_microservices()
+        microservices = tech_sw.get_microservices(dfd)
         microservices = clean_pom_names(microservices)
         tmp.tmp_config.set("DFD", "microservices", str(microservices))
         return

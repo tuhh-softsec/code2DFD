@@ -134,7 +134,7 @@ def detect_microservice(file_path, dfd):
         return False
 
     microservice = [False, False]
-    microservices = tech_sw.get_microservices()
+    microservices = tech_sw.get_microservices(dfd)
 
     repo_path = tmp.tmp_config["Repository"]["path"]
 

@@ -26,7 +26,7 @@ def set_information_flows(dfd) -> set:
     routings = get_routings()
     incoming_endpoints = get_incoming_endpoints(dfd)
     outgoing_endpoints = get_outgoing_endpoints(routings, dfd)
-    new_information_flows = match_incoming_to_outgoing_endpoints(incoming_endpoints, outgoing_endpoints)
+    new_information_flows = match_incoming_to_outgoing_endpoints(incoming_endpoints, outgoing_endpoints, dfd)
 
     # merge old and new flows
     for ni in new_information_flows.keys():
@@ -145,7 +145,7 @@ def get_outgoing_endpoints(routings: set, dfd) -> set:
     return outgoing_endpoints
 
 
-def match_incoming_to_outgoing_endpoints(incoming_endpoints: set, outgoing_endpoints: set) -> dict:
+def match_incoming_to_outgoing_endpoints(incoming_endpoints: set, outgoing_endpoints: set, dfd) -> dict:
     """Finds information flows by regexing routing keys of outgoing endpoints to queues of incoming endpoints.
     """
 
@@ -157,7 +157,7 @@ def match_incoming_to_outgoing_endpoints(incoming_endpoints: set, outgoing_endpo
     else:
         information_flows = dict()
 
-    microservices = tech_sw.get_microservices()
+    microservices = dfd
     rabbit_server = False
     for id in microservices.keys():
         if ("Message Broker", "RabbitMQ") in microservices[id]["tagged_values"]:
