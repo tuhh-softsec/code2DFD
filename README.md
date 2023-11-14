@@ -34,6 +34,8 @@ The corresponding path only needs to be un-commented for analysis (all others ha
 To start the tool via the terminal, simply enter `python3 code2DFD.py` in a command line opened in the root directory.
 The extraction will start and some status messages appear on the screen.
 Alternatively, the repository path can be given as parameter: `python3 code2DFD.py repository/path`.
+If you want to analyse in application on GitHub, simply put in the GitHub handle.
+For example, for the repository `https://github.com/sqshq/piggymetrics`, run the command `python3 code2DFD.py sqshq/piggymetrics`
 Path as parameter overrules path in config-file.
 Once the analysis is finished, the results can be found in the `output/` folder.
 
