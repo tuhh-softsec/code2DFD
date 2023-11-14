@@ -65,7 +65,7 @@ def set_information_flows(dfd) -> dict:
                     target_service = False
                 if not target_service and "url" in line:
                     target_url = line.split("url")[1].split("=")[1].split(",")[0].strip().strip("\"")
-                    target_service = fi.resolve_url(target_url, microservice)
+                    target_service = fi.resolve_url(target_url, microservice, dfd)
 
                 if target_service:
                     for m in microservices.keys():

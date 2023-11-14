@@ -10,7 +10,7 @@ def detect_spring_oauth(microservices: dict, information_flows: dict, dfd) -> di
 
     microservices = detect_authorization_server(microservices, dfd)
     microservices = detect_resource_servers(microservices, dfd)
-    microservices, information_flows = detect_token_server(microservices, information_flows)
+    microservices, information_flows = detect_token_server(microservices, information_flows, dfd)
     microservices = detect_preauthorized_methods(microservices, dfd)
 
     return microservices, information_flows
@@ -78,7 +78,7 @@ def detect_resource_servers(microservices: dict, dfd) -> dict:
     return microservices
 
 
-def detect_token_server(microservices: dict, information_flows: dict) -> dict:
+def detect_token_server(microservices: dict, information_flows: dict, dfd) -> dict:
     """Goes thorugh properties of services and detects if one of them is tokenserver for the others.
     """
 
@@ -97,7 +97,7 @@ def detect_token_server(microservices: dict, information_flows: dict) -> dict:
         for prop in microservices[m]["properties"]:
             if prop[0] == "oauth_tokenuri":
                 token_server_uri = prop[1]
-                token_server = fi.resolve_url(token_server_uri, False)
+                token_server = fi.resolve_url(token_server_uri, False, dfd)
                 if token_server:
                     for m2 in microservices.keys():
                         if microservices[m2]["servicename"] == token_server:
