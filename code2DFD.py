@@ -4,6 +4,7 @@
 # Contact: simon.schneider@tuhh.de
 
 import sys
+import os
 from configparser import ConfigParser
 from datetime import datetime
 
@@ -92,6 +93,9 @@ def main():
     elif len(arguments) >2:
         print("Please specify the repository paths one by one.")
         return
+
+    # Create analysed_repositories folder in case it doesn't exist yet (issue #2)
+    os.makedirs(os.path.dirname("./analysed_repositories"), exist_ok=True)
 
     local_path = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
     tmp.tmp_config.set("Repository", "local_path", local_path)
