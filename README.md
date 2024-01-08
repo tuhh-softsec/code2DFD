@@ -9,7 +9,7 @@ You can find the paper on [arXiv](https://arxiv.org/abs/2304.12769) or the publi
 If you use the tool in a scientific context, please cite as:
 
 ```bibtex
-@inproceedings{Code2DFD23,
+@article{Code2DFD23,
   title = {Automatic Extraction of Security-Rich Dataflow Diagrams for Microservice Applications written in Java},
   journal = {Journal of Systems and Software},
   volume = {202},
