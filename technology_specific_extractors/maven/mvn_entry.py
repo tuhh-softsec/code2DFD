@@ -9,7 +9,7 @@ import core.technology_switch as tech_sw
 import technology_specific_extractors.docker.dcr_entry as dcr
 import tmp.tmp as tmp
 import output_generators.traceability as traceability
-from core.service import CService
+from core.Service import CService
 
 
 def set_microservices(dfd) -> dict:

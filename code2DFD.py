@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Author: Simon Schneider, 2023
+# Author: Simon Schneider
 # Contact: simon.schneider@tuhh.de
 
 import sys
@@ -12,7 +12,7 @@ import core.dfd_extraction as dfd_extraction
 import core.file_interaction as fi
 import output_generators.logger as logger
 import tmp.tmp as tmp
-
+from core.DFD import CDFD
 
 def api_invocation(path: str) -> str:
     """Entry function for when tool is called via API call.
@@ -29,7 +29,7 @@ def api_invocation(path: str) -> str:
     # Copy config to tmp file
     ini_config = ConfigParser()
     ini_config.read('config/config.ini')
-    for section in ["Analysis Settings", "Repository", "Technology Profiles", "DFD"]:     #copying what is needed from config to temp
+    for section in ["Repository", "Technology Profiles", "DFD"]:     #copying what is needed from config to temp
         if not tmp.tmp_config.has_section(section):
             tmp.tmp_config.add_section(section)
         for entry in ini_config[section]:
@@ -49,6 +49,10 @@ def api_invocation(path: str) -> str:
 
     response["codeable_models_file"] = codeable_models
     response["traceability"] = traceability
+
+    # Call extraction via CDFD object
+    new_dfd = CDFD(path)
+
 
     # Execution time
     end_time = datetime.now()
@@ -70,7 +74,7 @@ def main():
     # Copy config to tmp file
     ini_config = ConfigParser()
     ini_config.read('config/config.ini')
-    for section in ["Analysis Settings", "Repository", "Technology Profiles", "DFD"]:     #copying what is needed from config to temp
+    for section in ["Repository", "Technology Profiles", "DFD"]:     #copying what is needed from config to temp
         if not tmp.tmp_config.has_section(section):
             tmp.tmp_config.add_section(section)
         for entry in ini_config[section]:

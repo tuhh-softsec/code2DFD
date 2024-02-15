@@ -1,6 +1,6 @@
-from core.service import CService
-from core.external_entity import CExternalEntity
-from core.information_flow import CInformationFlow
+from core.Service import CService
+from core.ExternalEntity import CExternalEntity
+from core.InformationFlow import CInformationFlow
 
 
 class CDFD:
@@ -9,9 +9,9 @@ class CDFD:
 
     def __init__(self, name):
         self.name = name
-        self.services = [CService]
-        self.external_entities = [CExternalEntity]
-        self.information_flows = [CInformationFlow]
+        self.services = list()
+        self.external_entities = list()
+        self.information_flows = list()
         self.traceability = dict()
 
     def __str__(self):
@@ -47,3 +47,16 @@ class CDFD:
 
     def add_traceability(self, model_item, item_type, file, line):
         pass
+
+    def run_technology_specific_extractors(self, extractors_file_path):
+        # open file containing list of extractors
+        # dynamically import the extractor
+        # execute extractor (imports to all have to be all model items for standardization)
+        # adjust self. model items to output from each extractor
+        with open(extractors_file_path, 'r') as file:
+            extractors = file.readlines()
+
+        
+        for extractor in extractors:
+            module = __import__(extractor)
+            ex = getattr(module, extractor)
