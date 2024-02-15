@@ -6,7 +6,6 @@ class CService:
         self.name = name
         self.stereotypes = stereotypes
         self.tagged_values = tagged_values
-        print(self.name, self.stereotypes, self.tagged_values)
 
     def add_stereotype(self, stereotype):
         if not stereotype in self.stereotypes:

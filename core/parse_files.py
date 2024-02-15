@@ -734,7 +734,7 @@ def parse_yaml_file(download_url: str, file_path: str) -> str:
                     trace = (file_path, line_nr + 1, span)
                     properties.add(("logstash_server", logstash_server, trace))
     except Exception as e:
-        print(e)
+        pass
 
     return microservice, properties
 

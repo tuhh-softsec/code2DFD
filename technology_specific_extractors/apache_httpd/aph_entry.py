@@ -160,7 +160,7 @@ def add_connections(microservices: dict, information_flows: dict, file, microser
                                         if str(prop[1]) == str(port):
                                             target_service = microservices[m]["servicename"]
                             except Exception as e:
-                                print(e)
+                                pass
                     else:
                         for m in microservices.keys():
                             if microservices[m]["servicename"] == host:

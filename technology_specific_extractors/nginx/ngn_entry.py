@@ -202,7 +202,7 @@ def detect_nginx(microservices: dict, information_flows: dict, external_componen
                                             except:
                                                 pass
                                 except Exception as e:
-                                    print(e)
+                                    pass
 
     if web_app:
         if port and correct_id:

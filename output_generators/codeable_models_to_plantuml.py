@@ -34,7 +34,6 @@ def convert(codeable_models_path: str) -> str:
 
     add_footer()
 
-    # Print, output, and return
     write_output(output_file_path)
 
     return plantuml_new, output_file_path

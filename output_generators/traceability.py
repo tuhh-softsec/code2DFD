@@ -7,22 +7,10 @@ traceability = dict()
 traceability["nodes"] = dict()
 traceability["edges"] = dict()
 
-def dev_print(message: str):
-    """Prints messages only if development_mode is set to True.
-    """
-
-    development_mode = bool(ast.literal_eval(tmp.tmp_config["Analysis Settings"]["development_mode"]))
-
-    if development_mode:
-        print("[dev] " + str(message))
-    return
-
 
 def add_trace(traceability_info: dict):
     """Adds an entry to the traceability dictionary.
     """
-
-    dev_print(traceability_info)
 
     # traceability info entries: (itemname, [parentitem], file, line, length)
     global traceability
@@ -42,7 +30,8 @@ def add_trace(traceability_info: dict):
 
         # check if parent item exists, otherwise can't add
         if not traceability_info["parent_item"] in traceability[type].keys():
-            print("Can't add traceability " + str(traceability_info))
+            #print("Can't add traceability " + str(traceability_info))
+            pass
         else:
 
             # Adding the highlighting of the lines to the link (GitHub's feature)

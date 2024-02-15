@@ -152,7 +152,6 @@ def extract_microservices(file_content, file_name) -> set:
                 if password != None:
                     properties.add(("datasource_password", password, (file_name, line_nr + 1, span)))
             except Exception as e:
-                #print(e)
                 pass
 
 

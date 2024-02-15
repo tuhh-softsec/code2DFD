@@ -13,7 +13,6 @@ class CDFD:
         self.external_entities = [CExternalEntity]
         self.information_flows = [CInformationFlow]
         self.traceability = dict()
-        print("Initialization")
 
     def __str__(self):
         return f"DFD {self.name}"

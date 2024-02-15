@@ -45,21 +45,6 @@ from technology_specific_extractors.zuul.zul_entry import detect_zuul
 
 from core.DFD import CDFD
 
-#import check_traceability
-
-
-def dev_print(message: str):
-    """Prints messages only if development_mode is set to True.
-    """
-
-    # TODO delete this, not needed
-
-    development_mode = bool(ast.literal_eval(tmp.tmp_config["Analysis Settings"]["development_mode"]))
-
-    if development_mode:
-        print("[dev] " + str(message))
-    return
-
 
 def perform_analysis():
     """Main function for the extraction, calling all technology-specific extractors, managing output etc.
@@ -87,7 +72,6 @@ def perform_analysis():
 
     # Classify brokers (needed for information flows)
     microservices = classify_brokers(microservices)
-    dev_print("got brokers")
 
     # Check authentication information of services
     microservices = detect_authentication_scopes(microservices, dfd)

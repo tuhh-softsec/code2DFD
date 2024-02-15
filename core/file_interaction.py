@@ -25,17 +25,6 @@ repo_cache = dict()
 exception_counter_repo = 0
 
 
-def dev_print(message: str):
-    """Prints messages only if development_mode is set to True.
-    """
-
-    development_mode = bool(ast.literal_eval(tmp.tmp_config["Analysis Settings"]["development_mode"]))
-
-    if development_mode:
-        print("[dev] " + str(message))
-    return
-
-
 def repo_downloaded(repo_folder: str) -> bool:
     """Checks if repository has been downloaded from GitHub already.
     """
@@ -164,7 +153,7 @@ def search_keywords(keywords: str):
                         results[id]["line_nr"] = line_nr
                         results[id]["span"] = str(span)
             except Exception as e:
-                dev_print(e)
+                pass
     return results
 
 
@@ -398,7 +387,7 @@ def resolve_url(url: str, microservice: str, dfd) -> str:
                                 if ("Configuration Server", "Spring Cloud Config") in microservices[mi]["tagged_values"]:
                                     pass
                     except Exception as e:
-                        print(e)
+                        pass
 
     return target_service
 
@@ -484,7 +473,6 @@ def get_repo_contents_local(repo_path: str, path: str) -> set:
     try:
         contents = os.scandir(local_repo_path)
     except Exception as e:
-        print(e)
         return repo
     for content in contents:
         path = tmp.tmp_config["Repository"]["path"]
