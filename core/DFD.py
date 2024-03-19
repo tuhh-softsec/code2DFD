@@ -2,6 +2,8 @@ from core.Service import CService
 from core.ExternalEntity import CExternalEntity
 from core.InformationFlow import CInformationFlow
 
+import core.technology_switch as tech_sw
+
 
 class CDFD:
     """Class CDFD as central collection of all extracted information.
@@ -16,15 +18,22 @@ class CDFD:
 
     def __str__(self):
         return f"DFD {self.name}"
+    
+    def print_services(self):
 
-    def add_service(self, service: CService):
-        if not service.name in [s.name for s in self.services]:
-            self.services.append(service)
-        else:
-            # merge stereotypes
-            pass
+        print("######")
+        for s in self.services:
+            print(self.services)
+        print("######")
         
 
+    def add_service(self, service: CService):
+        #if not service.name in [s.name for s in self.services]:
+        self.services.append(service)
+        #else:
+            # merge stereotypes
+        #    pass
+        
     def add_external_entity(self, external_entity):
         if not external_entity.name in [e.name for e in self.external_entities]:
             self.external_entities.append(external_entity)
@@ -53,6 +62,8 @@ class CDFD:
         # dynamically import the extractor
         # execute extractor (imports to all have to be all model items for standardization)
         # adjust self. model items to output from each extractor
+
+        
         with open(extractors_file_path, 'r') as file:
             extractors = file.readlines()
 
@@ -60,3 +71,10 @@ class CDFD:
         for extractor in extractors:
             module = __import__(extractor)
             ex = getattr(module, extractor)
+
+
+    def extract_services(self):
+        microservices = tech_sw.get_microservices(self)
+        for m in microservices:
+            self.add_service(microservices[m])
+        

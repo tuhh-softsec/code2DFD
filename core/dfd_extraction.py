@@ -59,7 +59,12 @@ def perform_analysis():
     microservices, information_flows, external_components = dict(), dict(), dict()
 
     microservices = tech_sw.get_microservices(dfd)
-    
+    for m in microservices:
+        print(microservices[m])
+    dfd.extract_services()
+    dfd.print_services()
+
+
     microservices = detect_databases(microservices)
     microservices = overwrite_port(microservices)
     microservices = detect_ssl_services(microservices)
