@@ -50,25 +50,32 @@ def perform_analysis():
     """Main function for the extraction, calling all technology-specific extractors, managing output etc.
     """
 
-    dfd = CDFD("TestDFD")
+    
     repo_path = tmp.tmp_config["Repository"]["path"]
     now = datetime.now()
     start_time = now.strftime("%H:%M:%S")
-    print("\n\tStart extraction of DFD for " + repo_path + " at " + str(start_time))
+    # print("\n\tStart extraction of DFD for " + repo_path + " at " + str(start_time))
+
+    #################### Refactored
+
+    extractors_path = "./extractors.txt"
+    dfd = CDFD(repo_path)
+
+
+    dfd.run_technology_specific_extractors(extractors_path)
+    
+
+    dfd.print_all()
+    ###########
 
     microservices, information_flows, external_components = dict(), dict(), dict()
 
     microservices = tech_sw.get_microservices(dfd)
-    for m in microservices:
-        print(microservices[m])
-    dfd.extract_services()
-    dfd.print_services()
-
-
+    
     microservices = detect_databases(microservices)
     microservices = overwrite_port(microservices)
     microservices = detect_ssl_services(microservices)
-    print("Extracted services from build- and IaC-files")
+    # print("Extracted services from build- and IaC-files")
 
     # Parse internal and external configuration files
     microservices, information_flows, external_components = detect_spring_config(microservices, information_flows, external_components, dfd)
@@ -96,26 +103,26 @@ def perform_analysis():
             id = 0
         information_flows[id] = dict()
         information_flows[id] = new_information_flows[new_flow]
-    print("Extracted information flows from API-calls, message brokers, and database connections")
+    #print("Extracted information flows from API-calls, message brokers, and database connections")
 
     # Detect everything else / execute all technology implementations
     microservices = tech_sw.get_microservices(dfd)
     microservices, information_flows, external_components = classify_microservices(microservices, information_flows, external_components, dfd)
 
     # Merging
-    print("Merging duplicate items")
+    # print("Merging duplicate items")
     information_flows = clean_database_connections(microservices, information_flows)
     information_flows = merge_duplicate_flows(information_flows)
     microservices, external_components = merge_duplicate_services(microservices, external_components)
     microservices, information_flows, external_components = merge_duplicate_annotations(microservices, information_flows, external_components)
 
     # Printing
-    print("\nFinished extraction. Results:\n")
-    repo_path = repo_path.replace("/", "_")
-    filename = "./output/results/" + repo_path + ".txt"
-    filename_dict = "./output/results/dict_" + repo_path + ".txt"
-    output_file = open(filename, "w")
-    output_file_dict = open(filename_dict, "w")
+    # print("\nFinished extraction. Results:\n")
+    # repo_path = repo_path.replace("/", "_")
+    # filename = "./output/results/" + repo_path + ".txt"
+    # filename_dict = "./output/results/dict_" + repo_path + ".txt"
+    # output_file = open(filename, "w")
+    # output_file_dict = open(filename_dict, "w")
 
     # if information_flows:
     #     print("\nInformation Flows:")
@@ -142,31 +149,31 @@ def perform_analysis():
     #         output_file.write("\n" + str(external_components[e]))
 
     # Writing dict for calculating metrics
-    complete = dict()
-    complete["microservices"] = microservices
-    complete["information_flows"] = information_flows
-    complete["external_components"] = external_components
+    # complete = dict()
+    # complete["microservices"] = microservices
+    # complete["information_flows"] = information_flows
+    # complete["external_components"] = external_components
 
-    output_file_dict.write(str(complete))
+    # output_file_dict.write(str(complete))
 
-    output_file_dict.close()
-    output_file.close()
+    # output_file_dict.close()
+    # output_file.close()
 
     # Saving
-    tmp.tmp_config.set("DFD", "microservices", str(microservices))
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows))
-    tmp.tmp_config.set("DFD", "external_components", str(external_components))
+    # tmp.tmp_config.set("DFD", "microservices", str(microservices))
+    # tmp.tmp_config.set("DFD", "information_flows", str(information_flows))
+    # tmp.tmp_config.set("DFD", "external_components", str(external_components))
 
-    codeable_models, codeable_models_path = codeable_model.output_codeable_model(microservices, information_flows, external_components)
-    traceability_content = traceability.output_traceability()
-    visualizer.output_png(codeable_models_path, repo_path)
-    json_architecture.generate_json_architecture(microservices, information_flows, external_components)
+    # codeable_models, codeable_models_path = codeable_model.output_codeable_model(microservices, information_flows, external_components)
+    # traceability_content = traceability.output_traceability()
+    # visualizer.output_png(codeable_models_path, repo_path)
+    # json_architecture.generate_json_architecture(microservices, information_flows, external_components)
 
     #calculate_metrics.calculate_single_system(repo_path)
 
     #check_traceability.check_traceability(microservices, information_flows, external_components, traceability_content)
 
-    return codeable_models, traceability_content
+    return #codeable_models, traceability_content
 
 
 def classify_brokers(microservices: dict) -> dict:
@@ -183,7 +190,7 @@ def classify_microservices(microservices: dict, information_flows: dict, externa
     """Tries to determine the microservice's funcitonality.
     """
 
-    print("Classifying all services")
+    # print("Classifying all services")
     microservices, information_flows = detect_eureka(microservices, information_flows, dfd)
     microservices, information_flows, external_components = detect_zuul(microservices, information_flows, external_components, dfd)
     microservices, information_flows, external_components = detect_spring_cloud_gateway(microservices, information_flows, external_components, dfd)

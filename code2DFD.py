@@ -88,9 +88,9 @@ def main():
 
     if len(arguments) == 1:
         repo_path = tmp.tmp_config["Repository"]["path"]
-        print("No repository given as parameter. \
-                \n   You can provide the path as: > python3 code2dfd.py repository/path \
-                \nAnalysing " + repo_path + " as specified in config/config.ini")
+        # print("No repository given as parameter. \
+        #         \n   You can provide the path as: > python3 code2dfd.py repository/path \
+        #         \nAnalysing " + repo_path + " as specified in config/config.ini")
     elif len(arguments) == 2:
         repo_path = arguments[1]
         tmp.tmp_config.set("Repository", "path", repo_path)

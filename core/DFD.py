@@ -3,6 +3,7 @@ from core.ExternalEntity import CExternalEntity
 from core.InformationFlow import CInformationFlow
 
 import core.technology_switch as tech_sw
+import importlib
 
 
 class CDFD:
@@ -19,13 +20,22 @@ class CDFD:
     def __str__(self):
         return f"DFD {self.name}"
     
-    def print_services(self):
+    def print_all(self):
+        self.print_services()
+        self.print_information_flows()
+        self.print_external_entities()
 
-        print("######")
+    def print_services(self):
         for s in self.services:
-            print(self.services)
-        print("######")
-        
+            print(s)
+
+    def print_information_flows(self):
+        for i in self.information_flows:
+            print(i)
+
+    def print_external_entities(self):
+        for e in self.external_entities:
+            print(e)
 
     def add_service(self, service: CService):
         #if not service.name in [s.name for s in self.services]:
@@ -63,14 +73,19 @@ class CDFD:
         # execute extractor (imports to all have to be all model items for standardization)
         # adjust self. model items to output from each extractor
 
-        
+        # list of all extractors
         with open(extractors_file_path, 'r') as file:
             extractors = file.readlines()
 
-        
+        # dynamically import extractors 
         for extractor in extractors:
-            module = __import__(extractor)
-            ex = getattr(module, extractor)
+            module = importlib.import_module(f"technology_specific_extractors.{extractor}.{extractor}")
+            # get the main method
+            ex = getattr(module, f"detect_{extractor}")
+            # execute main method, save returned services, flows, and external entities
+            ex(self)
+            # now full dfd object is passed to extractors and the merging logic is done there.
+            # more burden for adding new ones, but probably best
 
 
     def extract_services(self):
@@ -78,3 +93,5 @@ class CDFD:
         for m in microservices:
             self.add_service(microservices[m])
         
+    def print_test(self):
+        print("testtesttesttesttest")
