@@ -23,81 +23,25 @@ def detect_maven(dfd: CDFD) -> dict:
     if not used_in_application(dfd.repo_path):
         return False
 
-    # rm {
-    if tmp.tmp_config.has_option("DFD", "microservices"):
-        microservices = ast.literal_eval(tmp.tmp_config["DFD"]["microservices"])
-    else:
-        microservices = dict()
-    microservices_set = set()
-    # }
-
-
     pom_files = fi.get_file_as_lines("pom.xml")
-    module_tuples = list()
 
     for pf in pom_files.keys():
         pom_file = pom_files[pf]
-        image = "image_placeholder"
-        modules = extract_modules(pom_file)
-        if modules:
-            module_tuples.append((pom_file["name"], modules))
-        else:
-            microservice, properties = parse_configurations(pom_file)
-            properties = extract_dependencies(properties, pom_file["content"])
-            if microservice[0]:
-                port = dcr.detect_port(pom_file["path"])
-                # rm{
-                # create microservice in dict
+        microservice, properties = parse_configurations(pom_file)
+        
+        if microservice[0]:
+            port = dcr.detect_port(pom_file["path"])
 
-                try:
-                    id = max(microservices.keys()) + 1
-                except:
-                    id = 0
-                microservices[id] = dict()
+            if port:
+                tagged_values = [("Port", port)]
+            else:
+                tagged_values = list()
 
-                microservices[id]["servicename"] = microservice[0]
-                microservices[id]["image"] = image
-                microservices[id]["type"] = "internal"
-                microservices[id]["pom_path"] = pom_file["path"]
-                microservices[id]["properties"] = properties
-                microservices[id]["stereotype_instances"] = list()
-                # }
-                if port:
-                    tagged_values = [("Port", port)]
-                else:
-                    tagged_values = list()
+            dfd.add_service(CService(microservice[0], list(), tagged_values))
 
-                dfd.add_service(CService(microservice[0], list(), tagged_values))
-                try:
-                    trace = dict()
-                    name = microservice[0]
-                    name = name.replace("pom_", "")
-                    trace["item"] = name
-                    trace["file"] = microservice[1][0]
-                    trace["line"] = microservice[1][1]
-                    trace["span"] = microservice[1][2]
-                    traceability.add_trace(trace)
-                except:
-                    pass
-
-    nested_microservices = check_nested_modules(module_tuples)
-    for m in nested_microservices:
-        microservices_set.add(m)
-
-    tmp.tmp_config.set("DFD", "microservices", str(microservices))
-
+    microservices = list()
     return microservices
 
-
-def extract_dependencies(properties: set, pom_file_lines) -> set:
-    """Parses pom_file to check for dependencies.
-    """
-
-    for line in pom_file_lines:
-        if "spring-cloud-starter-netflix-hystrix" in line:
-            properties.add(("circuit_breaker", "Hystrix", ("file", "line", "span")))
-
-    return properties
 
 
 def used_in_application(repo_path) -> bool:
@@ -105,31 +49,6 @@ def used_in_application(repo_path) -> bool:
     """
 
     return fi.file_exists("pom.xml", repo_path)
-
-
-def extract_modules(file: list) -> list:
-    """Extracts modules of a Maven project based on the <module> </module>-tag.
-    """
-
-    modules = list()
-    for line in file["content"]:
-        if "<module>" in line:
-            modules.append(line.split("<module>")[1].split("</module>")[0].strip())
-
-    return modules
-
-
-def check_nested_modules(module_tuples: list) -> list:
-    """Takes list of tuples of the form [(component, [modules])] and checks for links between them. If yes, returns list of components = services that need to be added to the list.
-    """
-
-    microservices = list()
-    for tuple1 in module_tuples:
-        for tuple2 in module_tuples:
-            if tuple1[0] in tuple2[1]:
-                microservices.append(tuple1[0])
-
-    return microservices
 
 
 def parse_configurations(pom_file) -> str:
