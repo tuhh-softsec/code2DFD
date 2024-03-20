@@ -10,8 +10,9 @@ class CDFD:
     """Class CDFD as central collection of all extracted information.
     """
 
-    def __init__(self, name):
+    def __init__(self, name, repo_path):
         self.name = name
+        self.repo_path = repo_path
         self.services = list()
         self.external_entities = list()
         self.information_flows = list()
@@ -38,8 +39,8 @@ class CDFD:
             print(e)
 
     def add_service(self, service: CService):
-        #if not service.name in [s.name for s in self.services]:
-        self.services.append(service)
+        if not service.name in [s.name for s in self.services]:
+            self.services.append(service)
         #else:
             # merge stereotypes
         #    pass

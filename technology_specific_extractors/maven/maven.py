@@ -10,26 +10,27 @@ import technology_specific_extractors.docker.dcr_entry as dcr
 import tmp.tmp as tmp
 import output_generators.traceability as traceability
 
+from core.DFD import CDFD
 from core.Service import CService
 from core.ExternalEntity import CExternalEntity
 from core.InformationFlow import CInformationFlow
 
 
-def detect_maven(dfd) -> dict:
+def detect_maven(dfd: CDFD) -> dict:
     """Extracts the list of services from pom.xml files and sets the variable in the tmp-file.
     """
 
-    dfd.print_test()
-
-
-    if not used_in_application():
+    if not used_in_application(dfd.repo_path):
         return False
 
+    # rm {
     if tmp.tmp_config.has_option("DFD", "microservices"):
         microservices = ast.literal_eval(tmp.tmp_config["DFD"]["microservices"])
     else:
         microservices = dict()
     microservices_set = set()
+    # }
+
 
     pom_files = fi.get_file_as_lines("pom.xml")
     module_tuples = list()
@@ -45,7 +46,9 @@ def detect_maven(dfd) -> dict:
             properties = extract_dependencies(properties, pom_file["content"])
             if microservice[0]:
                 port = dcr.detect_port(pom_file["path"])
+                # rm{
                 # create microservice in dict
+
                 try:
                     id = max(microservices.keys()) + 1
                 except:
@@ -58,12 +61,13 @@ def detect_maven(dfd) -> dict:
                 microservices[id]["pom_path"] = pom_file["path"]
                 microservices[id]["properties"] = properties
                 microservices[id]["stereotype_instances"] = list()
+                # }
                 if port:
-                    microservices[id]["tagged_values"] = [("Port", port)]
+                    tagged_values = [("Port", port)]
                 else:
-                    microservices[id]["tagged_values"] = list()
+                    tagged_values = list()
 
-                new_service = CService(microservice[0], )
+                dfd.add_service(CService(microservice[0], list(), tagged_values))
                 try:
                     trace = dict()
                     name = microservice[0]
@@ -96,11 +100,9 @@ def extract_dependencies(properties: set, pom_file_lines) -> set:
     return properties
 
 
-def used_in_application() -> bool:
+def used_in_application(repo_path) -> bool:
     """Checks if application has pom.xml file.
     """
-
-    repo_path = tmp.tmp_config["Repository"]["path"]
 
     return fi.file_exists("pom.xml", repo_path)
 

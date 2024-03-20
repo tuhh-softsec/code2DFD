@@ -59,7 +59,7 @@ def perform_analysis():
     #################### Refactored
 
     extractors_path = "./extractors.txt"
-    dfd = CDFD(repo_path)
+    dfd = CDFD(repo_path, repo_path)
 
 
     dfd.run_technology_specific_extractors(extractors_path)
