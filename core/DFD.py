@@ -79,7 +79,7 @@ class CDFD:
             extractors = file.readlines()
 
         # dynamically import extractors 
-        for extractor in extractors:
+        for extractor in [e.strip() for e in extractors]:
             module = importlib.import_module(f"technology_specific_extractors.{extractor}.{extractor}")
             # get the main method
             ex = getattr(module, f"detect_{extractor}")

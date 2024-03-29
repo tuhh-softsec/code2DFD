@@ -37,10 +37,9 @@ def detect_maven(dfd: CDFD) -> dict:
             else:
                 tagged_values = list()
 
-            dfd.add_service(CService(microservice[0], list(), tagged_values))
+            dfd.add_service(CService(microservice[0], list(), tagged_values, properties))
 
-    microservices = list()
-    return microservices
+    return 
 
 
 

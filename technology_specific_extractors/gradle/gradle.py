@@ -13,52 +13,26 @@ from core.Service import CService
 from core.ExternalEntity import CExternalEntity
 from core.InformationFlow import CInformationFlow
 
-def set_microservices(dfd: CDFD) -> dict:
+def detect_gradle(dfd: CDFD) -> dict:
     """Extracts the list of services from build.gradle files and sets the variable in the tmp-file.
     """
 
     if not used_in_application(dfd):
         return False
 
-    microservices = dict()
-
     gradle_files = fi.get_file_as_lines("build.gradle")
     for gf in gradle_files.keys():
         gradle_file = gradle_files[gf]
-        image = "image_placeholder"
         if not gradle_file["path"] == "build.gradle":       # root gradle file, not for a service
 
             microservice, properties = parse_configurations(gradle_file)
 
             if microservice[0]:
-                try:
-                    id = max(microservices.keys()) + 1
-                except:
-                    id = 0
-                microservices[id] = dict()
+                # microservices[id]["gradle_path"] = gradle_file["path"]
 
-                microservices[id]["servicename"] = microservice[0]
-                microservices[id]["image"] = image
-                microservices[id]["type"] = "internal"
-                microservices[id]["gradle_path"] = gradle_file["path"]
-                microservices[id]["properties"] = properties
-                microservices[id]["stereotype_instances"] = list()
-                microservices[id]["tagged_values"] = list()
+                dfd.add_service(CService(microservice[0], list(), list(), properties))
 
-                try:
-                    trace = dict()
-                    name = microservice[0]
-                    trace["item"] = name
-                    trace["file"] = microservice[1][0]
-                    trace["line"] = microservice[1][1]
-                    trace["span"] = microservice[1][2]
-                    traceability.add_trace(trace)
-                except:
-                    pass
-
-    tmp.tmp_config.set("DFD", "microservices", str(microservices))
-
-    return microservices
+    return 
 
 
 def used_in_application(dfd: CDFD) -> bool:
@@ -101,7 +75,6 @@ def parse_properties_file(gradle_path: str):
             if entry.is_file():
                 if not "test" in entry.path:
                     if entry.path.split("/")[-1] in ["application.properties", "bootstrap.properties"]:
-                        logger.write_log_message("Found application.properties here: " + str(entry.path), "info")
                         file_path = entry.path
                         file_url = "https://raw.githubusercontent.com/" + repo_path + "/master/" + ("/").join(file_path.split("/")[3:])
                         new_microservice, new_properties = parse.parse_properties_file(file_url)

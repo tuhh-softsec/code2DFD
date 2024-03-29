@@ -2,10 +2,11 @@
 
 class CService:
 
-    def __init__(self, name, stereotypes = list(), tagged_values = list()):
+    def __init__(self, name, stereotypes = list(), tagged_values = list(), properties = list()):
         self.name = name
         self.stereotypes = stereotypes
         self.tagged_values = tagged_values
+        self.properties = properties
 
     def add_stereotype(self, stereotype):
         if not stereotype in self.stereotypes:
