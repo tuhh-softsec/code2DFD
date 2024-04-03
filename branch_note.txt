@@ -5,3 +5,5 @@ Plan for the refactoring:
 - adjust extractors one after another:
     - arguments and return values in a standardized format (always services, flows, external entities, even if left unchanged)
     - add name to list of extractors in a file, these get executed
+    - for that: duplicate xxx_entry.py as name.py (same as folder name), perform changes in there
+    - main function must be called "detect_name" for now

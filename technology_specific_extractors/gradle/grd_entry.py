@@ -129,7 +129,7 @@ def detect_microservice(file_path, dfd):
     """Detects which microservice a file belongs to by looking for next build.gradle.
     """
 
-    if not used_in_application():
+    if not used_in_application(dfd):
         return False
 
     microservice = [False, False]
