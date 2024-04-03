@@ -89,12 +89,12 @@ class CDFD:
             # more burden for adding new ones, but probably best
 
 
-    def detect_microservice(self, service_path: str):
+    def detect_microservice(self, file_path: str):
 
         for detector in ["maven", "gradle", "docker_compose"]:
             module = importlib.import_module(f"technology_specific_extractors.{detector}.{detector}")
             detect = getattr(module, f"detect_microservice")
-            microservice = detect(service_path, self)
+            microservice = detect(file_path, self)
             
         
 

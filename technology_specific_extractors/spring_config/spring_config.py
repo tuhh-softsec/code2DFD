@@ -39,7 +39,6 @@ def detect_config_server(dfd: CDFD):
     if len(results) > 1:
         print("More than one config server. Picking first one found.")
     for r in results.keys():
-        print("in here")
         config_server = dfd.detect_microservice(results[r]["path"])
         config_server = tech_sw.detect_microservice(results[r]["path"], dfd)
 
