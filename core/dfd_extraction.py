@@ -12,7 +12,7 @@ from technology_specific_extractors.apache_httpd.aph_entry import detect_apacheh
 from technology_specific_extractors.circuit_breaker.cbr_entry import detect_circuit_breakers
 from technology_specific_extractors.consul.cns_entry import detect_consul
 from technology_specific_extractors.database_connections.dbc_entry import clean_database_connections
-from technology_specific_extractors.databases.dbs_entry import detect_databases
+from technology_specific_extractors.databases.databases import detect_databases
 from technology_specific_extractors.elasticsearch.ela_entry import detect_elasticsearch
 from technology_specific_extractors.eureka.eur_entry import detect_eureka, detect_eureka_server_only
 from technology_specific_extractors.grafana.grf_entry import detect_grafana
@@ -37,7 +37,7 @@ from technology_specific_extractors.spring_config.cnf_entry import detect_spring
 from technology_specific_extractors.spring_encryption.enc_entry import detect_spring_encryption
 from technology_specific_extractors.spring_gateway.sgt_entry import detect_spring_cloud_gateway
 from technology_specific_extractors.spring_oauth.soa_entry import detect_spring_oauth
-from technology_specific_extractors.ssl.ssl_entry import detect_ssl_services
+from technology_specific_extractors.ssl.ssl import detect_ssl
 from technology_specific_extractors.turbine.trb_entry import detect_turbine
 from technology_specific_extractors.zipkin.zip_entry import detect_zipkin_server
 from technology_specific_extractors.zookeeper.zoo_entry import detect_zookeeper
@@ -72,9 +72,9 @@ def perform_analysis():
 
     microservices = tech_sw.get_microservices(dfd)
     
-    microservices = detect_databases(microservices)
-    microservices = overwrite_port(microservices)
-    microservices = detect_ssl_services(microservices)
+    microservices = detect_databases(dfd)
+    microservices = overwrite_port(dfd)
+    microservices = detect_ssl(dfd)
     # print("Extracted services from build- and IaC-files")
 
     # Parse internal and external configuration files
@@ -223,13 +223,13 @@ def classify_microservices(microservices: dict, information_flows: dict, externa
     return microservices, information_flows, external_components
 
 
-def overwrite_port(microservices: dict) -> dict:
+def overwrite_port(dfd: CDFD):
     """Writes port from properties to tagged vallues.
     """
 
-    for m in microservices.keys():
+    for service in dfd.services:
         port = False
-        for prop in microservices[m]["properties"]:
+        for prop in service.properties:
             if prop[0] == "port":
                 if type(prop[1]) == str:
                     if "port" in prop[1].casefold():
@@ -239,21 +239,8 @@ def overwrite_port(microservices: dict) -> dict:
                 else:
                     port = prop[1]
                 if port:
-                    # Traceability
-                    trace = dict()
-                    trace["parent_item"] = microservices[m]["servicename"]
-                    trace["item"] = "Port"
-                    trace["file"] = prop[2][0]
-                    trace["line"] = prop[2][1]
-                    trace["span"] = prop[2][2]
-
-                    traceability.add_trace(trace)
-                    if "tagged_values" in microservices[m]:
-                        microservices[m]["tagged_values"].append(("Port", port))
-                    else:
-                        microservices[m]["tagged_values"] = [("Port", port)]
-
-    return microservices
+                    service.tagged_values.append(("Port", port))
+    return
 
 
 def detect_miscellaneous(microservices: dict, information_flows: dict, external_components: dict) -> dict:
