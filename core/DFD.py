@@ -88,11 +88,5 @@ class CDFD:
             # now full dfd object is passed to extractors and the merging logic is done there.
             # more burden for adding new ones, but probably best
 
-
-    def extract_services(self):
-        microservices = tech_sw.get_microservices(self)
-        for m in microservices:
-            self.add_service(microservices[m])
-        
     def print_test(self):
         print("testtesttesttesttest")

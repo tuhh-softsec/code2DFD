@@ -8,6 +8,9 @@ class CService:
         self.tagged_values = tagged_values
         self.properties = properties
 
+    def __str__(self):
+        return f"Service \"{self.name}\"\n\tStereotypes: {str(self.stereotypes)}\n\tTagged values: {str(self.tagged_values)}\n\tProperties: {str(self.properties)}"
+
     def add_stereotype(self, stereotype):
         if not stereotype in self.stereotypes:
             self.stereotypes.append(stereotype)
