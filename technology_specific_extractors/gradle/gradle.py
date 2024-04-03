@@ -98,22 +98,19 @@ def parse_properties_file(gradle_path: str):
     return microservice, properties
 
 
-def detect_microservice(file_path, dfd):
+def detect_microservice(file_path: str, dfd: CDFD) -> str:
     """Detects which microservice a file belongs to by looking for next build.gradle.
     """
 
-    if not used_in_application():
+    if not used_in_application(dfd):
         return False
 
-    microservice = [False, False]
-    microservices = tech_sw.get_microservices(dfd)
-
-    repo_path = tmp.tmp_config["Repository"]["path"]
+    detected_microservice = False
 
     path = file_path
     found_gradle = False
 
-    local_repo_path = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
+    local_repo_path = "./analysed_repositories/" + ("/").join(dfd.repo_path.split("/")[1:])
 
     dirs = list()
     path = ("/").join(path.split("/")[:-1])
@@ -125,41 +122,35 @@ def detect_microservice(file_path, dfd):
                 if entry.is_file():
                     if entry.name.casefold() == "build.gradle":
                         gradle_path = ("/").join(entry.path.split("/")[3:])
-                        logger.write_log_message("Found build.gradle here: " + str(entry.path), "info")
                         found_gradle = True
-                        gradle_file_url = "https://raw.githubusercontent.com/" + repo_path + "/master/" + file_path
+                        gradle_file_url = "https://raw.githubusercontent.com/" + dfd.repo_path + "/master/" + file_path
         path = ("/").join(path.split("/")[:-1])
 
     if found_gradle:
         gradle_file = dict()
         gradle_file["path"] = gradle_path
-        for m in microservices.keys():
-            try:
-                if microservices[m]["gradle_path"] == gradle_path:
-                    microservice[0] = microservices[m]["servicename"]
-            except:
-                pass
-        if not microservice[0]:
-
+        for service in dfd.services:
+            if "gradle_path" in service.properties:
+                if service.properties["gradle_path"] == gradle_path:
+                    detected_microservice = service.name
+        if not detected_microservice:
             gradle_file["content"] = fi.file_as_lines(gradle_file_url)
             microservice, properties = parse_configurations(gradle_file)
-    else:
-        logger.write_log_message("Did not find microservice", "info")
+            detected_microservice = microservice[0]
 
-    if not microservice[0]:
-
-        for m in microservices.keys():
+    if not detected_microservice:
+        for service in dfd.services:
             try:
-                image = microservices[m]["image"]
+                image = service.properties["image"]
                 path = "/".join(file_path.split("/")[:-1])
                 path = path.strip(".").strip("/")
                 image = image.strip(".").strip("/")
                 if image in path:
-                    microservice[0] = microservices[m]["servicename"]
+                    detected_microservice = service.name
             except:
                 pass
 
-    return microservice[0]
+    return detected_microservice
 
 
 #

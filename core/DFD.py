@@ -95,10 +95,10 @@ class CDFD:
             module = importlib.import_module(f"technology_specific_extractors.{detector}.{detector}")
             detect = getattr(module, f"detect_microservice")
             microservice = detect(file_path, self)
-            
-        
+            if microservice:
+                return microservice
 
-        return
+        return False
 
     def print_test(self):
         print("testtesttesttesttest")
