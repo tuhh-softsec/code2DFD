@@ -97,7 +97,6 @@ class CDFD:
             microservice = detect(file_path, self)
             if microservice:
                 return microservice
-
         return False
 
     def print_test(self):

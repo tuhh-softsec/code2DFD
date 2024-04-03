@@ -153,17 +153,14 @@ def check_image(image: str):
     return tuple
 
 
-def detect_microservice(file_path: str, dfd) -> str:
+def detect_microservice(file_path: str, dfd: CDFD) -> str:
     """Detects, which service a file belongs to based on image given in docker-compose file and dockerfile belonging to file given as input.
     """
 
-    microservices = tech_sw.get_microservices(dfd)
     microservice = False
     dockerfile_path = False
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
-
-    local_repo_path = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
+    local_repo_path = "./analysed_repositories/" + ("/").join(dfd.repo_path.split("/")[1:])
 
     # Find corresponding dockerfile
     dirs = list()
@@ -177,7 +174,7 @@ def detect_microservice(file_path: str, dfd) -> str:
             for entry in dir:
                 if entry.is_file():
                     if entry.name.casefold() == "dockerfile":
-                        dockerfile_path = entry.path.split(repo_path.split("/")[1])[1].strip("/")
+                        dockerfile_path = entry.path.split(dfd.repo_path.split("/")[1])[1].strip("/")
                         found_docker = True
         path = ("/").join(path.split("/")[:-1])
 
@@ -207,9 +204,9 @@ def detect_microservice(file_path: str, dfd) -> str:
 
     # go through microservices to see if dockerfile_image fits an image
     try:
-        for m in microservices.keys():
-            if microservices[m]["image"] == docker_image:
-                microservice = microservices[m]["servicename"]
+        for service in dfd.services:
+            if service.properties["image"] == docker_image:
+                microservice = service.name
     except:
         pass
 
