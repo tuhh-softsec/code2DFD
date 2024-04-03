@@ -16,9 +16,9 @@ def detect_spring_config(dfd: CDFD):
     """
 
     config_server, config_path = False, False
-    microservices, config_server, config_path, config_file_path, config_repo_uri, config_server_ports, config_file_path_local = detect_config_server(dfd)
+    config_server, config_path, config_file_path, config_repo_uri, config_server_ports, config_file_path_local = detect_config_server(dfd)
     if config_file_path or config_repo_uri or config_file_path_local:
-        microservices, information_flows, external_components = parse_config_files(config_server, config_path, config_file_path, config_file_path_local, config_repo_uri, microservices, information_flows, external_components)
+        parse_config_files(config_server, config_path, config_file_path, config_file_path_local, config_repo_uri, dfd)
     microservices, information_flows = detect_config_clients(microservices, information_flows, config_server, config_server_ports)
 
     return
@@ -40,61 +40,27 @@ def detect_config_server(dfd: CDFD):
         print("More than one config server. Picking first one found.")
     for r in results.keys():
         config_server = dfd.detect_microservice(results[r]["path"])
-        config_server = tech_sw.detect_microservice(results[r]["path"], dfd)
 
-        for m in microservices.keys():
-            if microservices[m]["servicename"] == config_server:
-                try:
-                    microservices[m]["stereotype_instances"].append("configuration_server")
-                except:
-                    microservices[m]["stereotype_instances"] = ["configuration_server"]
-                try:
-                    microservices[m]["tagged_values"].append(("Configuration Server", "Spring Cloud Config"))
-                except:
-                    microservices[m]["tagged_values"] = [("Configuration Server", "Spring Cloud Config")]
-
-                # Traceability
-                trace = dict()
-                trace["parent_item"] = config_server
-                trace["item"] = "configuration_server"
-                trace["file"] = results[r]["path"]
-                trace["line"] = results[r]["line_nr"]
-                trace["span"] = results[r]["span"]
-
-                traceability.add_trace(trace)
+        for service in dfd.services:
+            if service.name == config_server:
+                service.stereotypes.append("configuration_server")
+                service.tagged_values.append(("Configuration Server", "Spring Cloud Config"))
 
                 try:
-                    config_path = ("/").join(microservices[m]["pom_path"].split("/")[:-1])
+                    config_path = ("/").join(service.properties["pom_path"].split("/")[:-1])
                 except:
                     pass
 
-                for prop in microservices[m]["properties"]:
+                for prop in service.properties:
                     if prop[0] == "config_file_path":
                         config_file_path = prop[1]
                     elif prop[0] == "config_repo_uri":
                         config_repo_uri = prop[1]
-
-                        trace = dict()
-                        trace["item"] = "github-repository"
-                        trace["file"] = prop[2][0]
-                        trace["line"] = prop[2][1]
-                        trace["span"] = prop[2][2]
-
-                        traceability.add_trace(trace)
-
-                        trace = dict()
-                        trace["item"] = "github-repository -> " + config_server
-                        trace["file"] = prop[2][0]
-                        trace["line"] = prop[2][1]
-                        trace["span"] = prop[2][2]
-
-                        traceability.add_trace(trace)
-
                     elif prop[0] == "config_file_path_local":
                         config_file_path_local = prop[1]
                     elif prop[0] == "port":
                         config_server_ports.append(prop[1])
-    return microservices, config_server, config_path, config_file_path, config_repo_uri, config_server_ports, config_file_path_local
+    return config_server, config_path, config_file_path, config_repo_uri, config_server_ports, config_file_path_local
 
 
 def detect_config_clients(microservices: dict, information_flows: dict, config_server: str, config_server_ports: list) -> dict:
@@ -210,17 +176,17 @@ def detect_config_clients(microservices: dict, information_flows: dict, config_s
     return microservices, information_flows
 
 
-def parse_config_files(config_server: str, config_path: str, config_file_path: str, config_file_path_local: str, config_repo_uri: str, microservices: dict, information_flows: dict, external_components: dict) -> dict:
+def parse_config_files(config_server: str, config_path: str, config_file_path: str, config_file_path_local: str, config_repo_uri: str, dfd: CDFD) -> dict:
     """Parses config files from locally or other GitHub repository.
     """
 
     if not config_file_path:
         config_file_path = ""
     if config_repo_uri:
-        information_flows, external_components = set_repo(information_flows, external_components, config_repo_uri, config_server)
+        set_repo(dfd, config_repo_uri, config_server)
         repo_path = config_repo_uri.split("github.com/")[1].split(".")[0]
     else:
-        repo_path = tmp.tmp_config["Repository"]["path"]
+        repo_path = dfd.repo_path
     gh_contents = False
     contents = set()
 
@@ -236,19 +202,15 @@ def parse_config_files(config_server: str, config_path: str, config_file_path: s
 
     # external (other github repository) didn't work, look locally
     if config_file_path_local:
+        config_file_path_local = config_file_path_local.split("/".join(dfd.repo_path.split("/")[1:]))[1].strip("./")
 
-        repo_path = tmp.tmp_config["Repository"]["path"]
-        config_file_path_local = config_file_path_local.split("/".join(repo_path.split("/")[1:]))[1].strip("./")
-
-        new_contents = fi.get_repo_contents_local(repo_path, config_file_path_local)
+        new_contents = fi.get_repo_contents_local(dfd.repo_path, config_file_path_local)
         for file in new_contents:
             contents.add(file)
 
 
     if not gh_contents and not contents:
-        repo_path = tmp.tmp_config["Repository"]["path"]
-
-        new_contents = fi.get_repo_contents_local(repo_path, config_file_path)
+        new_contents = fi.get_repo_contents_local(dfd.repo_path, config_file_path)
         for file in new_contents:
             contents.add(file)
 
@@ -261,18 +223,16 @@ def parse_config_files(config_server: str, config_path: str, config_file_path: s
             ending = False
             microservice = False
             properties = set()
-            for m in microservices.keys():
-                if file[0].split(".")[0] == microservices[m]["servicename"]:
-                    microservice = microservices[m]["servicename"]
-                    correct_id = m
+            for service in dfd.services:
+                if file[0].split(".")[0] == service.name:
+                    microservice = service.name
                     if "." in file[0]:
                         ending = file[0].split(".")[1]
                     break
             if not microservice:
-                for m in microservices.keys():
-                    if  microservices[m]["servicename"] in file[0].split(".")[0]:
-                        microservice = microservices[m]["servicename"]
-                        correct_id = m
+                for service in dfd.services:
+                    if service.name in file[0].split(".")[0]:
+                        microservice = service.name
                         if "." in file[0]:
                             ending = file[0].split(".")[1]
                         break
@@ -284,35 +244,16 @@ def parse_config_files(config_server: str, config_path: str, config_file_path: s
                     elif ending == "properties":
                         name, properties = parse.parse_properties_file(file[1])
                         name = name[0]
-                    if "properties" in microservices[correct_id]:
-                        microservices[correct_id]["properties"] |= properties
-                    else:
-                        microservices[correct_id]["properties"] = properties
-
-    return microservices, information_flows, external_components
+                    for service in dfd.services:
+                        if service.name == microservice:
+                            service.properties |= properties
+    return 
 
 
-def set_repo(information_flows: dict, external_components: dict, config_repo_uri: str, config_server: str) -> dict:
+def set_repo(dfd: CDFD, config_repo_uri: str, config_server: str):
     """Adds a repo to the external components.
     """
 
-    try:
-        id = max(information_flows.keys()) + 1
-    except:
-        id = 0
-    information_flows[id] = dict()
-    information_flows[id]["sender"] = "github-repository"
-    information_flows[id]["receiver"] = config_server
-    information_flows[id]["stereotype_instances"] = ["restful_http"]
-
-    try:
-        id = max(external_components.keys()) + 1
-    except:
-        id = 0
-    external_components[id] = dict()
-    external_components[id]["name"] = "github-repository"
-    external_components[id]["type"] = "external_component"
-    external_components[id]["stereotype_instances"] = ["github_repository", "entrypoint"]
-    external_components[id]["tagged_values"] = [("URL", config_repo_uri)]
-
-    return information_flows, external_components
+    dfd.add_information_flow(CInformationFlow("github-repository", config_server, ["restful_http"]))
+    dfd.add_external_entity(CExternalEntity("github-repository", ["github_repository", "entrypoint"], [("URL", config_repo_uri)]))
+    return 
