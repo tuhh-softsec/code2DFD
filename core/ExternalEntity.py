@@ -2,10 +2,10 @@
 
 class CExternalEntity:
 
-    def __init__(self, name):
+    def __init__(self, name, stereotypes = list(), tagged_values = list()):
         self.name = name
-        self.stereotypes = list()
-        self.tagged_values = list()
+        self.stereotypes = stereotypes
+        self.tagged_values = tagged_values
 
     def add_stereotype(self, stereotype):
         if not stereotype in self.stereotypes:

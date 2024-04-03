@@ -10,6 +10,10 @@ class CDFD:
     """Class CDFD as central collection of all extracted information.
     """
 
+    services: CService
+    external_entities: CExternalEntity
+    information_flows: CInformationFlow
+
     def __init__(self, name, repo_path):
         self.name = name
         self.repo_path = repo_path
@@ -45,14 +49,14 @@ class CDFD:
             # merge stereotypes
         #    pass
         
-    def add_external_entity(self, external_entity):
+    def add_external_entity(self, external_entity: CExternalEntity):
         if not external_entity.name in [e.name for e in self.external_entities]:
             self.external_entities.append(external_entity)
         else:
             # merge stereotypes
             pass
 
-    def add_information_flow(self, information_flow):
+    def add_information_flow(self, information_flow: CInformationFlow):
         if not information_flow.name in [i.name for i in self.information_flows]:
             self.information_flows.append(information_flow)
         else:

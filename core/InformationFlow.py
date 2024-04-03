@@ -2,12 +2,12 @@
 
 class CInformationFlow:
 
-    def __init__(self, sender, receiver):
+    def __init__(self, sender, receiver, stereotypes = list(), tagged_values = list()):
         self.sender = sender
         self.receiver = receiver
         self.name = f"{self.sender} -> {self.receiver}"
-        self.stereotypes = list()
-        self.tagged_values = list()
+        self.stereotypes = stereotypes
+        self.tagged_values = tagged_values
 
     def add_stereotype(self, stereotype):
         if not stereotype in self.stereotypes:
