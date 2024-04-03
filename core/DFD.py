@@ -82,11 +82,23 @@ class CDFD:
         for extractor in [e.strip() for e in extractors]:
             module = importlib.import_module(f"technology_specific_extractors.{extractor}.{extractor}")
             # get the main method
-            ex = getattr(module, f"detect_{extractor}")
+            extract = getattr(module, f"detect_{extractor}")
             # execute main method, save returned services, flows, and external entities
-            ex(self)
+            extract(self)
             # now full dfd object is passed to extractors and the merging logic is done there.
             # more burden for adding new ones, but probably best
+
+
+    def detect_microservice(self, service_path: str):
+
+        for detector in ["maven", "gradle", "docker_compose"]:
+            module = importlib.import_module(f"technology_specific_extractors.{detector}.{detector}")
+            detect = getattr(module, f"detect_microservice")
+            microservice = detect(service_path, self)
+            
+        
+
+        return
 
     def print_test(self):
         print("testtesttesttesttest")
