@@ -1,5 +1,5 @@
-import ast
 import json
+import os
 
 import tmp.tmp as tmp
 
@@ -168,7 +168,6 @@ def quotate_ids():
     traceability = new_traceability
 
 
-
 def write_to_file():
     """Writes tracebility info from dict to json file.
     """
@@ -176,6 +175,6 @@ def write_to_file():
     repo_path = tmp.tmp_config["Repository"]["path"]
     repo_path = repo_path.replace("/", "_")
     filename = "./output/traceability/" + repo_path + "_traceability.json"
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, "w") as file:
         file.write(json.dumps(traceability, indent=4))
-    return

@@ -1,7 +1,7 @@
 import ast
+import os
 from datetime import datetime
 
-#import output_generators.calculate_metrics as calculate_metrics
 import output_generators.codeable_model as codeable_model
 import core.technology_switch as tech_sw
 import tmp.tmp as tmp
@@ -105,47 +105,39 @@ def perform_analysis():
     microservices, information_flows, external_components = merge_duplicate_annotations(microservices, information_flows, external_components)
 
     # Printing
-    print("\nFinished extraction. Results:\n")
+    print("\nFinished extraction")
     repo_path = repo_path.replace("/", "_")
     filename = "./output/results/" + repo_path + ".txt"
-    filename_dict = "./output/results/dict_" + repo_path + ".txt"
-    output_file = open(filename, "w")
-    output_file_dict = open(filename_dict, "w")
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    with open(filename, "w") as output_file:
+        if information_flows:
+            output_file.write("\nInformation Flows:\n")
+            for i in information_flows.keys():
+                output_file.write("\n" + str(information_flows[i]))
 
-    # if information_flows:
-    #     print("\nInformation Flows:")
-    #     output_file.write("\n\nInformation Flows:\n")
-    #     for i in information_flows.keys():
-    #         print("\t", information_flows[i])
-    #         output_file.write("\n" + str(information_flows[i]))
+        if microservices:
+            output_file.write("\nMicroservices:\n")
+            for m in microservices.keys():
+                microservices[m].pop("image", None)
+                microservices[m].pop("pom_path", None)
+                microservices[m].pop("properties", None)
+                output_file.write("\n" + str(microservices[m]))
 
-    # if microservices:
-    #     print("\nMicroservices:")
-    #     output_file.write("\n\nMicroservices:\n")
-    #     for m in microservices.keys():
-    #         print("\t", microservices[m])
-    #         microservices[m].pop("image", None)
-    #         microservices[m].pop("pom_path", None)
-    #         microservices[m].pop("properties", None)
-    #         output_file.write("\n" + str(microservices[m]))
-
-    # if external_components:
-    #     print("\nExternal Components:")
-    #     output_file.write("\n\nExternal Components:\n")
-    #     for e in external_components.keys():
-    #         print("\t", external_components[e])
-    #         output_file.write("\n" + str(external_components[e]))
+        if external_components:
+            output_file.write("\nExternal Components:\n")
+            for e in external_components.keys():
+                output_file.write("\n" + str(external_components[e]))
 
     # Writing dict for calculating metrics
-    complete = dict()
-    complete["microservices"] = microservices
-    complete["information_flows"] = information_flows
-    complete["external_components"] = external_components
+    filename_dict = "./output/results/" + repo_path + "_dict.txt"
+    os.makedirs(os.path.dirname(filename_dict), exist_ok=True)
+    with open(filename_dict, "w") as output_file_dict:
+        complete = dict()
+        complete["microservices"] = microservices
+        complete["information_flows"] = information_flows
+        complete["external_components"] = external_components
 
-    output_file_dict.write(str(complete))
-
-    output_file_dict.close()
-    output_file.close()
+        output_file_dict.write(str(complete))
 
     # Saving
     tmp.tmp_config.set("DFD", "microservices", str(microservices))
@@ -154,8 +146,8 @@ def perform_analysis():
 
     codeable_models, codeable_models_path = codeable_model.output_codeable_model(microservices, information_flows, external_components)
     traceability_content = traceability.output_traceability()
-    visualizer.output_png(codeable_models_path, repo_path)
-    json_architecture.generate_json_architecture(microservices, information_flows, external_components)
+    visualizer.output_png(codeable_models_path)
+    json_architecture.generate_json_architecture(information_flows)
 
     #calculate_metrics.calculate_single_system(repo_path)
 
