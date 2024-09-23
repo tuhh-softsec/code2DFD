@@ -31,12 +31,11 @@ The corresponding path only needs to be un-commented for analysis (all others ha
 
 
 ##### 2. Running the tool
-To start the tool via the terminal, simply enter `python3 code2DFD.py` in a command line opened in the root directory.
+To start the tool via the terminal using the config file, simply enter `python3 code2DFD.py --config_path PATH_TO_CONFIG` in a command line opened in the root directory.
+For example, `python3 code2DFD.py --config_path config/config.ini` for the example config in this repository.
 The extraction will start and some status messages appear on the screen.
-Alternatively, the repository path can be given as parameter: `python3 code2DFD.py repository/path`.
-If you want to analyse in application on GitHub, simply put in the GitHub handle.
-For example, for the repository `https://github.com/sqshq/piggymetrics`, run the command `python3 code2DFD.py sqshq/piggymetrics`
-Path as parameter overrules path in config-file.
+If you want to analyse in application on GitHub, simply put in the GitHub handle, using the `--github_path` option.
+For example, for the repository `https://github.com/sqshq/piggymetrics`, run the command `python3 code2DFD.py --github_path sqshq/piggymetrics`
 Once the analysis is finished, the results can be found in the `output/` folder.
 
 To run the tool as a RESTful API service, run `python3 flask_code2DFD.py`.
