@@ -1,7 +1,7 @@
+import os
+
 import tmp.tmp as tmp
 
-plantuml_path = "plantuml.jar"
-output_directory = "output/codeable_models"
 
 # the used metamodel is microservice_dfds_metamodel.py
 
@@ -116,7 +116,6 @@ def output_codeable_model(microservices, information_flows, external_components)
             new_line = "\nadd_links({" + sender + ": " + receiver + "})"
         file_content += new_line
 
-
     file_content += footer(last_node)
 
     output_path = str()
@@ -130,9 +129,9 @@ def create_file(model_name: str, content: str):
 
     model_name = model_name.replace("-", "_")
     file_path = "./output/codeable_models/" + model_name + ".py"
-    file = open(file_path, "w")
-    file.write(content)
-    file.close()
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    with open(file_path, "w") as file:
+        file.write(content)
 
     return file_path
 

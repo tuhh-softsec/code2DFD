@@ -1,7 +1,10 @@
+import os.path
+
 import tmp.tmp as tmp
 
 
 plantuml_new = str()
+
 
 def convert(codeable_models_path: str) -> str:
     """Creates (good looking) PlantUML file out of CodeableModels file.
@@ -201,6 +204,7 @@ def write_output(output_file_path):
 
     global plantuml_new
 
+    os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
     with open(output_file_path, 'w+') as output_file:
         output_file.write(plantuml_new)
 
