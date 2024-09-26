@@ -1,3 +1,8 @@
+"""NOTE: this does not generate the complete output as JSON file. It only saves the information flows into /edges.
+This was needed for another project using Code2DFD and will remain here for now until removed in the future.
+"""
+
+
 import json
 import os
 
@@ -31,7 +36,7 @@ def write_to_file(architecture_dict):
 
     repo_path = tmp.tmp_config["Repository"]["path"]
     repo_path = repo_path.replace("/", "--")
-    filename = "./output/architecture/" + repo_path + ".json"
+    filename = "./output/edges/" + repo_path + ".json"
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, 'w') as architecture_file:
         json.dump(architecture_dict, architecture_file, indent=4)
