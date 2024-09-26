@@ -7,4 +7,5 @@ output/logs/*
 output/png/*
 output/results/*
 output/traceability/*
+output/edges/*
 
