@@ -5,7 +5,7 @@ from datetime import datetime
 import output_generators.codeable_model as codeable_model
 import core.technology_switch as tech_sw
 import tmp.tmp as tmp
-import output_generators.json_architecture as json_architecture
+import output_generators.json_edges as json_edges
 import output_generators.traceability as traceability
 import output_generators.visualizer as visualizer
 from technology_specific_extractors.apache_httpd.aph_entry import detect_apachehttpd_webserver
@@ -147,7 +147,7 @@ def perform_analysis():
     codeable_models, codeable_models_path = codeable_model.output_codeable_model(microservices, information_flows, external_components)
     traceability_content = traceability.output_traceability()
     visualizer.output_png(codeable_models_path)
-    json_architecture.generate_json_architecture(information_flows)
+    json_edges.generate_json_edges(information_flows)
 
     #calculate_metrics.calculate_single_system(repo_path)
 
