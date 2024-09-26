@@ -5,6 +5,7 @@ from datetime import datetime
 import output_generators.codeable_model as codeable_model
 import core.technology_switch as tech_sw
 import tmp.tmp as tmp
+import output_generators.json_architecture as json_architecture
 import output_generators.json_edges as json_edges
 import output_generators.traceability as traceability
 import output_generators.visualizer as visualizer
@@ -148,6 +149,7 @@ def perform_analysis():
     traceability_content = traceability.output_traceability()
     visualizer.output_png(codeable_models_path)
     json_edges.generate_json_edges(information_flows)
+    json_architecture.generate_json_architecture(microservices, information_flows, external_components)
 
     #calculate_metrics.calculate_single_system(repo_path)
 
