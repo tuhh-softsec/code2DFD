@@ -8,4 +8,5 @@ output/png/*
 output/results/*
 output/traceability/*
 output/edges/*
+output/json_architecture/*
 
