@@ -86,8 +86,17 @@ def main():
         clone_repo(tmp.tmp_config.get("Repository", "path"))
 
     elif args.github_path is not None:
-        repo_path = args.github_path
+        repo_path = args.github_path.strip()
         clone_repo(repo_path)
+
+        ini_config = ConfigParser()
+        ini_config.read('config/config.ini')
+        for section in ["Analysis Settings", "Repository", "Technology Profiles", "DFD"]:     #copying what is needed from config to temp
+            if not tmp.tmp_config.has_section(section):
+                tmp.tmp_config.add_section(section)
+            for entry in ini_config[section]:
+                tmp.tmp_config.set(section, entry, ini_config[section][entry])
+        tmp.tmp_config.set("Repository", "path", repo_path) # overwrite with user-provided path
 
     # calling the actual extraction
     dfd_extraction.perform_analysis()
