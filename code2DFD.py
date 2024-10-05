@@ -83,15 +83,9 @@ def main():
             for entry in ini_config[section]:
                 tmp.tmp_config.set(section, entry, ini_config[section][entry])
         repo_path = tmp.tmp_config.get("Repository", "path")
-        local_path = get_local_path(repo_path)
-        tmp.tmp_config.set("Repository", "local_path", local_path)
-        clone_repo(repo_path, local_path)
 
     elif args.github_path is not None:
         repo_path = args.github_path.strip()
-        local_path = get_local_path(repo_path)
-        tmp.tmp_config.set("Repository", "local_path", local_path)
-        clone_repo(repo_path, local_path)
 
         ini_config = ConfigParser()
         ini_config.read('config/config.ini')
@@ -100,7 +94,10 @@ def main():
                 tmp.tmp_config.add_section(section)
             for entry in ini_config[section]:
                 tmp.tmp_config.set(section, entry, ini_config[section][entry])
-        tmp.tmp_config.set("Repository", "path", repo_path) # overwrite with user-provided path
+    local_path = get_local_path(repo_path)
+    clone_repo(repo_path, local_path)
+    tmp.tmp_config.set("Repository", "path", repo_path) # overwrite with user-provided path
+    tmp.tmp_config.set("Repository", "local_path", local_path)
 
     # calling the actual extraction
     dfd_extraction.perform_analysis()
