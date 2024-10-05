@@ -1,4 +1,3 @@
-import ast
 import os
 import re
 import subprocess
@@ -25,13 +24,22 @@ repo_cache = dict()
 exception_counter_repo = 0
 
 
+def get_local_path(repo_path):
+    return os.path.join(os.getcwd(), "analysed_repositories", *repo_path.split("/")[1:])
+
+
+def clone_repo(repo_path, local_path):
+    # Create analysed_repositories folder in case it doesn't exist yet (issue #2)
+    os.makedirs(os.path.join(os.getcwd(), "analysed_repositories"), exist_ok=True)
+    if not repo_downloaded(local_path):
+        download_repo(repo_path, local_path)
+
+
 def repo_downloaded(repo_folder: str) -> bool:
     """Checks if repository has been downloaded from GitHub already.
     """
 
-    if os.path.isdir(repo_folder):
-        return True
-    return False
+    return os.path.isdir(repo_folder)
 
 
 def download_repo(repo_path: str, local_path: str):
@@ -46,37 +54,24 @@ def detection_comment(file_name, line):
     """Checks if provided line is a comment. Based on language of the file, so only works for the ones with specified comment-delimiters.
     """
 
-    language = file_name.split(".")[-1]
-    if language == "js" and line.replace(" ", "")[:2] == "//":
-        return True
-    elif language == "java" and line.replace(" ", "")[:2] == "//":
-        return True
-    elif language == "yml" and line.replace(" ", "")[:1] == "#":
-        return True
-    return False
+    language = os.path.splitext(file_name)
+    return (language == ".js" and line.replace(" ", "")[:2] == "//") or (
+            language == ".java" and line.replace(" ", "")[:2] == "//") or (
+            language == ".yml" and line.replace(" ", "")[:1] == "#")
 
 
 def detection_import(line):
     """Checks if provided line is an import statement.
     """
 
-    try:
-        if line.split()[0] == "import":
-            return True
-        else:
-            return False
-    except:
-        return False
+    return line.startswith("import")
 
 
 def detection_config(file_name):
     """Checks if provided file is a config file.
     """
 
-    if "config" in file_name.casefold():
-        return True
-    else:
-        return False
+    return "config" in file_name.casefold()
 
 
 def extract_import(line):
@@ -90,12 +85,7 @@ def extract_variable(line, submodule):
     """Extracts a variable that is changed based on some module.
     """
 
-    new_keyword = False
-    if "=" in line:         # line is an assignment
-        new_keyword = line.split("=")[0].strip().split()[-1]
-    else:       # line is declaration
-        new_keyword = line.split(";")[0].strip().split()[-1]
-    return new_keyword
+    return line.split("=")[0].strip().split()[-1] if "=" in line else line.split(";")[0].strip().split()[-1]
 
 
 def search_keywords(keywords: str):
@@ -110,13 +100,13 @@ def search_keywords(keywords: str):
     if not repo_downloaded(repo_folder):
         download_repo(repo_path, repo_folder)
 
-    if type(keywords) == str:
+    if isinstance(keywords, str):
         keywords = [keywords]
 
     for keyword in keywords:
         if keyword[-1] == "(":
             keyword = "\"" + keyword + "\""
-        out = subprocess.Popen(['grep', '-rn', keyword, repo_folder], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        out = subprocess.Popen(['grep', '-rn', keyword, repo_folder], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = out.communicate()
         seen = set()
         for line in stdout.decode().splitlines():
@@ -138,15 +128,15 @@ def search_keywords(keywords: str):
                             content = file.readlines()
 
                         try:
-                            id = max(results.keys()) + 1
+                            id_ = max(results.keys()) + 1
                         except:
-                            id = 0
-                        results[id] = dict()
-                        results[id]["content"] = content
-                        results[id]["name"] = name
-                        results[id]["path"] = path
-                        results[id]["line_nr"] = line_nr
-                        results[id]["span"] = str(span)
+                            id_ = 0
+                        results[id_] = dict()
+                        results[id_]["content"] = content
+                        results[id_]["name"] = name
+                        results[id_]["path"] = path
+                        results[id_]["line_nr"] = line_nr
+                        results[id_]["span"] = str(span)
             except Exception as e:
                 pass
     return results
@@ -178,15 +168,15 @@ def pagList2lines(pagList) -> dict:
         for file in containing_files_URLs.keys():
             f = containing_files_URLs[file]
             try:
-                id = max(results.keys()) + 1
+                id_ = max(results.keys()) + 1
             except:
-                id = 0
-            results[id] = dict()
+                id_ = 0
+            results[id_] = dict()
 
-            results[id]["content"] = file_as_lines(f["download_url"])
-            results[id]["name"] = f["name"]
-            results[id]["path"] = f["path"]
-            results[id]["url"] = f["download_url"]
+            results[id_]["content"] = file_as_lines(f["download_url"])
+            results[id_]["name"] = f["name"]
+            results[id_]["path"] = f["path"]
+            results[id_]["url"] = f["download_url"]
 
         return results
 
@@ -198,14 +188,14 @@ def extract_downloadURL(files) -> dict:
     containing_files_URLs = dict()
     for f in files:
         try:
-            id = max(containing_files_URLs.keys()) + 1
+            id_ = max(containing_files_URLs.keys()) + 1
         except:
-            id = 0
-        containing_files_URLs[id] = dict()
+            id_ = 0
+        containing_files_URLs[id_] = dict()
 
-        containing_files_URLs[id]["path"] = f.path
-        containing_files_URLs[id]["download_url"] = f.download_url
-        containing_files_URLs[id]["name"] = f.name
+        containing_files_URLs[id_]["path"] = f.path
+        containing_files_URLs[id_]["download_url"] = f.download_url
+        containing_files_URLs[id_]["name"] = f.name
     return containing_files_URLs
 
 
@@ -236,7 +226,7 @@ def file_as_lines(raw_file):
         with open(local_path, "r") as file:
             file_as_lines = file.readlines()
     except Exception as e:
-        file_as_lines = requests.get(raw_file, stream = True).text.split("\n")
+        file_as_lines = requests.get(raw_file, stream=True).text.split("\n")
     return file_as_lines
 
 
@@ -338,8 +328,8 @@ def find_instances(class_of_interest: str) -> set:
         for line in range(len(f["content"])):
             match = re.search(regex, f["content"][line])
             if match:
-                object = f["content"][line].split(class_of_interest)[1].split(">")[-1].strip().strip(";").strip()
-                instances.add(object)
+                obj = f["content"][line].split(class_of_interest)[1].split(">")[-1].strip().strip(";").strip()
+                instances.add(obj)
 
     return instances
 
@@ -401,7 +391,7 @@ def check_dockerfile(build_path: str):
         return
     docker_compose_path = raw_files[0]["path"]
     if docker_compose_path != "docker_compose.yaml" and docker_compose_path != "docker_compose.yml":
-        docker_compose_path = ("/").join(docker_compose_path.split("/")[:-1])
+        docker_compose_path = "/".join(docker_compose_path.split("/")[:-1])
         path = docker_compose_path + build_path.replace(repo_path, "").strip("-")
     else:
         path = build_path.replace(repo_path, "").strip("./-")
@@ -414,8 +404,8 @@ def check_dockerfile(build_path: str):
         dirs.append(os.scandir(os.path.join(local_repo_path, path)))
 
         while dirs:
-            dir = dirs.pop()
-            for entry in dir:
+            d = dirs.pop()
+            for entry in d:
                 if entry.is_file():
                     if entry.name.casefold() == "dockerfile":
                         with open(entry.path, "r") as file:
@@ -425,7 +415,6 @@ def check_dockerfile(build_path: str):
 
     except:
         pass
-
 
     return lines
 
@@ -440,8 +429,8 @@ def file_exists(file_name: str) -> bool:
     dirs.append(os.scandir(local_repo_path))
 
     while dirs:
-        dir = dirs.pop()
-        for entry in dir:
+        d = dirs.pop()
+        for entry in d:
             if entry.is_file():
                 if entry.name.casefold() == file_name:
                     return True
@@ -485,22 +474,22 @@ def get_file_as_yaml(filename: str) -> dict:
     files = dict()
 
     repo_folder = tmp.tmp_config["Repository"]["local_path"]
-    out = subprocess.Popen(['find', repo_folder, '-name', filename], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+    out = subprocess.Popen(['find', repo_folder, '-name', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = out.communicate()
 
     if stdout:
         for line in stdout.decode().splitlines():
             try:
-                id = max(files.keys()) + 1
+                id_ = max(files.keys()) + 1
             except:
-                id = 0
-            files[id] = dict()
+                id_ = 0
+            files[id_] = dict()
 
             with open(line, 'r') as file:
-                files[id]["content"] = file.read()
+                files[id_]["content"] = file.read()
 
             relative_path = line.split(repo_folder)[1].strip("/")
-            files[id]["path"] = relative_path
+            files[id_]["path"] = relative_path
 
     return files
 
@@ -512,23 +501,23 @@ def get_file_as_lines(filename: str) -> dict:
     files = dict()
 
     repo_folder = tmp.tmp_config["Repository"]["local_path"]
-    out = subprocess.Popen(['find', repo_folder, '-name', filename], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+    out = subprocess.Popen(['find', repo_folder, '-name', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = out.communicate()
 
     if stdout:
         for line in stdout.decode().splitlines():
             try:
-                id = max(files.keys()) + 1
+                id_ = max(files.keys()) + 1
             except:
-                id = 0
-            files[id] = dict()
+                id_ = 0
+            files[id_] = dict()
 
             with open(line, 'r') as file:
-                files[id]["content"] = file.readlines()
+                files[id_]["content"] = file.readlines()
 
-            files[id]["name"] = line.split("/")[-1]
+            files[id_]["name"] = line.split("/")[-1]
 
             relative_path = line.split(repo_folder)[1].strip("/")
-            files[id]["path"] = relative_path
+            files[id_]["path"] = relative_path
 
     return files

@@ -3,15 +3,14 @@
 # Author: Simon Schneider, 2023
 # Contact: simon.schneider@tuhh.de
 
-import os
 from configparser import ConfigParser
 from datetime import datetime
 import argparse
 
 import core.dfd_extraction as dfd_extraction
-import core.file_interaction as fi
 import output_generators.logger as logger
 import tmp.tmp as tmp
+from core.file_interaction import get_local_path, clone_repo
 
 
 def api_invocation(path: str) -> dict:
@@ -42,8 +41,7 @@ def api_invocation(path: str) -> dict:
     local_path = get_local_path(repo_path)
     tmp.tmp_config.set("Repository", "local_path", local_path)
 
-    if not fi.repo_downloaded(local_path):
-        fi.download_repo(repo_path, local_path)
+    clone_repo(repo_path, local_path)
 
     # Call extraction
     codeable_models, traceability = dfd_extraction.perform_analysis()
@@ -112,17 +110,6 @@ def main():
 
     print("\nStarted", start_time)
     print("Finished", end_time)
-
-
-def get_local_path(repo_path):
-    return os.path.join(os.getcwd(), "analysed_repositories", *repo_path.split("/")[1:])
-
-
-def clone_repo(repo_path, local_path):
-    # Create analysed_repositories folder in case it doesn't exist yet (issue #2)
-    os.makedirs(os.path.join(os.getcwd(), "analysed_repositories"), exist_ok=True)
-    if not fi.repo_downloaded(local_path):
-        fi.download_repo(repo_path, local_path)
 
 
 if __name__ == '__main__':
