@@ -12,10 +12,10 @@ def generate_json_architecture(microservices: dict, information_flows: dict, ext
                  "information_flows": list(information_flows.values()),
                  "external_components": list(external_components.values())}
     
-    repo_path = tmp.tmp_config["Repository"]["path"]
-    repo_path = repo_path.replace("/", "--")
-    filename = "./output/json_architecture/" + repo_path + ".json"
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-    
-    with open(filename, 'w') as architecture_file:
+    output_path = tmp.tmp_config["Analysis Settings"]["output_path"]
+    filename = f"{os.path.split(output_path)[1]}_json_architecture.json"
+    output_path = os.path.join(output_path, filename)
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, 'w') as architecture_file:
         json.dump(full_dict, architecture_file, indent=4)

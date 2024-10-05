@@ -24,7 +24,12 @@ repo_cache = dict()
 exception_counter_repo = 0
 
 
-def get_local_path(repo_path):
+def get_output_path(repo_path: str) -> str:
+    repo_path = repo_path.replace("/", "--")
+    return os.path.join(os.getcwd(), 'code2dfd_output', repo_path)
+
+
+def get_local_path(repo_path: str) -> str:
     return os.path.join(os.getcwd(), "analysed_repositories", *repo_path.split("/")[1:])
 
 

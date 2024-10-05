@@ -10,7 +10,7 @@ import argparse
 import core.dfd_extraction as dfd_extraction
 import output_generators.logger as logger
 import tmp.tmp as tmp
-from core.file_interaction import get_local_path, clone_repo
+from core.file_interaction import get_output_path, get_local_path, clone_repo
 
 
 def api_invocation(path: str) -> dict:
@@ -98,6 +98,7 @@ def main():
     clone_repo(repo_path, local_path)
     tmp.tmp_config.set("Repository", "path", repo_path) # overwrite with user-provided path
     tmp.tmp_config.set("Repository", "local_path", local_path)
+    tmp.tmp_config.set("Analysis Settings", "output_path", get_output_path(repo_path))
 
     # calling the actual extraction
     dfd_extraction.perform_analysis()
