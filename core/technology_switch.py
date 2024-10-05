@@ -1,6 +1,6 @@
 import ast
 
-import output_generators.logger as logger
+from output_generators.logger import logger
 import technology_specific_extractors.database_connections.dbc_entry as dbc
 import technology_specific_extractors.docker_compose.dcm_entry as dcm
 import technology_specific_extractors.feign_client.fgn_entry as fgn
@@ -21,7 +21,7 @@ def get_microservices(dfd) -> dict:
     if tmp.tmp_config.has_option("DFD", "microservices"):
         return ast.literal_eval(tmp.tmp_config["DFD"]["microservices"])
     else:
-        logger.write_log_message("Microservices not set yet, start extraction", "info")
+        logger.info("Microservices not set yet, start extraction")
 
         mvn.set_microservices(dfd)
         grd.set_microservices(dfd)
@@ -37,7 +37,7 @@ def get_information_flows(dfd) -> dict:
     if tmp.tmp_config.has_option("DFD", "information_flows"):
         return ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])
     else:
-        logger.write_log_message("Information flows not set yet, start extraction", "info")
+        logger.info("Information flows not set yet, start extraction")
         communication_techs_list = ast.literal_eval(tmp.tmp_config["Technology Profiles"]["communication_techs_list"])
         for com_tech in communication_techs_list:
             eval(com_tech[1]).set_information_flows(dfd)

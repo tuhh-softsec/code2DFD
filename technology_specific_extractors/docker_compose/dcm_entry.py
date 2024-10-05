@@ -2,7 +2,7 @@ import ast
 import os
 
 import core.file_interaction as fi
-import output_generators.logger as logger
+from output_generators.logger import logger
 import core.technology_switch as tech_sw
 import technology_specific_extractors.docker_compose.dcm_parser as dcm_parser
 import tmp.tmp as tmp
@@ -151,9 +151,9 @@ def get_environment_variables(docker_compose_file_URL: str) -> set:
             try:
                 environment_variables.add((line.split("=")[0].strip(), line.split("=")[1].strip()))
             except:
-                logger.write_log_message("error splitting line in dco_entry.set_microservices", "debug")
+                logger.debug("error splitting line in dco_entry.set_microservices")
     except:
-        logger.write_log_message("No .env file exists", "info")
+        logger.info("No .env file exists")
     return environment_variables
 
 

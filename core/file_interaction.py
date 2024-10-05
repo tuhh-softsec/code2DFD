@@ -5,7 +5,7 @@ from configparser import ConfigParser
 
 import requests
 
-import output_generators.logger as logger
+from output_generators.logger import logger
 import core.technology_switch as tech_sw
 import tmp.tmp as tmp
 
@@ -297,9 +297,9 @@ def find_variable(parameter: str, file) -> str:
                             i += 1
                             if parameter_variable in fc["content"][linec + i] and "=" in fc["content"][linec + i]:
                                 variable = fc["content"][linec + i].split("=")[1].strip().strip(";").strip().strip("\"")
-            logger.write_log_message(f"Found {variable} in file {correct_file}", "info")
+            logger.info(f"Found {variable} in file {correct_file}")
         except:
-            logger.write_log_message(f"Could not find a definition for {parameter}", "info")
+            logger.info(f"Could not find a definition for {parameter}")
             return None
     else:           # means that it's a variable in this file -> go through lines to find it
         if parameter[-2:-1] == "()":
@@ -311,9 +311,9 @@ def find_variable(parameter: str, file) -> str:
                     if parameter_variable in file["content"][line] and "=" in file["content"][line] and ("private" in file["content"][line] or "public" in file["content"][line] or "protected" in file["content"][line]):
                         variable = file["content"][line].split("=")[1].strip().strip(";").strip().strip("\"")
                 name = file["name"]
-                logger.write_log_message(f"Found {variable} in this file ({name})", "info")
+                logger.info(f"Found {variable} in this file ({name})")
             except:
-                logger.write_log_message(f"Could not find a definition for {parameter}", "info")
+                logger.info(f"Could not find a definition for {parameter}")
                 return None
     return variable
 

@@ -2,7 +2,7 @@ import ast
 import os
 
 import core.file_interaction as fi
-import output_generators.logger as logger
+from output_generators.logger import logger
 import core.parse_files as parse
 import core.technology_switch as tech_sw
 import tmp.tmp as tmp
@@ -100,7 +100,7 @@ def parse_properties_file(gradle_path: str):
             if entry.is_file():
                 if not "test" in entry.path:
                     if entry.path.split("/")[-1] in ["application.properties", "bootstrap.properties"]:
-                        logger.write_log_message("Found application.properties here: " + str(entry.path), "info")
+                        logger.info("Found application.properties here: " + str(entry.path))
                         file_path = entry.path
                         file_url = "https://raw.githubusercontent.com/" + repo_path + "/master/" + ("/").join(file_path.split("/")[3:])
                         new_microservice, new_properties = parse.parse_properties_file(file_url)
@@ -109,7 +109,7 @@ def parse_properties_file(gradle_path: str):
                         if new_properties:
                             properties = properties.union(new_properties)
                     elif entry.path.split("/")[-1] in ["application.yaml", "application.yml", "bootstrap.yml", "bootstrap.yaml", "filebeat.yml", "filebeat.yaml"]:
-                        logger.write_log_message("Found properties file here: " + str(entry.path), "info")
+                        logger.info("Found properties file here: " + str(entry.path))
                         file_path = entry.path
                         file_url = "https://raw.githubusercontent.com/" + repo_path + "/master/" + ("/").join(file_path.split("/")[3:])
 
@@ -151,7 +151,7 @@ def detect_microservice(file_path, dfd):
                 if entry.is_file():
                     if entry.name.casefold() == "build.gradle":
                         gradle_path = ("/").join(entry.path.split("/")[3:])
-                        logger.write_log_message("Found build.gradle here: " + str(entry.path), "info")
+                        logger.info("Found build.gradle here: " + str(entry.path))
                         found_gradle = True
                         gradle_file_url = "https://raw.githubusercontent.com/" + repo_path + "/master/" + file_path
         path = ("/").join(path.split("/")[:-1])
@@ -170,7 +170,7 @@ def detect_microservice(file_path, dfd):
             gradle_file["content"] = fi.file_as_lines(gradle_file_url)
             microservice, properties = parse_configurations(gradle_file)
     else:
-        logger.write_log_message("Did not find microservice", "info")
+        logger.info("Did not find microservice")
 
     if not microservice[0]:
 

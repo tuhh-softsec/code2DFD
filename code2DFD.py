@@ -8,7 +8,7 @@ from datetime import datetime
 import argparse
 
 import core.dfd_extraction as dfd_extraction
-import output_generators.logger as logger
+from output_generators.logger import logger
 import tmp.tmp as tmp
 from core.file_interaction import get_output_path, get_local_path, clone_repo
 
@@ -33,8 +33,8 @@ def api_invocation(path: str) -> dict:
 
     start_time = datetime.now()
 
-    logger.write_log_message("*** New execution ***", "info")
-    logger.write_log_message("Copying config file to tmp file", "debug")
+    logger.info("*** New execution ***")
+    logger.debug("Copying config file to tmp file")
 
     # Overwrite repo_path from config file with the one from the API call
     repo_path = str(path)
@@ -71,8 +71,8 @@ def main():
 
     args = parser.parse_args()
 
-    logger.write_log_message("*** New execution ***", "info")
-    logger.write_log_message("Copying config file to tmp file", "debug")
+    logger.info("*** New execution ***")
+    logger.debug("Copying config file to tmp file")
 
     if args.config_path is not None:
         # Copy config to tmp file
