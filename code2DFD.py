@@ -14,7 +14,7 @@ import output_generators.logger as logger
 import tmp.tmp as tmp
 
 
-def api_invocation(path: str) -> str:
+def api_invocation(path: str) -> dict:
     """Entry function for when tool is called via API call.
     """
 
