@@ -64,9 +64,7 @@ def used_in_application() -> bool:
     """Checks if application has build.gradle file.
     """
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
-
-    return fi.file_exists("build.gradle", repo_path)
+    return fi.file_exists("build.gradle")
 
 
 def parse_configurations(gradle_file) -> str:

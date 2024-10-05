@@ -34,17 +34,12 @@ def repo_downloaded(repo_folder: str) -> bool:
     return False
 
 
-def download_repo(repo_path: str):
+def download_repo(repo_path: str, local_path: str):
     """Downloads repository from GitHub for local querying.
     """
 
-    local_repo_path = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
-    clone_URL = "https://github.com/" + repo_path + ".git"
-    command = "git clone " + clone_URL + " " + local_repo_path
-
+    command = f"git clone https://github.com/{repo_path}.git {local_path}"
     os.system(command)
-
-    return True
 
 
 def detection_comment(file_name, line):
@@ -108,12 +103,12 @@ def search_keywords(keywords: str):
     """
 
     repo_path = tmp.tmp_config["Repository"]["path"]
-    repo_folder = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
+    repo_folder = tmp.tmp_config["Repository"]["local_path"]
 
     results = dict()
 
     if not repo_downloaded(repo_folder):
-        download_repo(repo_path)
+        download_repo(repo_path, repo_folder)
 
     if type(keywords) == str:
         keywords = [keywords]
@@ -235,7 +230,7 @@ def file_as_lines(raw_file):
 
     local_path_parts = raw_file.split("githubusercontent.com/")[1].split("/")[1:]
     local_path_parts.pop(1)
-    local_path = "./analysed_repositories/" + ("/").join(local_path_parts)
+    local_path = os.path.join(os.getcwd(), "analysed_repositories", *local_path_parts)
 
     try:
         with open(local_path, "r") as file:
@@ -414,10 +409,9 @@ def check_dockerfile(build_path: str):
     lines = list()
 
     try:
-        repo_path = tmp.tmp_config["Repository"]["path"]
-        local_repo_path = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
+        local_repo_path = tmp.tmp_config["Repository"]["local_path"]
         dirs = list()
-        dirs.append(os.scandir(local_repo_path + "/" + path))
+        dirs.append(os.scandir(os.path.join(local_repo_path, path)))
 
         while dirs:
             dir = dirs.pop()
@@ -436,11 +430,11 @@ def check_dockerfile(build_path: str):
     return lines
 
 
-def file_exists(file_name: str, repo_path: str) -> bool:
+def file_exists(file_name: str) -> bool:
     """Checks if a file exists in the repository.
     """
 
-    local_repo_path = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
+    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
 
     dirs = list()
     dirs.append(os.scandir(local_repo_path))
@@ -463,20 +457,20 @@ def get_repo_contents_local(repo_path: str, path: str) -> set:
 
     repo = set()
 
-    local_repo_path = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
+    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
 
     if not repo_downloaded(local_repo_path):
-        download_repo(repo_path)
+        download_repo(repo_path, local_repo_path)
 
     if path:
-        local_repo_path = local_repo_path + "/" + path.strip("/")
+        local_repo_path = os.path.join(local_repo_path, path.strip("/"))  # TODO I guess the strip() should also become OS-independent
     try:
         contents = os.scandir(local_repo_path)
     except Exception as e:
         return repo
     for content in contents:
         path = tmp.tmp_config["Repository"]["path"]
-        download_url = "https://raw.githubusercontent.com/" + path + "/master/" + ("/").join(content.path.split("/")[3:])
+        download_url = f"https://raw.githubusercontent.com/{path}/master/{"/".join(content.path.split("/")[3:])}"
         repo.add((content.name, download_url, content.path))
 
     contents.close()
@@ -488,10 +482,9 @@ def get_file_as_yaml(filename: str) -> dict:
     """Looks for a file in the repository and downloads it if existing.
     """
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
     files = dict()
 
-    repo_folder = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
+    repo_folder = tmp.tmp_config["Repository"]["local_path"]
     out = subprocess.Popen(['find', repo_folder, '-name', filename], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
     stdout, stderr = out.communicate()
 
@@ -516,10 +509,9 @@ def get_file_as_lines(filename: str) -> dict:
     """Looks for a file in the repository and downloads it if existing.
     """
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
     files = dict()
 
-    repo_folder = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
+    repo_folder = tmp.tmp_config["Repository"]["local_path"]
     out = subprocess.Popen(['find', repo_folder, '-name', filename], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
     stdout, stderr = out.communicate()
 
@@ -540,7 +532,3 @@ def get_file_as_lines(filename: str) -> dict:
             files[id]["path"] = relative_path
 
     return files
-
-
-
-#

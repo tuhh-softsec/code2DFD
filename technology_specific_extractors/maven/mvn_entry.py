@@ -94,9 +94,7 @@ def used_in_application() -> bool:
     """Checks if application has pom.xml file.
     """
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
-
-    return fi.file_exists("pom.xml", repo_path)
+    return fi.file_exists("pom.xml")
 
 
 def extract_modules(file: list) -> list:

@@ -36,13 +36,14 @@ def api_invocation(path: str) -> str:
             tmp.tmp_config.set(section, entry, ini_config[section][entry])
 
     # Overwrite repo_path from config file with the one from the API call
-    tmp.tmp_config.set("Repository", "path", str(path))
+    repo_path = str(path)
+    tmp.tmp_config.set("Repository", "path", repo_path)
 
-    local_path = "./analysed_repositories/" + ("/").join(path.split("/")[1:])
+    local_path = get_local_path(repo_path)
     tmp.tmp_config.set("Repository", "local_path", local_path)
 
     if not fi.repo_downloaded(local_path):
-        fi.download_repo(path)
+        fi.download_repo(repo_path, local_path)
 
     # Call extraction
     codeable_models, traceability = dfd_extraction.perform_analysis()
@@ -83,11 +84,16 @@ def main():
         for section in ["Analysis Settings", "Repository", "Technology Profiles", "DFD"]:     #copying what is needed from config to temp
             for entry in ini_config[section]:
                 tmp.tmp_config.set(section, entry, ini_config[section][entry])
-        clone_repo(tmp.tmp_config.get("Repository", "path"))
+        repo_path = tmp.tmp_config.get("Repository", "path")
+        local_path = get_local_path(repo_path)
+        tmp.tmp_config.set("Repository", "local_path", local_path)
+        clone_repo(repo_path, local_path)
 
     elif args.github_path is not None:
         repo_path = args.github_path.strip()
-        clone_repo(repo_path)
+        local_path = get_local_path(repo_path)
+        tmp.tmp_config.set("Repository", "local_path", local_path)
+        clone_repo(repo_path, local_path)
 
         ini_config = ConfigParser()
         ini_config.read('config/config.ini')
@@ -108,13 +114,15 @@ def main():
     print("Finished", end_time)
 
 
-def clone_repo(repo_path):
+def get_local_path(repo_path):
+    return os.path.join(os.getcwd(), "analysed_repositories", *repo_path.split("/")[1:])
+
+
+def clone_repo(repo_path, local_path):
     # Create analysed_repositories folder in case it doesn't exist yet (issue #2)
-    os.makedirs(os.path.dirname("./analysed_repositories"), exist_ok=True)
-    local_path = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
-    tmp.tmp_config.set("Repository", "local_path", local_path)
+    os.makedirs(os.path.join(os.getcwd(), "analysed_repositories"), exist_ok=True)
     if not fi.repo_downloaded(local_path):
-        fi.download_repo(repo_path)
+        fi.download_repo(repo_path, local_path)
 
 
 if __name__ == '__main__':
