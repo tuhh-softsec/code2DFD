@@ -8,9 +8,9 @@ def generate_json_architecture(microservices: dict, information_flows: dict, ext
     """Creates JSON file that contains the complete extracted architecture.
     """
 
-    full_dict = {"microservices": microservices,
-                 "information_flows": information_flows,
-                 "external_components": external_components}
+    full_dict = {"microservices": list(microservices.values()),
+                 "information_flows": list(information_flows.values()),
+                 "external_components": list(external_components.values())}
     
     repo_path = tmp.tmp_config["Repository"]["path"]
     repo_path = repo_path.replace("/", "--")
@@ -19,8 +19,3 @@ def generate_json_architecture(microservices: dict, information_flows: dict, ext
     
     with open(filename, 'w') as architecture_file:
         json.dump(full_dict, architecture_file, indent=4)
-
-    return
-
-
-    
