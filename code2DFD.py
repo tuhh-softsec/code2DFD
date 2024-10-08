@@ -101,7 +101,7 @@ def main():
         if args.commit is not None: # TODO should get commit from config file as well
             commit = args.commit[:7]
             git_repo.checkout(commit)
-        tmp.tmp_config.set("Analysis Settings", "output_path", get_output_path(repo_path, commit)) #TODO output generators should put correct paths
+        tmp.tmp_config.set("Analysis Settings", "output_path", get_output_path(repo_path, commit))
         print(f"Analyzing repository {repo_path} at commit {commit}")
         dfd_extraction.perform_analysis()
         git_repo.checkout(head)

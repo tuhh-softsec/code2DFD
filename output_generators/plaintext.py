@@ -1,11 +1,13 @@
 import os
+from pathlib import Path
 
 import tmp.tmp as tmp
 
 
 def write_plaintext(microservices, information_flows, external_components):
     output_path = tmp.tmp_config["Analysis Settings"]["output_path"]
-    filename = f"{os.path.split(output_path)[1]}_results.txt"
+    parts = Path(output_path).parts
+    filename = f"{parts[-2]}--{parts[-1]}_results.txt"
     output_path = os.path.join(output_path, filename)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w") as output_file:

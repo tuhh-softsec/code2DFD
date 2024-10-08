@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import tmp.tmp as tmp
 
@@ -8,7 +9,8 @@ import tmp.tmp as tmp
 def output_codeable_model(microservices, information_flows, external_components):
     """Entry function to creation of codeable models. Calls all necessary helper functions and outputs the codeable model"""
 
-    model_name = tmp.tmp_config["Repository"]["path"].split("/")[-1]
+    parts = Path(tmp.tmp_config["Analysis Settings"]["output_path"]).parts
+    model_name = f"{parts[-2]}_{parts[-1]}"
 
     file_content = header()
     file_content += "\"" + str(model_name) + "\""
