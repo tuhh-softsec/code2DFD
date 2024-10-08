@@ -28,11 +28,6 @@ def get_output_path(repo_path: str, commit: str = None) -> str:
     else:
         return os.path.join(os.getcwd(), 'code2DFD_output', repo_path, commit)
 
-
-def get_local_path(repo_path: str) -> str:
-    return os.path.join(os.getcwd(), "analysed_repositories", *repo_path.split("/")[1:])
-
-
 def clone_repo(repo_path, local_path):
     # Create analysed_repositories folder in case it doesn't exist yet (issue #2)
     os.makedirs(os.path.join(os.getcwd(), "analysed_repositories"), exist_ok=True)
