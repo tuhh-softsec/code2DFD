@@ -6,6 +6,7 @@
 from configparser import ConfigParser
 from datetime import datetime
 import argparse
+from pydriller import Repository
 
 import core.dfd_extraction as dfd_extraction
 from output_generators.logger import logger
@@ -66,6 +67,7 @@ def main():
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--config_path", type=str, help="Path to the config file to use")
     source.add_argument("--github_path", type=str, help="Path to the repository on GitHub as 'repository/path'")
+    parser.add_argument("--commit", type=str, help="Analyze repository at this commit")
     now = datetime.now()
     start_time = now.strftime("%H:%M:%S")
 
@@ -89,12 +91,20 @@ def main():
         tmp.tmp_config.set("Repository", "path", repo_path) # overwrite with user-provided path
 
     local_path = get_local_path(repo_path)
-    clone_repo(repo_path, local_path)
+    clone_repo(repo_path, local_path) # TODO use PyDriller to clone repo
     tmp.tmp_config.set("Repository", "local_path", local_path)
     tmp.tmp_config.set("Analysis Settings", "output_path", get_output_path(repo_path))
 
-    # calling the actual extraction
-    dfd_extraction.perform_analysis()
+    repository = Repository(path_to_repo=local_path)
+    with repository._prep_repo(local_path) as git_repo:
+        commit = head = git_repo.get_head().hash[:7]
+        if args.commit is not None: # TODO should get commit from config file as well
+            commit = args.commit[:7]
+            git_repo.checkout(commit)
+        tmp.tmp_config.set("Analysis Settings", "output_path", get_output_path(repo_path, commit)) #TODO output generators should put correct paths
+        print(f"Analyzing repository {repo_path} at commit {commit}")
+        dfd_extraction.perform_analysis()
+        git_repo.checkout(head)
 
     now = datetime.now()
     end_time = now.strftime("%H:%M:%S")
