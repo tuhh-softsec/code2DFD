@@ -98,9 +98,13 @@ def main():
     repository = Repository(path_to_repo=local_path)
     with repository._prep_repo(local_path) as git_repo:
         commit = head = git_repo.get_head().hash[:7]
-        if args.commit is not None: # TODO should get commit from config file as well
+        if args.commit is not None:
             commit = args.commit[:7]
-            git_repo.checkout(commit)
+            tmp.tmp_config.set("Analysis Settings", "commit", args.commit)
+        elif tmp.tmp_config.has_option("Analysis Settings", "commit"):
+            commit = tmp.tmp_config.get("Analysis Settings", "commit")[:7]
+            tmp.tmp_config.set("Analysis Settings", "commit", commit)
+        git_repo.checkout(commit)
         tmp.tmp_config.set("Analysis Settings", "output_path", get_output_path(repo_path, commit))
         print(f"Analyzing repository {repo_path} at commit {commit}")
         dfd_extraction.perform_analysis()
