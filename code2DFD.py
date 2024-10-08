@@ -6,12 +6,11 @@ import os
 from configparser import ConfigParser
 from datetime import datetime
 import argparse
-from pydriller import Repository
 
 import core.dfd_extraction as dfd_extraction
 from output_generators.logger import logger
 import tmp.tmp as tmp
-from core.file_interaction import get_output_path, clone_repo
+from core.file_interaction import clone_repo
 
 CONFIG_SECTIONS = ["Analysis Settings", "Repository", "Technology Profiles", "DFD"]
 COMMUNICATIONS_TECH_LIST = '[("RabbitMQ", "rmq"), ("Kafka", "kfk"), ("RestTemplate", "rst"),\
@@ -71,8 +70,6 @@ def main():
     parser.add_argument("--commit", type=str, help="Analyze repository at this commit")
     # TODO add cli for url
     # TODO add cli for local path
-    now = datetime.now()
-    start_time = now.strftime("%H:%M:%S")
 
     args = parser.parse_args()
 
@@ -99,32 +96,17 @@ def main():
     if args.development_mode:
         tmp.tmp_config.set("Analysis Settings", "development_mode", "True")
 
-    repo_path = tmp.tmp_config.get("Repository", "path")
+    if args.commit is not None:
+        commit = args.commit[:7]
+        tmp.tmp_config.set("Analysis Settings", "commit", commit)
+    elif tmp.tmp_config.has_option("Analysis Settings", "commit"):
+        commit = tmp.tmp_config.get("Analysis Settings", "commit")[:7]
+        tmp.tmp_config.set("Analysis Settings", "commit", commit)
+
     local_path = os.path.join(os.getcwd(), "analysed_repositories")
-    url_path = tmp.tmp_config.get("Repository", "url")
+    tmp.tmp_config.set("Repository", "local_path", local_path)
 
-    os.makedirs(local_path, exist_ok=True)
-    repository = Repository(path_to_repo=url_path, clone_repo_to=local_path)
-    with repository._prep_repo(url_path) as git_repo:
-        tmp.tmp_config.set("Repository", "local_path", str(git_repo.path))
-        commit = head = git_repo.get_head().hash[:7]
-        if args.commit is not None:
-            commit = args.commit[:7]
-            tmp.tmp_config.set("Analysis Settings", "commit", args.commit)
-        elif tmp.tmp_config.has_option("Analysis Settings", "commit"):
-            commit = tmp.tmp_config.get("Analysis Settings", "commit")[:7]
-            tmp.tmp_config.set("Analysis Settings", "commit", commit)
-        git_repo.checkout(commit)
-        tmp.tmp_config.set("Analysis Settings", "output_path", get_output_path(repo_path, commit))
-        print(f"Analyzing repository {repo_path} at commit {commit}")
-        dfd_extraction.perform_analysis()
-        git_repo.checkout(head)
-
-    now = datetime.now()
-    end_time = now.strftime("%H:%M:%S")
-
-    print("\nStarted", start_time)
-    print("Finished", end_time)
+    dfd_extraction.perform_analysis()
 
 
 if __name__ == '__main__':
