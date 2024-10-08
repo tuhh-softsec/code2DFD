@@ -7,7 +7,7 @@ from configparser import ConfigParser
 from datetime import datetime
 import argparse
 
-import core.dfd_extraction as dfd_extraction
+from core.dfd_extraction import perform_analysis
 from output_generators.logger import logger
 import tmp.tmp as tmp
 
@@ -27,8 +27,7 @@ def api_invocation(url: str, commit: str) -> dict:
     """Entry function for when tool is called via API call.
     """
 
-    repo_path = url.split("github.com/")[1]  # TODO This needs to generalize beyond GitHub
-    print("New call for " + repo_path)
+    print("New call for " + url)
 
     start_time = datetime.now()
 
@@ -40,14 +39,14 @@ def api_invocation(url: str, commit: str) -> dict:
             tmp.tmp_config.set(section, entry, DEFAULT_CONFIG[section][entry])
 
     # Overwrite repo_path from config file with the one from the API call
-    tmp.tmp_config.set("Repository", "path", repo_path)
+    tmp.tmp_config.set("Repository", "url", url)
     tmp.tmp_config.set("Repository", "local_path",
                        os.path.join(os.getcwd(), "analysed_repositories"))
     if commit is not None:
         tmp.tmp_config.set("Analysis Settings", "commit", commit)
 
     # Call extraction
-    codeable_models, traceability = dfd_extraction.perform_analysis()
+    codeable_models, traceability = perform_analysis()
 
     response = dict()
     response["codeable_models_file"] = codeable_models
@@ -63,36 +62,41 @@ def api_invocation(url: str, commit: str) -> dict:
     return response
 
 
-def main():
+def cli_invocation():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config_path", type=str, help="Path to the config file to use")
-    parser.add_argument("--repo_path", type=str, help="Path to the repository as 'repository/path'")
-    parser.add_argument("--development_mode", action='store_true', help="Switch on development mode")
-    parser.add_argument("--commit", type=str, help="Analyze repository at this commit")
-    # TODO add cli for url
-    # TODO add cli for local path
+    parser.add_argument("--config_path", type=str, help="Path to the config file to use (can be replaced with following CLI arguments")
+    repository = parser.add_argument_group("Repository", "Repository information")
+    repository.add_argument("--repo_url", type=str, help="URL to clone the repository from (might be local path)")
+    repository.add_argument("--repo_local_path", type=str, help="Location to clone repository to (default: 'analysed_repositories' in CWD)")
+    settings = parser.add_argument_group("Analysis Settings", "Parameters for additional analysis settings")
+    settings.add_argument("--commit", type=str, help="Analyze repository at this commit")
+    settings.add_argument("--development_mode", action='store_true', help="Switch on development mode")
 
     args = parser.parse_args()
 
     logger.info("*** New execution ***")
-    logger.debug("Copying config file to tmp file")
 
     if args.config_path:
         # Copy config to tmp file
+        logger.debug("Copying config file to tmp file")
         tmp.tmp_config.read(args.config_path)
-
     else:
         # global ini_config
+        logger.debug("Initializing tmp file with default config")
         for section in CONFIG_SECTIONS:  # Copying what is needed from default to temp
             tmp.tmp_config.add_section(section)
             for entry in DEFAULT_CONFIG[section]:
                 tmp.tmp_config.set(section, entry, DEFAULT_CONFIG[section][entry])
 
-    if args.repo_path:
-        repo_path = args.repo_path.strip()
-        tmp.tmp_config.set("Repository", "path", repo_path) # overwrite with user-provided path
-    elif not tmp.tmp_config.has_option("Repository", "path"):
-        raise AttributeError("Parameter 'repo_path' must be provided either in config file or by --repo_path")
+    if args.repo_url:
+        tmp.tmp_config.set("Repository", "url", args.repo_url)
+    elif not tmp.tmp_config.has_option("Repository", "url"):
+        raise AttributeError("Parameter [Repository][url] must be provided either in config file or by --repo_url")
+
+    if args.repo_local_path:
+        tmp.tmp_config.set("Repository", "local_path", args.local_path)
+    elif not tmp.tmp_config.has_option("Repository", "local_path"):
+        tmp.tmp_config.set("Repository", "local_path", os.path.join(os.getcwd(), "analysed_repositories"))
 
     if args.development_mode:
         tmp.tmp_config.set("Analysis Settings", "development_mode", "True")
@@ -104,11 +108,8 @@ def main():
         commit = tmp.tmp_config.get("Analysis Settings", "commit")[:7]
         tmp.tmp_config.set("Analysis Settings", "commit", commit)
 
-    local_path = os.path.join(os.getcwd(), "analysed_repositories")
-    tmp.tmp_config.set("Repository", "local_path", local_path)
-
-    dfd_extraction.perform_analysis()
+    perform_analysis()
 
 
 if __name__ == '__main__':
-    main()
+    cli_invocation()
