@@ -10,7 +10,6 @@ import argparse
 import core.dfd_extraction as dfd_extraction
 from output_generators.logger import logger
 import tmp.tmp as tmp
-from core.file_interaction import clone_repo
 
 CONFIG_SECTIONS = ["Analysis Settings", "Repository", "Technology Profiles", "DFD"]
 COMMUNICATIONS_TECH_LIST = '[("RabbitMQ", "rmq"), ("Kafka", "kfk"), ("RestTemplate", "rst"),\
@@ -24,33 +23,35 @@ DEFAULT_CONFIG.set("Analysis Settings", "development_mode", "False")
 DEFAULT_CONFIG.set("Technology Profiles", "communication_techs_list", COMMUNICATIONS_TECH_LIST)
 
 
-def api_invocation(path: str) -> dict:
+def api_invocation(url: str, commit: str) -> dict:
     """Entry function for when tool is called via API call.
     """
 
-    print("New call for " + path)
-    response = dict()
+    repo_path = url.split("github.com/")[1]  # TODO This needs to generalize beyond GitHub
+    print("New call for " + repo_path)
 
     start_time = datetime.now()
 
     logger.info("*** New execution ***")
-    logger.debug("Copying config file to tmp file")
+    logger.debug("Initializing config to tmp file")
+    for section in CONFIG_SECTIONS:  # Copying what is needed from default to temp
+        tmp.tmp_config.add_section(section)
+        for entry in DEFAULT_CONFIG[section]:
+            tmp.tmp_config.set(section, entry, DEFAULT_CONFIG[section][entry])
 
     # Overwrite repo_path from config file with the one from the API call
-    # TODO add analysis of specific commit with Flask API
-    repo_path = str(path)
     tmp.tmp_config.set("Repository", "path", repo_path)
-
-    local_path = os.path.join(os.getcwd(), "analysed_repositories", *repo_path.split("/")[1:])
-    tmp.tmp_config.set("Repository", "local_path", local_path)
-
-    clone_repo(repo_path, local_path) # TODO use Pydriller
+    tmp.tmp_config.set("Repository", "local_path",
+                       os.path.join(os.getcwd(), "analysed_repositories"))
+    if commit is not None:
+        tmp.tmp_config.set("Analysis Settings", "commit", commit)
 
     # Call extraction
     codeable_models, traceability = dfd_extraction.perform_analysis()
 
+    response = dict()
     response["codeable_models_file"] = codeable_models
-    response["traceability"] = traceability
+    response["traceability_file"] = traceability
 
     # Execution time
     end_time = datetime.now()
