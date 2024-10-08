@@ -32,13 +32,28 @@ The corresponding path only needs to be un-commented for analysis (all others ha
 
 ##### 2. Running the tool
 To start the tool via the terminal using the config file, simply enter `python3 code2DFD.py --config_path PATH_TO_CONFIG` in a command line opened in the root directory.
-For example, `python3 code2DFD.py --config_path config/config.ini` for the example config in this repository.
-The extraction will start and some status messages appear on the screen.
-If you want to analyse in application on GitHub, simply put in the GitHub handle, using the `--github_path` option.
-For example, for the repository `https://github.com/sqshq/piggymetrics`, run the command `python3 code2DFD.py --github_path sqshq/piggymetrics`
+For example, `python3 code2DFD.py --config_path config/config.ini` for the [example config](config/config.ini) in this repository.
 
+The config file needs to specify the following sections and parameters:
+- Repository
+  - `path`: `organization/repository` part of GitHub URL
+  - `url`: the full URL of the repository to clone from (may be local path)
+  - `local_path`: local directory to clone the repository to (without the repository name itself)
+- Technology profiles: same as in [example config](config/config.ini)
+- DFD: empty section
+- Analysis Settings (optional)
+  - `development_mode`: boolean, turns on development mode
+  - `commit`: hash of the commit to checkout and analyze; repository will be returned to the same commit it was in before analysis; if commit not provided, attempts to checkout `HEAD`
+  
+It is possible to provide these parameters also by command line, see `python3 code2DFD.py --help` for exact usage
+
+If both config file and CLI arguments provided, CLI arguments take precedence
+
+###### 2.1 RESTful service
 To run the tool as a RESTful API service, run `python3 flask_code2DFD.py`.
+
 This will spawn up a Flask server and you can trigger DFD-extractions by sending a request to  `localhost:5001/dfd` with parameters `url` and optionally `commit`.
+
 Currently only GitHub URLs are supported this way.
 
 

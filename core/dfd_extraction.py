@@ -57,7 +57,6 @@ def perform_analysis():
     """
     local_path = tmp.tmp_config.get("Repository", "local_path")
     url_path = tmp.tmp_config.get("Repository", "url")
-    repo_path = tmp.tmp_config.get("Repository", "path")
 
     os.makedirs(local_path, exist_ok=True)
     repository = Repository(path_to_repo=url_path, clone_repo_to=local_path)
@@ -68,10 +67,10 @@ def perform_analysis():
             commit = tmp.tmp_config.get("Analysis Settings", "commit")
         else:
             commit = head
-        tmp.tmp_config.set("Analysis Settings", "output_path", os.path.join(os.getcwd(), "code2DFD_output", repo_path.replace("/", "--"), commit))
+        repo_name = git_repo.project_name
+        tmp.tmp_config.set("Analysis Settings", "output_path", os.path.join(os.getcwd(), "code2DFD_output", repo_name.replace("/", "--"), commit))
         git_repo.checkout(commit)
-
-        print(f"\nStart extraction of DFD for {repo_path} on commit {commit} at {datetime.now().strftime("%H:%M:%S")}")
+        print(f"\nStart extraction of DFD for {repo_name} on commit {commit} at {datetime.now().strftime("%H:%M:%S")}")
         codeable_models, traceability_content = DFD_extraction()
         print(f"Finished: {datetime.now().strftime("%H:%M:%S")}")
 
