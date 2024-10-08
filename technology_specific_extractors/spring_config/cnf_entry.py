@@ -215,19 +215,16 @@ def parse_config_files(config_server: str, config_file_path: str, config_file_pa
         config_file_path = ""
     if config_repo_uri:
         information_flows, external_components = set_repo(information_flows, external_components, config_repo_uri, config_server)
-        repo_path = config_repo_uri.split("github.com/")[1].split(".")[0]
-    else:
-        repo_path = tmp.tmp_config["Repository"]["path"]
     gh_contents = False
     contents = set()
 
     if config_file_path:
-        new_contents = fi.get_repo_contents_local(repo_path, config_file_path)
+        new_contents = fi.get_repo_contents_local(config_file_path)
         for file in new_contents:
             contents.add(file)
 
     else:
-        new_contents = fi.get_repo_contents_local(repo_path, False)
+        new_contents = fi.get_repo_contents_local(False)
         for file in new_contents:
             contents.add(file)
 
@@ -237,15 +234,13 @@ def parse_config_files(config_server: str, config_file_path: str, config_file_pa
         local_path = tmp.tmp_config["Repository"]["local_path"]
         config_file_path_local = os.path.relpath(config_file_path_local, start=local_path)
 
-        new_contents = fi.get_repo_contents_local(repo_path, config_file_path_local)
+        new_contents = fi.get_repo_contents_local(config_file_path_local)
         for file in new_contents:
             contents.add(file)
 
 
     if not gh_contents and not contents:
-        repo_path = tmp.tmp_config["Repository"]["path"]
-
-        new_contents = fi.get_repo_contents_local(repo_path, config_file_path)
+        new_contents = fi.get_repo_contents_local(config_file_path)
         for file in new_contents:
             contents.add(file)
 

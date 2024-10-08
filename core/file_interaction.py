@@ -21,35 +21,6 @@ repo_cache = dict()
 exception_counter_repo = 0
 
 
-def get_output_path(repo_path: str, commit: str = None) -> str:
-    repo_path = repo_path.replace("/", "--")
-    if commit is None:
-        return os.path.join(os.getcwd(), 'code2DFD_output', repo_path)
-    else:
-        return os.path.join(os.getcwd(), 'code2DFD_output', repo_path, commit)
-
-def clone_repo(repo_path, local_path):
-    # Create analysed_repositories folder in case it doesn't exist yet (issue #2)
-    os.makedirs(os.path.join(os.getcwd(), "analysed_repositories"), exist_ok=True)
-    if not repo_downloaded(local_path):
-        download_repo(repo_path, local_path)
-
-
-def repo_downloaded(repo_folder: str) -> bool:
-    """Checks if repository has been downloaded from GitHub already.
-    """
-
-    return os.path.isdir(repo_folder)
-
-
-def download_repo(repo_path: str, local_path: str):
-    """Downloads repository from GitHub for local querying.
-    """
-
-    command = f"git clone https://github.com/{repo_path}.git {local_path}"
-    os.system(command)
-
-
 def detection_comment(file_name, line):
     """Checks if provided line is a comment. Based on language of the file, so only works for the ones with specified comment-delimiters.
     """
@@ -92,13 +63,9 @@ def search_keywords(keywords: str):
     """Searches keywords locally using grep.
     """
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
     repo_folder = tmp.tmp_config["Repository"]["local_path"]
 
     results = dict()
-
-    if not repo_downloaded(repo_folder):
-        download_repo(repo_path, repo_folder)
 
     if isinstance(keywords, str):
         keywords = [keywords]
@@ -422,7 +389,7 @@ def file_exists(file_name: str) -> bool:
     return False
 
 
-def get_repo_contents_local(repo_path: str, path: str) -> set:
+def get_repo_contents_local(path: str) -> set:
     """Creates a set of all files in the repository given as path.
     """
 
@@ -430,9 +397,6 @@ def get_repo_contents_local(repo_path: str, path: str) -> set:
 
     local_repo_path = tmp.tmp_config["Repository"]["local_path"]
     to_crawl = local_repo_path
-
-    if not repo_downloaded(local_repo_path):
-        download_repo(repo_path, local_repo_path)
 
     if path:
         to_crawl = os.path.join(local_repo_path, path)
