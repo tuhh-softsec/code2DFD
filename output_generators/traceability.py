@@ -132,8 +132,6 @@ def convert_path_to_url(path: str) -> str:
         return path
 
     repo_path = tmp.tmp_config["Repository"]["path"]
-    if "analysed_repositories" in path:
-        path = ("/").join(path.split("/")[3:])
     url = "https://github.com/" + str(repo_path) + "/blob/master/" + str(path)
 
     return url

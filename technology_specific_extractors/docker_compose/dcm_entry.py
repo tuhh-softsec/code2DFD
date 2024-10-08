@@ -176,28 +176,26 @@ def detect_microservice(file_path: str, dfd) -> str:
     microservice = False
     dockerfile_path = False
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
-
-    local_repo_path = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
+    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
 
     # Find corresponding dockerfile
     dirs = list()
     found_docker = False
 
-    path = ("/").join(file_path.split("/")[:-1])
+    path = os.path.dirname(file_path)
     while not found_docker and path != "":
-        dirs.append(os.scandir(local_repo_path + "/" + path))
+        dirs.append(os.scandir(os.path.join(local_repo_path, path)))
         while dirs:
             dir = dirs.pop()
             for entry in dir:
                 if entry.is_file():
                     if entry.name.casefold() == "dockerfile":
-                        dockerfile_path = entry.path.split(repo_path.split("/")[1])[1].strip("/")
+                        dockerfile_path = os.path.relpath(entry.path, start=local_repo_path).strip("/")
                         found_docker = True
-        path = ("/").join(path.split("/")[:-1])
+        path = os.path.dirname(path)
 
     if dockerfile_path:
-        dockerfile_location = ("/").join(dockerfile_path.split("/")[:-1])
+        dockerfile_location = os.path.dirname(dockerfile_path)
 
     # find docker-compose path
     try:
@@ -209,14 +207,14 @@ def detect_microservice(file_path: str, dfd) -> str:
         if len(raw_files) == 0:
             return microservice
         docker_compose_path = raw_files[0]["path"]          # path in the repo (w/0 "analysed_...")
-        docker_compose_location = ("/").join(docker_compose_path.split("/")[:-1])
+        docker_compose_location = os.path.dirname(docker_compose_path)
     except:
         pass
 
     # path of dockerfile relative to docker-compose file
     # if dockerfile is in same branch in file structure as docker-compose-file:
     try:
-        docker_image = dockerfile_location.replace(docker_compose_location, "").strip("/")
+        docker_image = os.path.relpath(dockerfile_location, start=docker_compose_location).strip("/")
     except:
         pass
 
