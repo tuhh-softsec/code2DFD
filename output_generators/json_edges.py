@@ -5,6 +5,7 @@ This was needed for another project using Code2DFD and will remain here for now 
 
 import json
 import os
+from pathlib import Path
 
 import tmp.tmp as tmp
 
@@ -33,7 +34,8 @@ def write_to_file(architecture_dict):
     """
 
     output_path = tmp.tmp_config["Analysis Settings"]["output_path"]
-    filename = f"{os.path.split(output_path)[1]}_edges.json"
+    parts = Path(output_path).parts
+    filename = f"{parts[-2]}--{parts[-1]}_edges.json"
     output_path = os.path.join(output_path, filename)
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)

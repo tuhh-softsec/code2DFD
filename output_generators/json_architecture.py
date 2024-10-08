@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 
 import tmp.tmp as tmp
 
@@ -13,7 +14,8 @@ def generate_json_architecture(microservices: dict, information_flows: dict, ext
                  "external_components": list(external_components.values())}
     
     output_path = tmp.tmp_config["Analysis Settings"]["output_path"]
-    filename = f"{os.path.split(output_path)[1]}_json_architecture.json"
+    parts = Path(output_path).parts
+    filename = f"{parts[-2]}--{parts[-1]}_json_architecture.json"
     output_path = os.path.join(output_path, filename)
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
