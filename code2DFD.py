@@ -2,7 +2,7 @@
 #
 # Author: Simon Schneider, 2023
 # Contact: simon.schneider@tuhh.de
-
+import os
 from configparser import ConfigParser
 from datetime import datetime
 import argparse
@@ -11,7 +11,7 @@ from pydriller import Repository
 import core.dfd_extraction as dfd_extraction
 from output_generators.logger import logger
 import tmp.tmp as tmp
-from core.file_interaction import get_output_path, get_local_path, clone_repo
+from core.file_interaction import get_output_path, clone_repo
 
 CONFIG_SECTIONS = ["Analysis Settings", "Repository", "Technology Profiles", "DFD"]
 COMMUNICATIONS_TECH_LIST = '[("RabbitMQ", "rmq"), ("Kafka", "kfk"), ("RestTemplate", "rst"),\
@@ -42,10 +42,10 @@ def api_invocation(path: str) -> dict:
     repo_path = str(path)
     tmp.tmp_config.set("Repository", "path", repo_path)
 
-    local_path = get_local_path(repo_path)
+    local_path = os.path.join(os.getcwd(), "analysed_repositories", *repo_path.split("/")[1:])
     tmp.tmp_config.set("Repository", "local_path", local_path)
 
-    clone_repo(repo_path, local_path)
+    clone_repo(repo_path, local_path) # TODO use Pydriller
 
     # Call extraction
     codeable_models, traceability = dfd_extraction.perform_analysis()
@@ -69,6 +69,8 @@ def main():
     parser.add_argument("--repo_path", type=str, help="Path to the repository as 'repository/path'")
     parser.add_argument("--development_mode", action='store_true', help="Switch on development mode")
     parser.add_argument("--commit", type=str, help="Analyze repository at this commit")
+    # TODO add cli for url
+    # TODO add cli for local path
     now = datetime.now()
     start_time = now.strftime("%H:%M:%S")
 
@@ -98,13 +100,13 @@ def main():
         tmp.tmp_config.set("Analysis Settings", "development_mode", "True")
 
     repo_path = tmp.tmp_config.get("Repository", "path")
-    local_path = get_local_path(repo_path)
-    clone_repo(repo_path, local_path) # TODO use PyDriller to clone repo
-    tmp.tmp_config.set("Repository", "local_path", local_path)
-    tmp.tmp_config.set("Analysis Settings", "output_path", get_output_path(repo_path))
+    local_path = os.path.join(os.getcwd(), "analysed_repositories")
+    url_path = tmp.tmp_config.get("Repository", "url")
 
-    repository = Repository(path_to_repo=local_path)
-    with repository._prep_repo(local_path) as git_repo:
+    os.makedirs(local_path, exist_ok=True)
+    repository = Repository(path_to_repo=url_path, clone_repo_to=local_path)
+    with repository._prep_repo(url_path) as git_repo:
+        tmp.tmp_config.set("Repository", "local_path", str(git_repo.path))
         commit = head = git_repo.get_head().hash[:7]
         if args.commit is not None:
             commit = args.commit[:7]
