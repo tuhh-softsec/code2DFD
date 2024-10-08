@@ -38,7 +38,8 @@ If you want to analyse in application on GitHub, simply put in the GitHub handle
 For example, for the repository `https://github.com/sqshq/piggymetrics`, run the command `python3 code2DFD.py --github_path sqshq/piggymetrics`
 
 To run the tool as a RESTful API service, run `python3 flask_code2DFD.py`.
-This will spawn up a Flask server and you can trigger DFD-extractions by sending a request to or opening your browser at `localhost:5000/dfd?path=*repository/path*`
+This will spawn up a Flask server and you can trigger DFD-extractions by sending a request to  `localhost:5001/dfd` with parameters `url` and optionally `commit`.
+Currently only GitHub URLs are supported this way.
 
 
 ##### 3. Output
