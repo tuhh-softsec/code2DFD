@@ -38,6 +38,7 @@ def api_invocation(path: str) -> dict:
     logger.debug("Copying config file to tmp file")
 
     # Overwrite repo_path from config file with the one from the API call
+    # TODO add analysis of specific commit with Flask API
     repo_path = str(path)
     tmp.tmp_config.set("Repository", "path", repo_path)
 
@@ -64,9 +65,9 @@ def api_invocation(path: str) -> dict:
 
 def main():
     parser = argparse.ArgumentParser()
-    source = parser.add_mutually_exclusive_group(required=True)
-    source.add_argument("--config_path", type=str, help="Path to the config file to use")
-    source.add_argument("--github_path", type=str, help="Path to the repository on GitHub as 'repository/path'")
+    parser.add_argument("--config_path", type=str, help="Path to the config file to use")
+    parser.add_argument("--repo_path", type=str, help="Path to the repository as 'repository/path'")
+    parser.add_argument("--development_mode", action='store_true', help="Switch on development mode")
     parser.add_argument("--commit", type=str, help="Analyze repository at this commit")
     now = datetime.now()
     start_time = now.strftime("%H:%M:%S")
@@ -76,20 +77,27 @@ def main():
     logger.info("*** New execution ***")
     logger.debug("Copying config file to tmp file")
 
-    if args.config_path is not None:
+    if args.config_path:
         # Copy config to tmp file
         tmp.tmp_config.read(args.config_path)
-        repo_path = tmp.tmp_config.get("Repository", "path")
 
-    elif args.github_path is not None:
+    else:
         # global ini_config
         for section in CONFIG_SECTIONS:  # Copying what is needed from default to temp
             tmp.tmp_config.add_section(section)
             for entry in DEFAULT_CONFIG[section]:
                 tmp.tmp_config.set(section, entry, DEFAULT_CONFIG[section][entry])
-        repo_path = args.github_path.strip()
-        tmp.tmp_config.set("Repository", "path", repo_path) # overwrite with user-provided path
 
+    if args.repo_path:
+        repo_path = args.repo_path.strip()
+        tmp.tmp_config.set("Repository", "path", repo_path) # overwrite with user-provided path
+    elif not tmp.tmp_config.has_option("Repository", "path"):
+        raise AttributeError("Parameter 'repo_path' must be provided either in config file or by --repo_path")
+
+    if args.development_mode:
+        tmp.tmp_config.set("Analysis Settings", "development_mode", "True")
+
+    repo_path = tmp.tmp_config.get("Repository", "path")
     local_path = get_local_path(repo_path)
     clone_repo(repo_path, local_path) # TODO use PyDriller to clone repo
     tmp.tmp_config.set("Repository", "local_path", local_path)
