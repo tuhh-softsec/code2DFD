@@ -151,17 +151,16 @@ def detect_turbine_stream(microservices: dict, information_flows: dict, dfd) -> 
                         traceability.add_trace(trace)
 
                         # find pom_file and check which broker there is a dependency for
-                        repo_path = tmp.tmp_config["Repository"]["path"]
                         path = results[r]["path"]
 
                         found_pom = False
 
-                        local_repo_path = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
+                        local_repo_path = tmp.tmp_config["Repository"]["local_path"]
 
                         dirs = list()
 
-                        path = ("/").join(path.split("/")[:-1])
-                        dirs.append(os.scandir(local_repo_path + "/" + path))
+                        path = os.path.dirname(path)
+                        dirs.append(os.scandir(os.path.join(local_repo_path, path)))
 
                         while path != "" and not found_pom:
                             dir = dirs.pop()
@@ -174,8 +173,8 @@ def detect_turbine_stream(microservices: dict, information_flows: dict, dfd) -> 
                                             if "<artifactId>spring-cloud-starter-stream-rabbit</artifactId>" in line:
                                                 uses_rabbit = True
                                                 trace_info = (results[r]["path"], results[r]["line_nr"], results[r]["span"])
-                            path = ("/").join(path.split("/")[:-1])
-                            dirs.append(os.scandir(local_repo_path + "/" + path))
+                            path = os.path.dirname(path)
+                            dirs.append(os.scandir(os.path.join(local_repo_path, path)))
 
                     if ("Monitoring Dashboard", "Hystrix") in microservices[id]["tagged_values"]:
                         dashboard = microservices[id]["servicename"]

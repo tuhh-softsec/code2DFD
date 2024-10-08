@@ -1,7 +1,7 @@
 import os
 import re
 import subprocess
-from configparser import ConfigParser
+from pathlib import Path, PurePosixPath
 
 import requests
 
@@ -9,9 +9,6 @@ from output_generators.logger import logger
 import core.technology_switch as tech_sw
 import tmp.tmp as tmp
 
-
-ini_config = ConfigParser()
-ini_config.read('config/config.ini')
 
 count = 0
 total_length = 0
@@ -59,7 +56,7 @@ def detection_comment(file_name, line):
     """Checks if provided line is a comment. Based on language of the file, so only works for the ones with specified comment-delimiters.
     """
 
-    language = os.path.splitext(file_name)
+    language = os.path.splitext(file_name)[1]
     return (language == ".js" and line.replace(" ", "")[:2] == "//") or (
             language == ".java" and line.replace(" ", "")[:2] == "//") or (
             language == ".yml" and line.replace(" ", "")[:1] == "#")
@@ -115,35 +112,36 @@ def search_keywords(keywords: str):
         stdout, stderr = out.communicate()
         seen = set()
         for line in stdout.decode().splitlines():
-            try:
-                if line.split(":")[0] not in seen:
-                    seen.add(line.split(":")[0])
-                    full_path = line.split(":")[0]
+            if line.startswith("Binary file"):
+                continue
+            line_parts = line.split(":")
+            if len(line_parts) < 3:
+                continue
+            full_path = line_parts[0]
+            if full_path not in seen:
+                seen.add(full_path)
+                if not "test" in full_path and len(full_path) >= 3 and not os.path.splitext(full_path)[1] == ".md":
+                    path = os.path.relpath(full_path, start=repo_folder)
+                    name = os.path.basename(path)
+                    line_nr = line_parts[1]
+                    code_line = ":".join(line_parts[2:])
+                    match = re.search(keyword, code_line)
+                    if match is None:
+                        continue
+                    span = match.span()
+                    with open(full_path) as file:
+                        content = file.readlines()
 
-                    if not "test" in full_path and len(full_path) >= 3 and not full_path[-3:] == ".md":
-                        try:
-                            path = full_path.split(repo_folder)[1].strip("/")
-                        except:
-                            path = "/"
-                        line_nr = line.split(":")[1]
-                        name = path.split("/")[-1]
-                        code_line = ":".join(line.split(":")[2:])
-                        span = re.search(keyword, code_line).span()
-                        with open(full_path) as file:
-                            content = file.readlines()
-
-                        try:
-                            id_ = max(results.keys()) + 1
-                        except:
-                            id_ = 0
-                        results[id_] = dict()
-                        results[id_]["content"] = content
-                        results[id_]["name"] = name
-                        results[id_]["path"] = path
-                        results[id_]["line_nr"] = line_nr
-                        results[id_]["span"] = str(span)
-            except Exception as e:
-                pass
+                    try:
+                        id_ = max(results.keys()) + 1
+                    except:
+                        id_ = 0
+                    results[id_] = dict()
+                    results[id_]["content"] = content
+                    results[id_]["name"] = name
+                    results[id_]["path"] = path
+                    results[id_]["line_nr"] = line_nr
+                    results[id_]["span"] = str(span)
     return results
 
 
@@ -224,8 +222,8 @@ def file_as_lines(raw_file):
     """
 
     local_path_parts = raw_file.split("githubusercontent.com/")[1].split("/")[1:]
-    local_path_parts.pop(1)
-    local_path = os.path.join(os.getcwd(), "analysed_repositories", *local_path_parts)
+    local_path = tmp.tmp_config.get("Repository", "local_path")
+    local_path = os.path.join(local_path, *(local_path_parts[2:]))
 
     try:
         with open(local_path, "r") as file:
@@ -242,7 +240,7 @@ def detect_microservice(file_path, dfd):
     microservices_set = tech_sw.get_microservices(dfd)
     microservices = [microservices_set[x]["servicename"] for x in microservices_set.keys()]
 
-    file_path_parts = file_path.split("/")
+    file_path_parts = Path(file_path).parts
     count = 0
     part = 0
     found = False
@@ -385,8 +383,7 @@ def resolve_url(url: str, microservice: str, dfd) -> str:
 def check_dockerfile(build_path: str):
     """Checks if under the service's build-path there is a dockerfile. If yes, returns it.
     """
-
-    repo_path = tmp.tmp_config["Repository"]["path"]
+    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
 
     # find docker-compose path, since build-path is relative to that
     raw_files = get_file_as_lines("docker-compose.yml")
@@ -394,20 +391,20 @@ def check_dockerfile(build_path: str):
         raw_files = get_file_as_lines("docker-compose.yaml")
     if len(raw_files) == 0:
         return
-    docker_compose_path = raw_files[0]["path"]
-    if docker_compose_path != "docker_compose.yaml" and docker_compose_path != "docker_compose.yml":
-        docker_compose_path = "/".join(docker_compose_path.split("/")[:-1])
-        path = docker_compose_path + build_path.replace(repo_path, "").strip("-")
-    else:
-        path = build_path.replace(repo_path, "").strip("./-")
+    docker_compose_path = raw_files[0]["path"]  # TODO this assumes there is exactly 1 relevant docker-compose
+    docker_compose_dir = os.path.dirname(docker_compose_path)
+
+    build_path = PurePosixPath(build_path.strip("-'"))  # Build path is always posix, so resolve it accordingly
+    build_path = os.path.normpath(build_path)
+
+    docker_path = os.path.join(local_repo_path, os.path.join(docker_compose_dir, build_path))
 
     lines = list()
 
-    try:
-        local_repo_path = tmp.tmp_config["Repository"]["local_path"]
-        dirs = list()
-        dirs.append(os.scandir(os.path.join(local_repo_path, path)))
+    dirs = list()
 
+    if os.path.exists(docker_path):
+        dirs.append(os.scandir(docker_path))
         while dirs:
             d = dirs.pop()
             for entry in d:
@@ -417,9 +414,6 @@ def check_dockerfile(build_path: str):
                             lines = file.readlines()
                 elif entry.is_dir():
                     dirs.append(os.scandir(entry.path))
-
-    except:
-        pass
 
     return lines
 
@@ -452,19 +446,22 @@ def get_repo_contents_local(repo_path: str, path: str) -> set:
     repo = set()
 
     local_repo_path = tmp.tmp_config["Repository"]["local_path"]
+    to_crawl = local_repo_path
 
     if not repo_downloaded(local_repo_path):
         download_repo(repo_path, local_repo_path)
 
     if path:
-        local_repo_path = os.path.join(local_repo_path, path.strip("/"))  # TODO I guess the strip() should also become OS-independent
+        to_crawl = os.path.join(local_repo_path, path)
     try:
-        contents = os.scandir(local_repo_path)
+        contents = os.scandir(to_crawl)
     except Exception as e:
         return repo
     for content in contents:
-        path = tmp.tmp_config["Repository"]["path"]
-        download_url = f"https://raw.githubusercontent.com/{path}/master/{"/".join(content.path.split("/")[3:])}"
+        repo_path = tmp.tmp_config["Repository"]["path"]
+        rel_path = os.path.relpath(content.path, start=local_repo_path)
+        rel_path_parts = Path(rel_path).parts
+        download_url = f"https://raw.githubusercontent.com/{repo_path}/master/{"/".join(rel_path_parts)}"
         repo.add((content.name, download_url, content.path))
 
     contents.close()
@@ -478,8 +475,8 @@ def get_file_as_yaml(filename: str) -> dict:
 
     files = dict()
 
-    repo_folder = tmp.tmp_config["Repository"]["local_path"]
-    out = subprocess.Popen(['find', repo_folder, '-name', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    local_path = tmp.tmp_config["Repository"]["local_path"]
+    out = subprocess.Popen(['find', local_path, '-name', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = out.communicate()
 
     if stdout:
@@ -493,8 +490,7 @@ def get_file_as_yaml(filename: str) -> dict:
             with open(line, 'r') as file:
                 files[id_]["content"] = file.read()
 
-            relative_path = line.split(repo_folder)[1].strip("/")
-            files[id_]["path"] = relative_path
+            files[id_]["path"] = os.path.relpath(line, start=local_path)
 
     return files
 
@@ -505,8 +501,8 @@ def get_file_as_lines(filename: str) -> dict:
 
     files = dict()
 
-    repo_folder = tmp.tmp_config["Repository"]["local_path"]
-    out = subprocess.Popen(['find', repo_folder, '-name', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    local_path = tmp.tmp_config["Repository"]["local_path"]
+    out = subprocess.Popen(['find', local_path, '-name', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = out.communicate()
 
     if stdout:
@@ -520,9 +516,8 @@ def get_file_as_lines(filename: str) -> dict:
             with open(line, 'r') as file:
                 files[id_]["content"] = file.readlines()
 
-            files[id_]["name"] = line.split("/")[-1]
+            files[id_]["name"] = os.path.basename(line)
 
-            relative_path = line.split(repo_folder)[1].strip("/")
-            files[id_]["path"] = relative_path
+            files[id_]["path"] = os.path.relpath(line, start=local_path)
 
     return files
