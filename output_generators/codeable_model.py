@@ -79,7 +79,7 @@ def output_codeable_model(microservices, information_flows, external_components)
         elif stereotypes:
             new_line = "\n" + name + " = CClass(external_component, \"" + str(external_components[e]["name"]) + "\", stereotype_instances = " + str(stereotypes) + ")"
         else:
-            new_line = "\n" + name + " = CClass(external_component, \"" + str(external_components[e]["name"]) + "\)"
+            new_line = "\n" + name + " = CClass(external_component, \"" + str(external_components[e]["name"]) + ")"
         file_content += new_line
 
 
