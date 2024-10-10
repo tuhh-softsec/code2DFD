@@ -60,6 +60,7 @@ def parse_properties_file(download_url: str) -> str:
 
     repo_path = tmp.tmp_config["Repository"]["path"]
     file_name = download_url.split(repo_path)[1].strip("/")
+    file_name = '/'.join(file_name.split("/")[1:])
 
     properties = set()
     microservice = [False, False]
