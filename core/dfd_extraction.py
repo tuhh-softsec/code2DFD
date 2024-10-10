@@ -1,5 +1,4 @@
 import ast
-import os
 from datetime import datetime
 
 import output_generators.codeable_model as codeable_model
@@ -9,6 +8,7 @@ import output_generators.json_architecture as json_architecture
 import output_generators.json_edges as json_edges
 import output_generators.traceability as traceability
 import output_generators.visualizer as visualizer
+import output_generators.plaintext as plaintext
 from technology_specific_extractors.apache_httpd.aph_entry import detect_apachehttpd_webserver
 from technology_specific_extractors.circuit_breaker.cbr_entry import detect_circuit_breakers
 from technology_specific_extractors.consul.cns_entry import detect_consul
@@ -107,44 +107,13 @@ def perform_analysis():
 
     # Printing
     print("\nFinished extraction")
-    repo_path = repo_path.replace("/", "_")
-    filename = "./output/results/" + repo_path + ".txt"
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-    with open(filename, "w") as output_file:
-        if information_flows:
-            output_file.write("\nInformation Flows:\n")
-            for i in information_flows.keys():
-                output_file.write("\n" + str(information_flows[i]))
-
-        if microservices:
-            output_file.write("\nMicroservices:\n")
-            for m in microservices.keys():
-                microservices[m].pop("image", None)
-                microservices[m].pop("pom_path", None)
-                microservices[m].pop("properties", None)
-                output_file.write("\n" + str(microservices[m]))
-
-        if external_components:
-            output_file.write("\nExternal Components:\n")
-            for e in external_components.keys():
-                output_file.write("\n" + str(external_components[e]))
-
-    # Writing dict for calculating metrics
-    filename_dict = "./output/results/" + repo_path + "_dict.txt"
-    os.makedirs(os.path.dirname(filename_dict), exist_ok=True)
-    with open(filename_dict, "w") as output_file_dict:
-        complete = dict()
-        complete["microservices"] = microservices
-        complete["information_flows"] = information_flows
-        complete["external_components"] = external_components
-
-        output_file_dict.write(str(complete))
 
     # Saving
     tmp.tmp_config.set("DFD", "microservices", str(microservices))
     tmp.tmp_config.set("DFD", "information_flows", str(information_flows))
     tmp.tmp_config.set("DFD", "external_components", str(external_components))
 
+    plaintext.write_plaintext(microservices, information_flows, external_components)
     codeable_models, codeable_models_path = codeable_model.output_codeable_model(microservices, information_flows, external_components)
     traceability_content = traceability.output_traceability()
     visualizer.output_png(codeable_models_path)

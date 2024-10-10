@@ -12,8 +12,9 @@ def convert(codeable_models_path: str) -> str:
 
     global plantuml_new
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
-    output_file_path = "./output/png/" + repo_path.replace("/", "--") + ".png"
+    output_file_path = tmp.tmp_config["Analysis Settings"]["output_path"]
+    filename = f"{os.path.split(output_file_path)[1]}_uml.txt"
+    output_file_path = os.path.join(output_file_path, filename)
 
     add_header()
 
@@ -207,5 +208,3 @@ def write_output(output_file_path):
     os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
     with open(output_file_path, 'w+') as output_file:
         output_file.write(plantuml_new)
-
-    return

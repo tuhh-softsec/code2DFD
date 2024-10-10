@@ -1,3 +1,5 @@
+import os
+
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
 import tmp.tmp as tmp
@@ -57,13 +59,13 @@ def detect_connections(microservices: dict, information_flows: dict, dockerfile,
     """Parses config file to find connections to prometheus.
     """
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
+    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
 
     for line in dockerfile["content"]:
         if "ADD" in line:
             ini_file_path = line.split(" ")[1]
 
-            ini_file_path = "./analysed_repositories/" + repo_path.split("/")[1] + "/" + ("/").join(dockerfile["path"].split("/")[:-1]) + "/" + ini_file_path
+            ini_file_path = os.path.join(local_repo_path, os.path.dirname(dockerfile["path"]), ini_file_path)
 
             with open(ini_file_path, "r") as file:
                 ini_file = list()

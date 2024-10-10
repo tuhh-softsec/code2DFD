@@ -14,6 +14,6 @@ def output_png(codeable_models_path: str):
 
     generator = plantuml.PlantUML(url="http://www.plantuml.com/plantuml/img/")
     try:
-        generator.processes_file(filename=new_plantuml_path, outfile=new_plantuml_path.replace("plantuml_source", "png").replace("txt", "png"))
+        generator.processes_file(filename=new_plantuml_path)
     except Exception:
         print("No connection to the PlantUML server possible or malformed input to the server.")

@@ -1,5 +1,6 @@
 import ast
 import re
+from pathlib import Path
 
 import ruamel.yaml
 
@@ -120,8 +121,8 @@ def extract_microservices(file_content, file_name) -> set:
                 new_image = file.get("services", {}).get(s).get("image")
                 image = new_image
                 for id in microservices_dict.keys():
-                    pom_path = microservices_dict[id]["pom_path"]
-                    if new_image.split("/")[-1] == pom_path.split("/")[-2]:
+                    pom_path = Path(microservices_dict[id]["pom_path"])
+                    if new_image.split("/")[-1] == pom_path.parts[-2]:
                         exists = True
                         if "pom_" in microservices_dict[id]["servicename"]:
                             microservices_dict[id]["servicename"] = s
@@ -132,8 +133,8 @@ def extract_microservices(file_content, file_name) -> set:
                 new_build = file.get("services", {}).get(s).get("build")
                 build = new_build
                 for id in microservices_dict.keys():
-                    pom_path = microservices_dict[id]["pom_path"]
-                    if new_build.split("/")[-1] == pom_path.split("/")[-2]:
+                    pom_path = Path(microservices_dict[id]["pom_path"])
+                    if new_build.split("/")[-1] == pom_path.parts[-2]:
                         exists = True
                         if "pom_" in microservices_dict[id]["servicename"]:
                             microservices_dict[id]["servicename"] = s
@@ -393,8 +394,8 @@ def extract_microservices(file_content, file_name) -> set:
                 new_image = file.get(s).get("image")
                 image = new_image
                 for id in microservices_dict.keys():
-                    pom_path = microservices_dict[id]["pom_path"]
-                    if new_image.split("/")[-1] == pom_path.split("/")[-2]:
+                    pom_path = Path(microservices_dict[id]["pom_path"])
+                    if new_image.split("/")[-1] == pom_path.parts[-2]:
                         exists = True
                         if "pom_" in microservices_dict[id]["servicename"]:
                             microservices_dict[id]["servicename"] = s
@@ -405,8 +406,8 @@ def extract_microservices(file_content, file_name) -> set:
                 new_build = file.get(s).get("build")
                 build = new_build
                 for id in microservices_dict.keys():
-                    pom_path = microservices_dict[id]["pom_path"]
-                    if new_build.split("/")[-1] == pom_path.split("/")[-2]:
+                    pom_path = Path(microservices_dict[id]["pom_path"])
+                    if new_build.split("/")[-1] == pom_path.parts[-2]:
                         exists = True
                         if "pom_" in microservices_dict[id]["servicename"]:
                             microservices_dict[id]["servicename"] = s
