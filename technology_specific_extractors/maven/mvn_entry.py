@@ -1,7 +1,6 @@
 import ast
 import os
 import re
-from pathlib import Path
 
 import core.file_interaction as fi
 from output_generators.logger import logger
@@ -147,7 +146,6 @@ def parse_properties_file(pom_path: str):
     properties = set()
     microservice = [False, False]
     # find properties file
-    repo_path = tmp.tmp_config["Repository"]["path"]
     path = os.path.dirname(pom_path)
 
     local_repo_path = tmp.tmp_config["Repository"]["local_path"]
@@ -160,14 +158,11 @@ def parse_properties_file(pom_path: str):
         for entry in dir:
             if entry.is_file():
                 if not "test" in entry.path:
-                    filename = entry.path.split("/")[-1]
+                    filename = os.path.basename(entry.path)
                     if filename in ["application.properties", "bootstrap.properties"]:
                         logger.info("Found application.properties here: " + str(entry.path))
                         file_path = entry.path
-                        rel_path = os.path.relpath(file_path, start=local_repo_path)
-                        rel_path_parts = Path(rel_path).parts
-                        file_url = "https://raw.githubusercontent.com/" + repo_path + "/master/" + "/".join(rel_path_parts)
-                        new_microservice, new_properties = parse.parse_properties_file(file_url)
+                        new_microservice, new_properties = parse.parse_properties_file(file_path)
                         if new_microservice[0]:
                             microservice = new_microservice
                         if new_properties:
@@ -175,10 +170,7 @@ def parse_properties_file(pom_path: str):
                     elif filename in ["application.yaml", "application.yml", "bootstrap.yml", "bootstrap.yaml", "filebeat.yml", "filebeat.yaml"]:
                         logger.info("Found properties file here: " + str(entry.path))
                         file_path = entry.path
-                        rel_path = os.path.relpath(file_path, start=local_repo_path)
-                        rel_path_parts = Path(rel_path).parts
-                        file_url = "https://raw.githubusercontent.com/" + repo_path + "/master/" + "/".join(rel_path_parts)
-                        new_microservice, new_properties = parse.parse_yaml_file(file_url, file_path)
+                        new_microservice, new_properties = parse.parse_yaml_file(file_path)
                         if new_microservice[0]:
                             microservice = new_microservice
                         if new_properties:
@@ -301,7 +293,6 @@ def detect_microservice(file_path, dfd):
     microservice = [False, False]
     microservices = tech_sw.get_microservices(dfd)
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
 
     path = file_path
     found_pom = False
@@ -320,7 +311,6 @@ def detect_microservice(file_path, dfd):
                         pom_path = os.path.relpath(entry.path, start=local_repo_path)
                         logger.info("Found pom.xml here: " + str(entry.path))
                         found_pom = True
-                        pom_file_url = "https://raw.githubusercontent.com/" + repo_path + "/master/" + ("/").join(Path(pom_path).parts)
         path = os.path.dirname(path)
 
     if found_pom:
@@ -333,7 +323,7 @@ def detect_microservice(file_path, dfd):
             except:
                 pass
         if not microservice[0]:
-            pom_file["content"] = fi.file_as_lines(pom_file_url)
+            pom_file["content"] = fi.file_as_lines(pom_path)
             microservice, properties = parse_configurations(pom_file)
     else:
         logger.info("Did not find microservice")

@@ -1,6 +1,5 @@
 import os
 
-import core.file_interaction as fi
 import tmp.tmp as tmp
 
 
@@ -29,18 +28,3 @@ def detect_port(path: str) -> int:
                 dirs.append(os.scandir(entry.path))
 
     return port
-
-
-def extract_port(download_url: str):
-    """Looks for exposed port in dockerfile.
-    """
-
-    try:
-        file = fi.file_as_lines(download_url)
-        for line in file:
-            line = line.casefold()
-            if "expose" in line:
-                port = line.split("expose")[1].split("/")[0].strip()
-                return port
-    except:
-        return False

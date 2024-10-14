@@ -36,9 +36,7 @@ def add_trace(traceability_info: dict):
         else:
 
             # Adding the highlighting of the lines to the link (GitHub's feature)
-            url = convert_path_to_url(traceability_info["file"])
-            if not "implicit" in url and not "heuristic" in url:
-                url = url + "#L" + str(traceability_info["line"])
+            file = traceability_info["file"]
 
             item = traceability_info["item"]
             parent_item = traceability_info["parent_item"]
@@ -51,28 +49,26 @@ def add_trace(traceability_info: dict):
             for sub_item in traceability[type][parent_item]["sub_items"].keys():
                 if sub_item == traceability_info["item"]:
                     exists = True
-                    if (traceability[type][parent_item]["sub_items"][sub_item]["file"] != url or
+                    if (traceability[type][parent_item]["sub_items"][sub_item]["file"] != file or
                             traceability[type][parent_item]["sub_items"][sub_item]["line"] != traceability_info["line"] or
                             traceability[type][parent_item]["sub_items"][sub_item]["span"] != str(traceability_info["span"])):
 
                         traceability[type][parent_item]["sub_items"][item] = dict()
-                        traceability[type][parent_item]["sub_items"][item]["file"] = url
+                        traceability[type][parent_item]["sub_items"][item]["file"] = file
                         traceability[type][parent_item]["sub_items"][item]["line"] = traceability_info["line"]
                         traceability[type][parent_item]["sub_items"][item]["span"] = str(traceability_info["span"])
 
             # sub item does not exist yet
             if not exists:
                 traceability[type][parent_item]["sub_items"][item] = dict()
-                traceability[type][parent_item]["sub_items"][item]["file"] = url
+                traceability[type][parent_item]["sub_items"][item]["file"] = file
                 traceability[type][parent_item]["sub_items"][item]["line"] = traceability_info["line"]
                 traceability[type][parent_item]["sub_items"][item]["span"] = str(traceability_info["span"])
 
 
     else:
         # Adding the highlighting of the lines to the link (GitHub's feature)
-        url = convert_path_to_url(traceability_info["file"])
-        if not "implicit" in url and not "heuristic" in url:
-            url = url + "#L" + str(traceability_info["line"])
+        file = traceability_info["file"]
 
         # check, whether item is already in dict
         exists = False
@@ -85,13 +81,13 @@ def add_trace(traceability_info: dict):
         for item in traceability[type].keys():
             if item == traceability_info["item"]:
                 exists = True
-                if (not traceability[type][item]["file"] == url
+                if (not traceability[type][item]["file"] == file
                     or not traceability[type][item]["line"] == traceability_info["line"]
                     or not traceability[type][item]["span"] == str(traceability_info["span"])):
 
                     item = traceability_info["item"]
                     traceability[type][item] = dict()
-                    traceability[type][item]["file"] = url
+                    traceability[type][item]["file"] = file
                     traceability[type][item]["line"] = traceability_info["line"]
                     traceability[type][item]["span"] = str(traceability_info["span"])
                 break
@@ -100,7 +96,7 @@ def add_trace(traceability_info: dict):
         if not exists:
             item = traceability_info["item"]
             traceability[type][item] = dict()
-            traceability[type][item]["file"] = url
+            traceability[type][item]["file"] = file
             traceability[type][item]["line"] = traceability_info["line"]
             traceability[type][item]["span"] = str(traceability_info["span"])
 
@@ -123,19 +119,6 @@ def revert_flow(old_sender: str, old_receiver: str):
 
     if to_delete:
         del traceability["edges"][to_delete]
-
-
-def convert_path_to_url(path: str) -> str:
-    """ Resolves the passed path to the corresponding GitHub download url.
-    """
-
-    if "implicit" in path or "heuristic" in path:
-        return path
-
-    repo_path = tmp.tmp_config["Repository"]["path"]
-    url = "https://github.com/" + str(repo_path) + "/blob/master/" + str(path)
-
-    return url
 
 
 def output_traceability():
