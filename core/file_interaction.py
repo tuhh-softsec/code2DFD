@@ -3,8 +3,6 @@ import re
 import subprocess
 from pathlib import Path, PurePosixPath
 
-import requests
-
 from output_generators.logger import logger
 import core.technology_switch as tech_sw
 import tmp.tmp as tmp
@@ -126,10 +124,9 @@ def pagList2lines(pagList) -> dict:
                 id_ = 0
             results[id_] = dict()
 
-            results[id_]["content"] = file_as_lines(f["download_url"])
+            results[id_]["content"] = file_as_lines(f["path"])
             results[id_]["name"] = f["name"]
             results[id_]["path"] = f["path"]
-            results[id_]["url"] = f["download_url"]
 
         return results
 
@@ -147,7 +144,6 @@ def extract_downloadURL(files) -> dict:
         containing_files_URLs[id_] = dict()
 
         containing_files_URLs[id_]["path"] = f.path
-        containing_files_URLs[id_]["download_url"] = f.download_url
         containing_files_URLs[id_]["name"] = f.name
     return containing_files_URLs
 
@@ -167,19 +163,15 @@ def get_struct(repo):
     return struct
 
 
-def file_as_lines(raw_file):
+def file_as_lines(path):
     """Downloads and splits raw file into lines.
     """
 
-    local_path_parts = raw_file.split("githubusercontent.com/")[1].split("/")[1:]
     local_path = tmp.tmp_config.get("Repository", "local_path")
-    local_path = os.path.join(local_path, *(local_path_parts[2:]))
+    local_path = os.path.join(local_path, path)
 
-    try:
-        with open(local_path, "r") as file:
-            file_as_lines = file.readlines()
-    except Exception as e:
-        file_as_lines = requests.get(raw_file, stream=True).text.split("\n")
+    with open(local_path, "r") as file:
+        file_as_lines = file.readlines()
     return file_as_lines
 
 
@@ -405,11 +397,7 @@ def get_repo_contents_local(path: str) -> set:
     except Exception as e:
         return repo
     for content in contents:
-        repo_path = tmp.tmp_config["Repository"]["path"]
-        rel_path = os.path.relpath(content.path, start=local_repo_path)
-        rel_path_parts = Path(rel_path).parts
-        download_url = f"https://raw.githubusercontent.com/{repo_path}/master/{'/'.join(rel_path_parts)}"
-        repo.add((content.name, download_url, content.path))
+        repo.add((content.name, content.path))
 
     contents.close()
 

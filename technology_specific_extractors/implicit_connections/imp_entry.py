@@ -1,7 +1,6 @@
 import ast
 import os
 
-import requests
 import yaml
 
 import core.file_interaction as fi
@@ -76,41 +75,34 @@ def weavescope(microservices):
 
 def zuul(microservices):
     new_information_flows = dict()
-    if microservices != None:
-        for m in microservices.keys():
-            if ("Gateway", "Zuul") in microservices[m]["tagged_values"]:
-                repo_path = tmp.tmp_config["Repository"]["path"]
+    for m in microservices.values():
+        if ("Gateway", "Zuul") in m["tagged_values"]:
+            try:
+                path = os.path.dirname(m["pom_path"])
+            except:
+                break
 
-                repo = fi.get_repo(repo_path)
-                try:
-                    path = os.path.dirname(microservices[m]["pom_path"])
-                except:
-                    break
-
-                contents = repo.get_contents(path)
-                if type(contents) != list:
-                    contents = [contents]
-                while contents:
-                    c = contents.pop()
-                    if c.type == "dir":
-                        contents.extend(repo.get_contents(c.path))
-                    else:
-                        filename = os.path.basename(c.path)
-                        if filename == "application.properties":
-                            logger.info("Found application.properties here: " + str(c.path))
-                            file_url = c.download_url
-                            new_information_flows = extract_routes_properties(file_url, microservices[m]["name"])
-                        elif filename == "application.yaml" or filename == "application.yml" or filename == "bootstrap.yml" or filename == "bootstrap.yaml":
-                            logger.info("Found properteis file here: " + str(c.path))
-                            file_url = c.download_url
-                            new_information_flows = extract_routes_yaml(file_url, microservices[m]["name"])
+            contents = fi.get_repo_contents_local(path)
+            while contents:
+                c = contents.pop()
+                path = c[1]
+                if os.path.isdir(c):
+                    contents.update(fi.get_repo_contents_local(path))
+                else:
+                    filename = os.path.basename(path)
+                    if filename == "application.properties":
+                        logger.info("Found application.properties here: " + str(path))
+                        new_information_flows = extract_routes_properties(c.path, microservices[m]["servicename"])
+                    elif filename == "application.yaml" or filename == "application.yml" or filename == "bootstrap.yml" or filename == "bootstrap.yaml":
+                        logger.info("Found properteis file here: " + str(path))
+                        new_information_flows = extract_routes_yaml(path, microservices[m]["servicename"])
 
     return new_information_flows
 
 
-def extract_routes_properties(url, service):
+def extract_routes_properties(path, service):
     try:
-        file = fi.file_as_lines(url)
+        file = fi.file_as_lines(path)
         for line in file:
             if "spring.application.name" in line:
                 microservice = str()
@@ -133,10 +125,11 @@ def extract_routes_properties(url, service):
     return
 
 
-def extract_routes_yaml(url, service):
+def extract_routes_yaml(path, service):
     try:
-        raw_file = requests.get(url)
-        for document in yaml.load_all(raw_file.text, Loader = yaml.FullLoader):
+        with open(path, 'r') as f:
+            text = f.read()
+        for document in yaml.load(text, Loader=yaml.FullLoader):
             routes = document.get("zuul").get("routes")
 
             new_information_flows = dict()
