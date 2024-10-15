@@ -219,11 +219,11 @@ def overwrite_port(microservices: dict) -> dict:
     """Writes port from properties to tagged vallues.
     """
 
-    for m in microservices.keys():
-        port = False
-        for prop in microservices[m]["properties"]:
+    for microservice in microservices.values():
+        for prop in microservice.get("properties", []):
             if prop[0] == "port":
-                if type(prop[1]) == str:
+                port = None
+                if isinstance(prop[1], str):
                     if "port" in prop[1].casefold():
                         port = prop[1].split(":")[1].strip("}")
                     else:
@@ -233,17 +233,14 @@ def overwrite_port(microservices: dict) -> dict:
                 if port:
                     # Traceability
                     trace = dict()
-                    trace["parent_item"] = microservices[m]["name"]
+                    trace["parent_item"] = microservice["name"]
                     trace["item"] = "Port"
                     trace["file"] = prop[2][0]
                     trace["line"] = prop[2][1]
                     trace["span"] = prop[2][2]
 
                     traceability.add_trace(trace)
-                    if "tagged_values" in microservices[m]:
-                        microservices[m]["tagged_values"].append(("Port", port))
-                    else:
-                        microservices[m]["tagged_values"] = [("Port", port)]
+                    microservice["tagged_values"] = microservice.get("tagged_values", list()) + [("Port", port)]
 
     return microservices
 
