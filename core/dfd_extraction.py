@@ -103,14 +103,14 @@ def perform_analysis():
     print("Merging duplicate items")
     information_flows = clean_database_connections(microservices, information_flows)
 
-    information_flows = merge_duplicate_flows(information_flows)
+    merge_duplicate_flows(information_flows)
 
-    microservices = merge_duplicate_nodes(microservices)
-    external_components = merge_duplicate_nodes(external_components)
+    merge_duplicate_nodes(microservices)
+    merge_duplicate_nodes(external_components)
 
-    microservices = merge_duplicate_annotations(microservices)
-    information_flows = merge_duplicate_annotations(information_flows)
-    external_components = merge_duplicate_annotations(external_components)
+    merge_duplicate_annotations(microservices)
+    merge_duplicate_annotations(information_flows)
+    merge_duplicate_annotations(external_components)
 
     # Printing
     print("\nFinished extraction")
@@ -414,7 +414,7 @@ def detect_miscellaneous(microservices: dict, information_flows: dict, external_
     return microservices, information_flows, external_components
 
 
-def merge_duplicate_flows(information_flows: dict) -> dict:
+def merge_duplicate_flows(information_flows: dict):
     """Multiple flows with the same sender and receiver might occur. They are merged here.
     """
 
@@ -435,16 +435,11 @@ def merge_duplicate_flows(information_flows: dict) -> dict:
                 if field not in ["sender", "receiver"]:
                     flow_i[field] = flow_i.get(field, list()) + list(j_value)
             to_delete.add(j)
-
-    information_flows_new = dict()
-    for old in information_flows.keys():
-        if old not in to_delete:
-            information_flows_new[old] = information_flows[old]
-
-    return information_flows_new
+    for k in to_delete:
+        del information_flows[k]
 
 
-def merge_duplicate_nodes(nodes: dict) -> dict:
+def merge_duplicate_nodes(nodes: dict):
     """Merge duplicate nodes
     """
 
@@ -464,16 +459,11 @@ def merge_duplicate_nodes(nodes: dict) -> dict:
                 if field not in ["name", "type"]:
                     node_i[field] = node_i.get(field, list()) + list(j_value)
             to_delete.add(j)
-
-    nodes_new = dict()
-    for old, item in nodes.items():
-        if old not in to_delete:
-            nodes_new[old] = item
-
-    return nodes_new
+    for k in to_delete:
+        del nodes[k]
 
 
-def merge_duplicate_annotations(collection: dict) -> dict:
+def merge_duplicate_annotations(collection: dict):
     """Merge annotations of all items
     """
 
@@ -496,5 +486,3 @@ def merge_duplicate_annotations(collection: dict) -> dict:
                     tagged_value = str(tagged_value)
                 tagged_values_set.add((tag, tagged_value))
             item["tagged_values"] = list(tagged_values_set)
-
-    return collection
