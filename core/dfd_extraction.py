@@ -96,6 +96,7 @@ def perform_analysis():
     print("Extracted information flows from API-calls, message brokers, and database connections")
 
     # Detect everything else / execute all technology implementations
+    print("Classifying all services")
     microservices = tech_sw.get_microservices(dfd)
     microservices, information_flows, external_components = classify_microservices(microservices, information_flows, external_components, dfd)
 
@@ -182,7 +183,6 @@ def classify_microservices(microservices: dict, information_flows: dict, externa
     """Tries to determine the microservice's funcitonality.
     """
 
-    print("Classifying all services")
     microservices, information_flows = detect_eureka(microservices, information_flows, dfd)
     microservices, information_flows, external_components = detect_zuul(microservices, information_flows, external_components, dfd)
     microservices, information_flows, external_components = detect_spring_cloud_gateway(microservices, information_flows, external_components, dfd)
