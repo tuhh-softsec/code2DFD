@@ -101,9 +101,15 @@ def perform_analysis():
     # Merging
     print("Merging duplicate items")
     information_flows = clean_database_connections(microservices, information_flows)
+
     information_flows = merge_duplicate_flows(information_flows)
-    microservices, external_components = merge_duplicate_services(microservices, external_components)
-    microservices, information_flows, external_components = merge_duplicate_annotations(microservices, information_flows, external_components)
+
+    microservices = merge_duplicate_nodes(microservices)
+    external_components = merge_duplicate_nodes(external_components)
+
+    microservices = merge_duplicate_annotations(microservices)
+    information_flows = merge_duplicate_annotations(information_flows)
+    external_components = merge_duplicate_annotations(external_components)
 
     # Printing
     print("\nFinished extraction")
@@ -413,18 +419,18 @@ def merge_duplicate_flows(information_flows: dict) -> dict:
 
     to_delete = set()
     keep = set()
-    for i in information_flows.keys():
-        for j in information_flows.keys():
-            if not i == j and not i in keep and not j in keep:
-                if information_flows[i]["sender"] == information_flows[j]["sender"]:
-                    if information_flows[i]["receiver"] == information_flows[j]["receiver"]:
+    for i, flow_i in information_flows.items():
+        for j, flow_j in information_flows.items():
+            if not i == j and i not in keep and j not in keep:
+                if flow_i["sender"] == flow_j["sender"]:
+                    if flow_i["receiver"] == flow_j["receiver"]:
                         # merge
-                        for property in information_flows[j].keys():
+                        for property in flow_j.keys():
                             if not property == "sender" and not property == "receiver":
                                 try:        # flow i has same propert -> merge them
-                                    information_flows[i][property] = information_flows[i][property] + information_flows[j][property]
+                                    flow_i[property] = flow_i[property] + flow_j[property]
                                 except:     # flow i does not have this property -> set it
-                                    information_flows[i][property] = information_flows[j][property]
+                                    flow_i[property] = flow_j[property]
                         to_delete.add(j)
                         keep.add(i)
 
@@ -436,84 +442,61 @@ def merge_duplicate_flows(information_flows: dict) -> dict:
     return information_flows_new
 
 
-def merge_duplicate_services(microservices: dict, external_components: dict) -> dict:
+def merge_duplicate_nodes(nodes: dict) -> dict:
     """Merge duplicate microservices
     """
 
     # Microservices
     to_delete = set()
     keep = set()
-    for i in microservices.keys():
-        for j in microservices.keys():
-            if not i == j and not i in keep and not j in keep:
-                if microservices[i]["name"] == microservices[j]["name"]:
+    for i, node_i in nodes.items():
+        for j, node_j in nodes.items():
+            if not i == j and i not in keep and j not in keep:
+                if node_i["name"] == node_j["name"]:
                     # merge
-                    for property in microservices[j].keys():
+                    for property in node_j.keys():
                         if not property == "name":
                             try:        # service i has same propert -> merge them
-                                microservices[i][property] = microservices[i][property] + microservices[j][property]
+                                node_i[property] = node_i[property] + node_j[property]
                             except:     # service i does not have this property -> set it
-                                microservices[i][property] = microservices[j][property]
+                                node_i[property] = node_j[property]
                     to_delete.add(j)
                     keep.add(i)
 
-    microservices_new = dict()
-    for old in microservices.keys():
+    nodes_new = dict()
+    for old in nodes.keys():
         if old not in to_delete:
-            microservices_new[old] = microservices[old]
+            nodes_new[old] = nodes[old]
 
-    # External components
-    to_delete = set()
-    keep = set()
-    for i in external_components.keys():
-        for j in external_components.keys():
-            if not i == j and not i in keep and not j in keep:
-                if external_components[i]["name"] == external_components[j]["name"]:
-                    # merge
-                    for property in external_components[j].keys():
-                        if not property == "name":
-                            try:        # service i has same propert -> merge them
-                                external_components[i][property] = external_components[i][property] + external_components[j][property]
-                            except:     # service i does not have this property -> set it
-                                external_components[i][property] = external_components[j][property]
-                    to_delete.add(j)
-                    keep.add(i)
-
-    external_components_new = dict()
-    for old in external_components.keys():
-        if old not in to_delete:
-            external_components_new[old] = external_components[old]
-
-    return microservices_new, external_components_new
+    return nodes_new
 
 
-def merge_duplicate_annotations(microservices: dict, information_flows: dict, external_components: dict) -> dict:
+def merge_duplicate_annotations(collection: dict) -> dict:
     """Merge annotations of all items
     """
 
-    for collection in [microservices, information_flows, external_components]:
-        for id in collection.keys():
-            if "stereotype_instances" in collection[id]:
-                stereotype_set = set()
-                for stereotype in collection[id]["stereotype_instances"]:
-                    stereotype_set.add(stereotype)
-                collection[id]["stereotype_instances"] = list(stereotype_set)
+    for item in collection.values():
+        if "stereotype_instances" in item:
+            stereotype_set = set()
+            for stereotype in item["stereotype_instances"]:
+                stereotype_set.add(stereotype)
+            item["stereotype_instances"] = list(stereotype_set)
 
-            if "tagged_values" in collection[id]:
-                tagged_values_set = set()
-                for tagged_value in collection[id]["tagged_values"]:
-                    if tagged_value[0] == "Port":
-                        try:
-                            tagged_values_set.add((tagged_value[0], int(tagged_value[1])))
-                        except:
-                            pass
-                    elif type(tagged_value[1]) == list:
-                        endpoints = list()
-                        for e in tagged_value[1]:
-                            endpoints.append(e)
-                        tagged_values_set.add((tagged_value[0], str(endpoints)))
-                    else:
-                        tagged_values_set.add((tagged_value[0], tagged_value[1]))
-                collection[id]["tagged_values"] = list(tagged_values_set)
+        if "tagged_values" in item:
+            tagged_values_set = set()
+            for tagged_value in item["tagged_values"]:
+                if tagged_value[0] == "Port":
+                    try:
+                        tagged_values_set.add((tagged_value[0], int(tagged_value[1])))
+                    except:
+                        pass
+                elif type(tagged_value[1]) == list:
+                    endpoints = list()
+                    for e in tagged_value[1]:
+                        endpoints.append(e)
+                    tagged_values_set.add((tagged_value[0], str(endpoints)))
+                else:
+                    tagged_values_set.add((tagged_value[0], tagged_value[1]))
+            item["tagged_values"] = list(tagged_values_set)
 
-    return microservices, information_flows, external_components
+    return collection
