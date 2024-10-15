@@ -1,6 +1,7 @@
 import ast
 import os
 from datetime import datetime
+from itertools import combinations
 
 import output_generators.codeable_model as codeable_model
 import core.technology_switch as tech_sw
@@ -418,22 +419,22 @@ def merge_duplicate_flows(information_flows: dict) -> dict:
     """
 
     to_delete = set()
-    keep = set()
-    for i, flow_i in information_flows.items():
+    for i, j in combinations(information_flows.keys(), 2):
+        flow_i = information_flows[i]
         flow_i["sender"] = flow_i["sender"].casefold()
         flow_i["receiver"] = flow_i["receiver"].casefold()
-        for j, flow_j in information_flows.items():
-            flow_j["sender"] = flow_j["sender"].casefold()
-            flow_j["receiver"] = flow_j["receiver"].casefold()
-            if not i == j and i not in keep and j not in keep:
-                if flow_i["sender"] == flow_j["sender"]:
-                    if flow_i["receiver"] == flow_j["receiver"]:
-                        # merge
-                        for field, j_value in flow_j.items():
-                            if field not in ["sender", "receiver"]:
-                                flow_i[field] = flow_i.get(field, list()) + list(j_value)
-                        to_delete.add(j)
-                        keep.add(i)
+        if i == j:
+            continue
+        flow_j = information_flows[j]
+        flow_j["sender"] = flow_j["sender"].casefold()
+        flow_j["receiver"] = flow_j["receiver"].casefold()
+
+        if flow_i["sender"] == flow_j["sender"] and flow_i["receiver"] == flow_j["receiver"]:
+            # merge
+            for field, j_value in flow_j.items():
+                if field not in ["sender", "receiver"]:
+                    flow_i[field] = flow_i.get(field, list()) + list(j_value)
+            to_delete.add(j)
 
     information_flows_new = dict()
     for old in information_flows.keys():
@@ -449,19 +450,20 @@ def merge_duplicate_nodes(nodes: dict) -> dict:
 
     # Microservices
     to_delete = set()
-    keep = set()
-    for i, node_i in nodes.items():
+    for i, j in combinations(nodes.keys(), 2):
+        node_i = nodes[i]
         node_i["name"] = node_i["name"].casefold()
-        for j, node_j in nodes.items():
-            node_j["name"] = node_j["name"].casefold()
-            if not i == j and i not in keep and j not in keep:
-                if node_i["name"] == node_j["name"]:
-                    # merge
-                    for field, j_value in node_j.items():
-                        if field not in ["name", "type"]:
-                            node_i[field] = node_i.get(field, list()) + list(j_value)
-                    to_delete.add(j)
-                    keep.add(i)
+        if i == j:
+            continue
+        node_j = nodes[j]
+        node_j["name"] = node_j["name"].casefold()
+
+        if node_i["name"] == node_j["name"]:
+            # merge
+            for field, j_value in node_j.items():
+                if field not in ["name", "type"]:
+                    node_i[field] = node_i.get(field, list()) + list(j_value)
+            to_delete.add(j)
 
     nodes_new = dict()
     for old, item in nodes.items():
