@@ -455,7 +455,7 @@ def merge_duplicate_nodes(nodes: dict) -> dict:
                 if node_i["name"] == node_j["name"]:
                     # merge
                     for property in node_j.keys():
-                        if not property == "name":
+                        if property not in ["name", "type"]:
                             try:        # service i has same propert -> merge them
                                 node_i[property] = node_i[property] + node_j[property]
                             except:     # service i does not have this property -> set it
