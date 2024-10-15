@@ -223,7 +223,7 @@ def overwrite_port(microservices: dict) -> dict:
                 if port:
                     # Traceability
                     trace = dict()
-                    trace["parent_item"] = microservices[m]["servicename"]
+                    trace["parent_item"] = microservices[m]["name"]
                     trace["item"] = "Port"
                     trace["file"] = prop[2][0]
                     trace["line"] = prop[2][1]
@@ -307,14 +307,14 @@ def detect_miscellaneous(microservices: dict, information_flows: dict, external_
                     except:
                         id2 = 0
                     information_flows[id2] = dict()
-                    information_flows[id2]["sender"] = microservices[m]["servicename"]
+                    information_flows[id2]["sender"] = microservices[m]["name"]
                     information_flows[id2]["receiver"] = "mail-server"
                     information_flows[id2]["stereotype_instances"] = ["restful_http"]
                     if mail_password:
                         information_flows[id2]["stereotype_instances"].append("plaintext_credentials_link")
 
                     trace = dict()
-                    trace["item"] = microservices[m]["servicename"] + " -> mail-server"
+                    trace["item"] = microservices[m]["name"] + " -> mail-server"
                     trace["file"] = prop[2][0]
                     trace["line"] = prop[2][1]
                     trace["span"] = prop[2][2]
@@ -372,11 +372,11 @@ def detect_miscellaneous(microservices: dict, information_flows: dict, external_
                         id2 = 0
                     information_flows[id2] = dict()
                     information_flows[id2]["sender"] = "external-website"
-                    information_flows[id2]["receiver"] = microservices[m]["servicename"]
+                    information_flows[id2]["receiver"] = microservices[m]["name"]
                     information_flows[id2]["stereotype_instances"] = ["restful_http"]
 
                     trace = dict()
-                    trace["item"] = "external-website -> " + microservices[m]["servicename"]
+                    trace["item"] = "external-website -> " + microservices[m]["name"]
                     trace["file"] = prop[2][0]
                     trace["line"] = prop[2][1]
                     trace["span"] = prop[2][2]
@@ -393,12 +393,12 @@ def detect_miscellaneous(microservices: dict, information_flows: dict, external_
                                 except:
                                     id = 0
                                 information_flows[id] = dict()
-                                information_flows[id]["sender"] = microservices[m2]["servicename"]
-                                information_flows[id]["receiver"] = microservices[m]["servicename"]
+                                information_flows[id]["sender"] = microservices[m2]["name"]
+                                information_flows[id]["receiver"] = microservices[m]["name"]
                                 information_flows[id]["stereotype_instances"] = ["restful_http"]
 
                                 trace = dict()
-                                trace["item"] = microservices[m2]["servicename"] + " -> " + microservices[m]["servicename"]
+                                trace["item"] = microservices[m2]["name"] + " -> " + microservices[m]["name"]
                                 trace["file"] = prop[2][0]
                                 trace["line"] = prop[2][1]
                                 trace["span"] = prop[2][2]
@@ -446,10 +446,10 @@ def merge_duplicate_services(microservices: dict, external_components: dict) -> 
     for i in microservices.keys():
         for j in microservices.keys():
             if not i == j and not i in keep and not j in keep:
-                if microservices[i]["servicename"] == microservices[j]["servicename"]:
+                if microservices[i]["name"] == microservices[j]["name"]:
                     # merge
                     for property in microservices[j].keys():
-                        if not property == "servicename":
+                        if not property == "name":
                             try:        # service i has same propert -> merge them
                                 microservices[i][property] = microservices[i][property] + microservices[j][property]
                             except:     # service i does not have this property -> set it

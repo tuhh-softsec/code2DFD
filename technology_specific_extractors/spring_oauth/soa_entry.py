@@ -26,7 +26,7 @@ def detect_authorization_server(microservices: dict, dfd) -> dict:
     for r in results.keys():
         authorization_server = tech_sw.detect_microservice(results[r]["path"], dfd)
         for m in microservices.keys():
-            if microservices[m]["servicename"] == authorization_server:
+            if microservices[m]["name"] == authorization_server:
                 if "stereotype_instances" in microservices[m]:
                     microservices[m]["stereotype_instances"].append("authorization_server")
                 else:
@@ -59,7 +59,7 @@ def detect_resource_servers(microservices: dict, dfd) -> dict:
     for r in results.keys():
         resource_server = tech_sw.detect_microservice(results[r]["path"], dfd)
         for m in microservices.keys():
-            if microservices[m]["servicename"] == resource_server:
+            if microservices[m]["name"] == resource_server:
                 try:
                     microservices[m]["stereotype_instances"].append("resource_server")
                 except:
@@ -100,13 +100,13 @@ def detect_token_server(microservices: dict, information_flows: dict, dfd) -> di
                 token_server = fi.resolve_url(token_server_uri, False, dfd)
                 if token_server:
                     for m2 in microservices.keys():
-                        if microservices[m2]["servicename"] == token_server:
+                        if microservices[m2]["name"] == token_server:
                             if "stereotype_instances" in microservices[m2]:
                                 microservices[m2]["stereotype_instances"].append("token_server")
                             else:
                                 microservices[m2]["stereotype_instances"] = ["token_server"]
                             trace = dict()
-                            trace["parent_item"] = microservices[m2]["servicename"]
+                            trace["parent_item"] = microservices[m2]["name"]
                             trace["item"] = "token_server"
                             trace["file"] = prop[2][0]
                             trace["line"] = prop[2][1]
@@ -121,12 +121,12 @@ def detect_token_server(microservices: dict, information_flows: dict, dfd) -> di
                     information_flows[id] = dict()
 
                     information_flows[id]["sender"] = token_server
-                    information_flows[id]["receiver"] = microservices[m]["servicename"]
+                    information_flows[id]["receiver"] = microservices[m]["name"]
                     information_flows[id]["stereotype_instances"] = stereotypes
                     information_flows[id]["tagged_values"] = tagged_values
 
                     trace = dict()
-                    trace["item"] = token_server + " -> " + microservices[m]["servicename"]
+                    trace["item"] = token_server + " -> " + microservices[m]["name"]
                     trace["file"] = prop[2][0]
                     trace["line"] = prop[2][1]
                     trace["span"] = prop[2][2]
@@ -152,7 +152,7 @@ def detect_preauthorized_methods(microservices: dict, dfd) -> dict:
                 tagged_values = [("Pre-authorized Endpoints", endpoints)]
 
             for m in microservices.keys():
-                if microservices[m]["servicename"] == microservice:
+                if microservices[m]["name"] == microservice:
                     try:
                         microservices[m]["stereotype_instances"].append("pre_authorized_endpoints")
                     except:

@@ -10,7 +10,7 @@ def detect_zookeeper(microservices: dict, information_flows: dict, dfd) -> dict:
     # Service
     for m in microservices.keys():
         if "wurstmeister/zookeeper" in microservices[m]["image"]:
-            zookeeper_service = microservices[m]["servicename"]
+            zookeeper_service = microservices[m]["name"]
             try:
                 microservices[m]["stereotype_instances"].append("configuration_server")
             except:
@@ -26,7 +26,7 @@ def detect_zookeeper(microservices: dict, information_flows: dict, dfd) -> dict:
         for m in microservices.keys():
             for prop in microservices[m]["tagged_values"]:
                 if prop == ("Message Broker", "Kafka"):
-                    kafka_service = microservices[m]["servicename"]
+                    kafka_service = microservices[m]["name"]
         if kafka_service:
             try:
                 id = max(information_flows.keys()) + 1

@@ -27,7 +27,7 @@ def detect_turbine_server(microservices: dict, dfd) -> dict:
         for line in results[r]["content"]:
             if "@EnableTurbine" in line:
                 for m in microservices.keys():
-                    if microservices[m]["servicename"] == microservice:
+                    if microservices[m]["name"] == microservice:
                         try:
                             microservices[m]["stereotype_instances"].append("monitoring_server")
                         except:
@@ -38,7 +38,7 @@ def detect_turbine_server(microservices: dict, dfd) -> dict:
                             microservices[m]["tagged_values"] = [("Monitoring Server", "Turbine")]
 
                         trace = dict()
-                        trace["parent_item"] = microservices[m]["servicename"]
+                        trace["parent_item"] = microservices[m]["name"]
                         trace["item"] = "monitoring_server"
                         trace["file"] = results[r]["path"]
                         trace["line"] = results[r]["line_nr"]
@@ -58,7 +58,7 @@ def detect_turbineamqp(microservices: dict, information_flows: dict, dfd) -> dic
         for line in results[r]["content"]:
             if "@EnableTurbineAmqp" in line:
                 for m in microservices.keys():
-                    if microservices[m]["servicename"] == microservice:
+                    if microservices[m]["name"] == microservice:
                         try:
                             microservices[m]["stereotype_instances"].append("monitoring_server")
                         except:
@@ -69,7 +69,7 @@ def detect_turbineamqp(microservices: dict, information_flows: dict, dfd) -> dic
                             microservices[m]["tagged_values"] = ("Monitoring Server", "Turbine")
 
                         trace = dict()
-                        trace["parent_item"] = microservices[m]["servicename"]
+                        trace["parent_item"] = microservices[m]["name"]
                         trace["item"] = "monitoring_server"
                         trace["file"] = results[r]["path"]
                         trace["line"] = results[r]["line_nr"]
@@ -77,7 +77,7 @@ def detect_turbineamqp(microservices: dict, information_flows: dict, dfd) -> dic
                         traceability.add_trace(trace)
 
                     if ("Monitoring Dashboard", "Hystrix") in microservices[m]["tagged_values"]:
-                        dashboard = microservices[m]["servicename"]
+                        dashboard = microservices[m]["name"]
                         try:
                             id = max(information_flows.keys()) + 1
                         except:
@@ -96,7 +96,7 @@ def detect_turbineamqp(microservices: dict, information_flows: dict, dfd) -> dic
                         traceability.add_trace(trace)
 
                     elif ("Message Broker", "RabbitMQ") in microservices[m]["tagged_values"]:
-                        rabbitmq = microservices[m]["servicename"]
+                        rabbitmq = microservices[m]["name"]
                         try:
                             id = max(information_flows.keys()) + 1
                         except:
@@ -131,8 +131,8 @@ def detect_turbine_stream(microservices: dict, information_flows: dict, dfd) -> 
         for line in results[r]["content"]:
             if "@EnableTurbineStream" in line:
                 for id in microservices.keys():
-                    if microservices[id]["servicename"] == microservice:
-                        turbine_server = microservices[id]["servicename"]
+                    if microservices[id]["name"] == microservice:
+                        turbine_server = microservices[id]["name"]
                         try:
                             microservices[id]["stereotype_instances"].append("monitoring_server")
                         except:
@@ -143,7 +143,7 @@ def detect_turbine_stream(microservices: dict, information_flows: dict, dfd) -> 
                             microservices[id]["tagged_values"] = ("Monitoring Server", "Turbine")
 
                         trace = dict()
-                        trace["parent_item"] = microservices[id]["servicename"]
+                        trace["parent_item"] = microservices[id]["name"]
                         trace["item"] = "monitoring_server"
                         trace["file"] = results[r]["path"]
                         trace["line"] = results[r]["line_nr"]
@@ -178,7 +178,7 @@ def detect_turbine_stream(microservices: dict, information_flows: dict, dfd) -> 
                             dirs.append(os.scandir(local_repo_path + "/" + path))
 
                     if ("Monitoring Dashboard", "Hystrix") in microservices[id]["tagged_values"]:
-                        dashboard = microservices[id]["servicename"]
+                        dashboard = microservices[id]["name"]
                         try:
                             id = max(information_flows.keys()) + 1
                         except:
@@ -199,7 +199,7 @@ def detect_turbine_stream(microservices: dict, information_flows: dict, dfd) -> 
     if turbine_server and uses_rabbit:
         for m in microservices.keys():
             if ("Message Broker", "RabbitMQ") in microservices[m]["tagged_values"]:
-                rabbitmq = microservices[m]["servicename"]
+                rabbitmq = microservices[m]["name"]
                 try:
                     id = max(information_flows.keys()) + 1
                 except:

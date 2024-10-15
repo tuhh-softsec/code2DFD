@@ -21,7 +21,7 @@ def detect_client_side(microservices: dict, dfd) -> dict:
         for line in results[r]["content"]:
             if "@RibbonClient" in line:
                 for m in microservices.keys():
-                    if microservices[m]["servicename"] == microservice:
+                    if microservices[m]["name"] == microservice:
                         try:
                             microservices[m]["stereotype_instances"].append("load_balancer")
                         except:

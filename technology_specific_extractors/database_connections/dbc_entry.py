@@ -44,7 +44,7 @@ def check_properties(microservices: dict, information_flows: dict, external_comp
     for m in microservices.keys():
         database_service, username, password, database_url = False, False, False, False
         trace_info = (False, False, False)
-        sender = microservices[m]["servicename"]
+        sender = microservices[m]["name"]
         for prop in microservices[m]["properties"]:
             if prop[0] == "datasource_url":
                 trace_info = (prop[2][0], prop[2][1], prop[2][2])
@@ -54,19 +54,19 @@ def check_properties(microservices: dict, information_flows: dict, external_comp
                     database_url = prop[1]
                     parts = database_url.split("/")
                     for mi in microservices.keys():
-                        if microservices[mi]["servicename"] in parts:
-                            database_service = microservices[mi]["servicename"]
+                        if microservices[mi]["name"] in parts:
+                            database_service = microservices[mi]["name"]
             elif prop[0] == "datasource_host":
                 trace_info = (prop[2][0], prop[2][1], prop[2][2])
                 for mi in microservices.keys():
-                    if microservices[mi]["servicename"] == prop[1]:
-                        database_service = microservices[mi]["servicename"]
+                    if microservices[mi]["name"] == prop[1]:
+                        database_service = microservices[mi]["name"]
             elif prop[0] == "datasource_uri":
                 trace_info = (prop[2][0], prop[2][1], prop[2][2])
                 database = prop[1].split("://")[1].split("/")[0]
                 for mi in microservices.keys():
-                    if microservices[mi]["servicename"] == database:
-                        database_service = microservices[mi]["servicename"]
+                    if microservices[mi]["name"] == database:
+                        database_service = microservices[mi]["name"]
             if prop[0] == "datasource_username":
                 username = env.resolve_env_var(prop[1])
             if prop[0] == "datasource_password":
@@ -106,7 +106,7 @@ def check_properties(microservices: dict, information_flows: dict, external_comp
             # adjust service to database
             for id in microservices.keys():
 
-                if microservices[id]["servicename"] == database_service:
+                if microservices[id]["name"] == database_service:
                     microservices[id]["type"] = "database_component"
                     if "stereotype_instances" in microservices[id]:
                         microservices[id]["stereotype_instances"].append("database")
@@ -159,12 +159,12 @@ def check_properties(microservices: dict, information_flows: dict, external_comp
             except:
                 id = 0
             external_components[id] = dict()
-            external_components[id]["name"] = "database-" + str(microservices[m]["servicename"])
+            external_components[id]["name"] = "database-" + str(microservices[m]["name"])
             external_components[id]["type"] = "external_component"
             external_components[id]["stereotype_instances"] = ["entrypoint", "exitpoint", "external_database"]
 
             trace = dict()
-            trace["item"] = "database-" + str(microservices[m]["servicename"])
+            trace["item"] = "database-" + str(microservices[m]["name"])
             trace["file"] = trace_info[0]
             trace["line"] = trace_info[1]
             trace["span"] = trace_info[2]
@@ -205,8 +205,8 @@ def check_properties(microservices: dict, information_flows: dict, external_comp
             except:
                 id = 0
             information_flows[id] = dict()
-            information_flows[id]["sender"] = "database-" + str(microservices[m]["servicename"])
-            information_flows[id]["receiver"] = microservices[m]["servicename"]
+            information_flows[id]["sender"] = "database-" + str(microservices[m]["name"])
+            information_flows[id]["receiver"] = microservices[m]["name"]
 
             information_flows[id]["stereotype_instances"] = ["jdbc"]
             if username or password:
@@ -223,7 +223,7 @@ def check_properties(microservices: dict, information_flows: dict, external_comp
             tmp.tmp_config.set("DFD", "external_components", str(external_components))
 
             trace = dict()
-            trace["item"] = "database-" + str(microservices[m]["servicename"]) + " -> " + microservices[m]["servicename"]
+            trace["item"] = "database-" + str(microservices[m]["name"]) + " -> " + microservices[m]["name"]
             trace["file"] = trace_info[0]
             trace["line"] = trace_info[1]
             trace["span"] = trace_info[2]
@@ -241,15 +241,9 @@ def clean_database_connections(microservices: dict, information_flows: dict) -> 
         if microservices[m]["type"] == "database_component":
             to_purge = set()
             for i in information_flows.keys():
-                if information_flows[i]["receiver"] == microservices[m]["servicename"]:
+                if information_flows[i]["receiver"] == microservices[m]["name"]:
                     to_purge.add(i)
             for p in to_purge:
                 information_flows.pop(p)
 
     return information_flows
-
-
-
-
-
-#

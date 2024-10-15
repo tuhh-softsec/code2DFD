@@ -37,7 +37,7 @@ def detect_config_server(microservices: dict, dfd):
         config_server = tech_sw.detect_microservice(results[r]["path"], dfd)
 
         for m in microservices.keys():
-            if microservices[m]["servicename"] == config_server:
+            if microservices[m]["name"] == config_server:
                 try:
                     microservices[m]["stereotype_instances"].append("configuration_server")
                 except:
@@ -99,7 +99,7 @@ def detect_config_clients(microservices: dict, information_flows: dict, config_s
     trace_file = False
 
     for m in microservices.keys():
-        if microservices[m]["servicename"] == config_server:
+        if microservices[m]["name"] == config_server:
             config_id = m
         config_uri, config_connected, config_username, config_password = False, False, False, False
         for prop in microservices[m]["properties"]:
@@ -146,12 +146,12 @@ def detect_config_clients(microservices: dict, information_flows: dict, config_s
                 id = 0
             information_flows[id] = dict()
             information_flows[id]["sender"] = config_server
-            information_flows[id]["receiver"] = microservices[m]["servicename"]
+            information_flows[id]["receiver"] = microservices[m]["name"]
             information_flows[id]["stereotype_instances"] = ["restful_http"]
 
             if trace_file:
                 trace = dict()
-                trace["item"] = config_server + " -> " + microservices[m]["servicename"]
+                trace["item"] = config_server + " -> " + microservices[m]["name"]
                 trace["file"] = trace_file
                 trace["line"] = trace_line
                 trace["span"] = trace_span
@@ -172,7 +172,7 @@ def detect_config_clients(microservices: dict, information_flows: dict, config_s
 
                     if trace_file:
                         trace = dict()
-                        trace["parent_item"] = microservices[config_id]["servicename"]
+                        trace["parent_item"] = microservices[config_id]["name"]
                         trace["item"] = "plaintext_credentials"
                         trace["file"] = trace_file
                         trace["line"] = trace_line
@@ -194,7 +194,7 @@ def detect_config_clients(microservices: dict, information_flows: dict, config_s
 
                     if trace_file:
                         trace = dict()
-                        trace["parent_item"] = microservices[config_id]["servicename"]
+                        trace["parent_item"] = microservices[config_id]["name"]
                         trace["item"] = "plaintext_credentials"
                         trace["file"] = trace_file
                         trace["line"] = trace_line
@@ -256,16 +256,16 @@ def parse_config_files(config_server: str, config_path: str, config_file_path: s
             microservice = False
             properties = set()
             for m in microservices.keys():
-                if file[0].split(".")[0] == microservices[m]["servicename"]:
-                    microservice = microservices[m]["servicename"]
+                if file[0].split(".")[0] == microservices[m]["name"]:
+                    microservice = microservices[m]["name"]
                     correct_id = m
                     if "." in file[0]:
                         ending = file[0].split(".")[1]
                     break
             if not microservice:
                 for m in microservices.keys():
-                    if  microservices[m]["servicename"] in file[0].split(".")[0]:
-                        microservice = microservices[m]["servicename"]
+                    if  microservices[m]["name"] in file[0].split(".")[0]:
+                        microservice = microservices[m]["name"]
                         correct_id = m
                         if "." in file[0]:
                             ending = file[0].split(".")[1]

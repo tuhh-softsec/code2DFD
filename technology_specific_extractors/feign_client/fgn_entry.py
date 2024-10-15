@@ -24,7 +24,7 @@ def set_information_flows(dfd) -> dict:
         for line in results[id]["content"]:
             if "@EnableCircuitBreaker" in line:
                 for m in microservices.keys():
-                    if microservices[m]["servicename"] == microservice:
+                    if microservices[m]["name"] == microservice:
                         try:
                             microservices[m]["properties"].append("hystrix_enabled")
                         except:
@@ -39,7 +39,7 @@ def set_information_flows(dfd) -> dict:
         load_balancer = "Ribbon"    # default load balancer for FeignClient
         tagged_values = set()
         for m in microservices.keys():
-            if microservices[m]["servicename"] == microservice:
+            if microservices[m]["name"] == microservice:
                 for prop in microservices[m]["properties"]:
                     if prop[0] == "feign_ribbon_disabled":
                         load_balancer = "Spring Cloud Load Balancer" # Load balancer if Ribbon is explicitely disabled (also, recently recommended)
@@ -69,7 +69,7 @@ def set_information_flows(dfd) -> dict:
 
                 if target_service:
                     for m in microservices.keys():
-                        if microservices[m]["servicename"].casefold() == target_service.casefold():
+                        if microservices[m]["name"].casefold() == target_service.casefold():
                             for s in microservices[m]["stereotype_instances"]:
                                 if s == "authentication_scope_all_requests":
                                     stereotype_instances.add("authenticated_request")
@@ -105,7 +105,7 @@ def is_microservice(service: str, dfd) -> bool:
     is_microservice = False
     microservices = tech_sw.get_microservices(dfd)
     for m in microservices.keys():
-        if service.casefold() == microservices[m]["servicename"].casefold():
+        if service.casefold() == microservices[m]["name"].casefold():
             is_microservice = True
 
     return is_microservice
