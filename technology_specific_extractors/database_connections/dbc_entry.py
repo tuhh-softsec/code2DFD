@@ -233,17 +233,15 @@ def check_properties(microservices: dict, information_flows: dict, external_comp
     return microservices, information_flows, external_components
 
 
-def clean_database_connections(microservices: dict, information_flows: dict) -> dict:
+def clean_database_connections(microservices: dict, information_flows: dict):
     """Removes database connections in wrong direction, which can occur from docker compose.
     """
 
-    for m in microservices.keys():
-        if microservices[m]["type"] == "database_component":
+    for microservice in microservices.values():
+        if microservice["type"] == "database_component":
             to_purge = set()
             for i in information_flows.keys():
-                if information_flows[i]["receiver"] == microservices[m]["name"]:
+                if information_flows[i]["receiver"] == microservice["name"]:
                     to_purge.add(i)
             for p in to_purge:
-                information_flows.pop(p)
-
-    return information_flows
+                del information_flows[p]

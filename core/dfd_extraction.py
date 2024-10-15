@@ -101,7 +101,6 @@ def perform_analysis():
 
     # Merging
     print("Merging duplicate items")
-    information_flows = clean_database_connections(microservices, information_flows)
 
     merge_duplicate_flows(information_flows)
 
@@ -111,6 +110,10 @@ def perform_analysis():
     merge_duplicate_annotations(microservices)
     merge_duplicate_annotations(information_flows)
     merge_duplicate_annotations(external_components)
+
+    print("Cleaning database connections")
+
+    clean_database_connections(microservices, information_flows)
 
     # Printing
     print("\nFinished extraction")
