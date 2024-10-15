@@ -425,12 +425,9 @@ def merge_duplicate_flows(information_flows: dict) -> dict:
                 if flow_i["sender"] == flow_j["sender"]:
                     if flow_i["receiver"] == flow_j["receiver"]:
                         # merge
-                        for property in flow_j.keys():
-                            if not property == "sender" and not property == "receiver":
-                                try:        # flow i has same propert -> merge them
-                                    flow_i[property] = flow_i[property] + flow_j[property]
-                                except:     # flow i does not have this property -> set it
-                                    flow_i[property] = flow_j[property]
+                        for field, j_value in flow_j.items():
+                            if field not in ["sender", "receiver"]:
+                                flow_i[field] = flow_i.get(field, list()) + list(j_value)
                         to_delete.add(j)
                         keep.add(i)
 
@@ -443,7 +440,7 @@ def merge_duplicate_flows(information_flows: dict) -> dict:
 
 
 def merge_duplicate_nodes(nodes: dict) -> dict:
-    """Merge duplicate microservices
+    """Merge duplicate nodes
     """
 
     # Microservices
@@ -454,19 +451,16 @@ def merge_duplicate_nodes(nodes: dict) -> dict:
             if not i == j and i not in keep and j not in keep:
                 if node_i["name"] == node_j["name"]:
                     # merge
-                    for property in node_j.keys():
-                        if property not in ["name", "type"]:
-                            try:        # service i has same propert -> merge them
-                                node_i[property] = node_i[property] + node_j[property]
-                            except:     # service i does not have this property -> set it
-                                node_i[property] = node_j[property]
+                    for field, j_value in node_j.items():
+                        if field not in ["name", "type"]:
+                            node_i[field] = node_i.get(field, list()) + list(j_value)
                     to_delete.add(j)
                     keep.add(i)
 
     nodes_new = dict()
-    for old in nodes.keys():
+    for old, item in nodes.items():
         if old not in to_delete:
-            nodes_new[old] = nodes[old]
+            nodes_new[old] = item
 
     return nodes_new
 
@@ -477,26 +471,19 @@ def merge_duplicate_annotations(collection: dict) -> dict:
 
     for item in collection.values():
         if "stereotype_instances" in item:
-            stereotype_set = set()
-            for stereotype in item["stereotype_instances"]:
-                stereotype_set.add(stereotype)
-            item["stereotype_instances"] = list(stereotype_set)
+            item["stereotype_instances"] = list(set(item["stereotype_instances"]))
 
         if "tagged_values" in item:
             tagged_values_set = set()
-            for tagged_value in item["tagged_values"]:
-                if tagged_value[0] == "Port":
+            for tag, tagged_value in item["tagged_values"]:
+                if tag == "Port":
                     try:
-                        tagged_values_set.add((tagged_value[0], int(tagged_value[1])))
-                    except:
+                        tagged_value = int(tagged_value)
+                    except ValueError:
                         pass
-                elif type(tagged_value[1]) == list:
-                    endpoints = list()
-                    for e in tagged_value[1]:
-                        endpoints.append(e)
-                    tagged_values_set.add((tagged_value[0], str(endpoints)))
-                else:
-                    tagged_values_set.add((tagged_value[0], tagged_value[1]))
+                elif isinstance(tagged_value, list):
+                    tagged_value = str(tagged_value)
+                tagged_values_set.add((tag, tagged_value))
             item["tagged_values"] = list(tagged_values_set)
 
     return collection
