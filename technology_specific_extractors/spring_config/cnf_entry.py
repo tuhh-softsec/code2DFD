@@ -1,3 +1,5 @@
+import os.path
+
 import core.file_interaction as fi
 import core.parse_files as parse
 import technology_specific_extractors.environment_variables as env
@@ -13,7 +15,7 @@ def detect_spring_config(microservices: dict, information_flows: dict, external_
     config_server, config_path = False, False
     microservices, config_server, config_path, config_file_path, config_repo_uri, config_server_ports, config_file_path_local = detect_config_server(microservices, dfd)
     if config_file_path or config_repo_uri or config_file_path_local:
-        microservices, information_flows, external_components = parse_config_files(config_server, config_path, config_file_path, config_file_path_local, config_repo_uri, microservices, information_flows, external_components)
+        microservices, information_flows, external_components = parse_config_files(config_server, config_file_path, config_file_path_local, config_repo_uri, microservices, information_flows, external_components)
     microservices, information_flows = detect_config_clients(microservices, information_flows, config_server, config_server_ports)
 
     return microservices, information_flows, external_components
@@ -58,7 +60,7 @@ def detect_config_server(microservices: dict, dfd):
                 traceability.add_trace(trace)
 
                 try:
-                    config_path = ("/").join(microservices[m]["pom_path"].split("/")[:-1])
+                    config_path = os.path.dirname(microservices[m]["pom_path"])
                 except:
                     pass
 
@@ -204,7 +206,7 @@ def detect_config_clients(microservices: dict, information_flows: dict, config_s
     return microservices, information_flows
 
 
-def parse_config_files(config_server: str, config_path: str, config_file_path: str, config_file_path_local: str, config_repo_uri: str, microservices: dict, information_flows: dict, external_components: dict) -> dict:
+def parse_config_files(config_server: str, config_file_path: str, config_file_path_local: str, config_repo_uri: str, microservices: dict, information_flows: dict, external_components: dict) -> dict:
     """Parses config files from locally or other GitHub repository.
     """
 
@@ -231,8 +233,8 @@ def parse_config_files(config_server: str, config_path: str, config_file_path: s
     # external (other github repository) didn't work, look locally
     if config_file_path_local:
 
-        repo_path = tmp.tmp_config["Repository"]["path"]
-        config_file_path_local = config_file_path_local.split("/".join(repo_path.split("/")[1:]))[1].strip("./")
+        local_path = tmp.tmp_config["Repository"]["local_path"]
+        config_file_path_local = os.path.relpath(config_file_path_local, start=local_path)
 
         new_contents = fi.get_repo_contents_local(repo_path, config_file_path_local)
         for file in new_contents:

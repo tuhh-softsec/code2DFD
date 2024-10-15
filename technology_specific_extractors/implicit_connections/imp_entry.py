@@ -1,10 +1,11 @@
 import ast
+import os
 
 import requests
 import yaml
 
 import core.file_interaction as fi
-import output_generators.logger as logger
+from output_generators.logger import logger
 import core.technology_switch as tech_sw
 import tmp.tmp as tmp
 import output_generators.traceability as traceability
@@ -82,7 +83,7 @@ def zuul(microservices):
 
                 repo = fi.get_repo(repo_path)
                 try:
-                    path = ("/").join(microservices[m]["pom_path"].split("/")[:-1])
+                    path = os.path.dirname(microservices[m]["pom_path"])
                 except:
                     break
 
@@ -94,12 +95,13 @@ def zuul(microservices):
                     if c.type == "dir":
                         contents.extend(repo.get_contents(c.path))
                     else:
-                        if c.path.split("/")[-1] == "application.properties":
-                            logger.write_log_message("Found application.properties here: " + str(c.path), "info")
+                        filename = os.path.basename(c.path)
+                        if filename == "application.properties":
+                            logger.info("Found application.properties here: " + str(c.path))
                             file_url = c.download_url
                             new_information_flows = extract_routes_properties(file_url, microservices[m]["servicename"])
-                        elif c.path.split("/")[-1] == "application.yaml" or c.path.split("/")[-1] == "application.yml" or c.path.split("/")[-1] == "bootstrap.yml" or c.path.split("/")[-1] == "bootstrap.yaml":
-                            logger.write_log_message("Found properteis file here: " + str(c.path), "info")
+                        elif filename == "application.yaml" or filename == "application.yml" or filename == "bootstrap.yml" or filename == "bootstrap.yaml":
+                            logger.info("Found properteis file here: " + str(c.path))
                             file_url = c.download_url
                             new_information_flows = extract_routes_yaml(file_url, microservices[m]["servicename"])
 
@@ -150,13 +152,3 @@ def extract_routes_yaml(url, service):
             return new_information_flows
     except:
         return False
-
-
-
-
-
-
-
-
-
-                    #

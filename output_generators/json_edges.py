@@ -27,16 +27,15 @@ def generate_json_edges(information_flows: dict):
     architecture_dict["edges"] = edges_list
     write_to_file(architecture_dict)
 
-    return
-
 
 def write_to_file(architecture_dict):
     """Writes json architecture to file.
     """
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
-    repo_path = repo_path.replace("/", "--")
-    filename = "./output/edges/" + repo_path + ".json"
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-    with open(filename, 'w') as architecture_file:
+    output_path = tmp.tmp_config["Analysis Settings"]["output_path"]
+    filename = f"{os.path.split(output_path)[1]}_edges.json"
+    output_path = os.path.join(output_path, filename)
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, 'w') as architecture_file:
         json.dump(architecture_dict, architecture_file, indent=4)

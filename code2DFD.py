@@ -3,18 +3,28 @@
 # Author: Simon Schneider, 2023
 # Contact: simon.schneider@tuhh.de
 
-import os
 from configparser import ConfigParser
 from datetime import datetime
 import argparse
 
 import core.dfd_extraction as dfd_extraction
-import core.file_interaction as fi
-import output_generators.logger as logger
+from output_generators.logger import logger
 import tmp.tmp as tmp
+from core.file_interaction import get_output_path, get_local_path, clone_repo
+
+CONFIG_SECTIONS = ["Analysis Settings", "Repository", "Technology Profiles", "DFD"]
+COMMUNICATIONS_TECH_LIST = '[("RabbitMQ", "rmq"), ("Kafka", "kfk"), ("RestTemplate", "rst"),\
+                            ("FeignClient", "fgn"), ("Implicit Connections", "imp"),\
+                            ("Database Connections", "dbc"), ("HTML", "html"),\
+                            ("Docker-Compose", "dcm")]'
+DEFAULT_CONFIG = ConfigParser()
+for section in CONFIG_SECTIONS:
+    DEFAULT_CONFIG.add_section(section)
+DEFAULT_CONFIG.set("Analysis Settings", "development_mode", "False")
+DEFAULT_CONFIG.set("Technology Profiles", "communication_techs_list", COMMUNICATIONS_TECH_LIST)
 
 
-def api_invocation(path: str) -> str:
+def api_invocation(path: str) -> dict:
     """Entry function for when tool is called via API call.
     """
 
@@ -23,26 +33,17 @@ def api_invocation(path: str) -> str:
 
     start_time = datetime.now()
 
-    logger.write_log_message("*** New execution ***", "info")
-    logger.write_log_message("Copying config file to tmp file", "debug")
-
-    # Copy config to tmp file
-    ini_config = ConfigParser()
-    ini_config.read('config/config.ini')
-    for section in ["Analysis Settings", "Repository", "Technology Profiles", "DFD"]:     #copying what is needed from config to temp
-        if not tmp.tmp_config.has_section(section):
-            tmp.tmp_config.add_section(section)
-        for entry in ini_config[section]:
-            tmp.tmp_config.set(section, entry, ini_config[section][entry])
+    logger.info("*** New execution ***")
+    logger.debug("Copying config file to tmp file")
 
     # Overwrite repo_path from config file with the one from the API call
-    tmp.tmp_config.set("Repository", "path", str(path))
+    repo_path = str(path)
+    tmp.tmp_config.set("Repository", "path", repo_path)
 
-    local_path = "./analysed_repositories/" + ("/").join(path.split("/")[1:])
+    local_path = get_local_path(repo_path)
     tmp.tmp_config.set("Repository", "local_path", local_path)
 
-    if not fi.repo_downloaded(local_path):
-        fi.download_repo(path)
+    clone_repo(repo_path, local_path)
 
     # Call extraction
     codeable_models, traceability = dfd_extraction.perform_analysis()
@@ -70,33 +71,27 @@ def main():
 
     args = parser.parse_args()
 
-    logger.write_log_message("*** New execution ***", "info")
-    logger.write_log_message("Copying config file to tmp file", "debug")
-    for section in ["Analysis Settings", "Repository", "Technology Profiles", "DFD"]:
-        if not tmp.tmp_config.has_section(section):
-            tmp.tmp_config.add_section(section)
+    logger.info("*** New execution ***")
+    logger.debug("Copying config file to tmp file")
 
     if args.config_path is not None:
         # Copy config to tmp file
-        ini_config = ConfigParser()
-        ini_config.read(args.config_path)
-        for section in ["Analysis Settings", "Repository", "Technology Profiles", "DFD"]:     #copying what is needed from config to temp
-            for entry in ini_config[section]:
-                tmp.tmp_config.set(section, entry, ini_config[section][entry])
-        clone_repo(tmp.tmp_config.get("Repository", "path"))
+        tmp.tmp_config.read(args.config_path)
+        repo_path = tmp.tmp_config.get("Repository", "path")
 
     elif args.github_path is not None:
+        # global ini_config
+        for section in CONFIG_SECTIONS:  # Copying what is needed from default to temp
+            tmp.tmp_config.add_section(section)
+            for entry in DEFAULT_CONFIG[section]:
+                tmp.tmp_config.set(section, entry, DEFAULT_CONFIG[section][entry])
         repo_path = args.github_path.strip()
-        clone_repo(repo_path)
-
-        ini_config = ConfigParser()
-        ini_config.read('config/config.ini')
-        for section in ["Analysis Settings", "Repository", "Technology Profiles", "DFD"]:     #copying what is needed from config to temp
-            if not tmp.tmp_config.has_section(section):
-                tmp.tmp_config.add_section(section)
-            for entry in ini_config[section]:
-                tmp.tmp_config.set(section, entry, ini_config[section][entry])
         tmp.tmp_config.set("Repository", "path", repo_path) # overwrite with user-provided path
+
+    local_path = get_local_path(repo_path)
+    clone_repo(repo_path, local_path)
+    tmp.tmp_config.set("Repository", "local_path", local_path)
+    tmp.tmp_config.set("Analysis Settings", "output_path", get_output_path(repo_path))
 
     # calling the actual extraction
     dfd_extraction.perform_analysis()
@@ -106,15 +101,6 @@ def main():
 
     print("\nStarted", start_time)
     print("Finished", end_time)
-
-
-def clone_repo(repo_path):
-    # Create analysed_repositories folder in case it doesn't exist yet (issue #2)
-    os.makedirs(os.path.dirname("./analysed_repositories"), exist_ok=True)
-    local_path = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
-    tmp.tmp_config.set("Repository", "local_path", local_path)
-    if not fi.repo_downloaded(local_path):
-        fi.download_repo(repo_path)
 
 
 if __name__ == '__main__':

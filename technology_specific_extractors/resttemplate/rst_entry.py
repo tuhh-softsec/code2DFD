@@ -2,7 +2,7 @@ import ast
 
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
-import output_generators.logger as logger
+from output_generators.logger import logger
 import output_generators.traceability as traceability
 import tmp.tmp as tmp
 
@@ -178,7 +178,7 @@ def get_outgoing_endpoints(information_flows: dict, dfd) -> set:
                     if new_outgoing_endpoint:
                         outgoing_endpoints.add((new_outgoing_endpoint, microservice,  files[file]["path"], files[file]["line_nr"], files[file]["span"]))
                     else:
-                        logger.write_log_message("\t\tSomething didn't work", "debug")
+                        logger.debug("\t\tSomething didn't work")
 
     return outgoing_endpoints, information_flows
 
@@ -215,7 +215,7 @@ def find_rst_variable(parameter: str, file: dict, line_nr: int, information_flow
     for p in range(len(parameters)):    # Treat each part individually
         parameters[p] = parameters[p].strip()
         if "(" in parameters[p] or ")" in parameters[p]:
-            logger.write_log_message("\tPart of the string is return value of a function. Can not determine this statically.", "debug")
+            logger.debug("\tPart of the string is return value of a function. Can not determine this statically.")
             return False, information_flows
         elif check_if_variable_is_input(parameters[p], file, line_nr):
             parameters[p] = "{" + parameters[p] + "}"
@@ -260,7 +260,7 @@ def find_rst_variable(parameter: str, file: dict, line_nr: int, information_flow
                             parameters[p], x = find_rst_variable(parameters[p], file, line)      # recursive step
                         if parameters[p] != False:
                             parameters[p] = parameters[p].strip("\"").strip()
-                            logger.write_log_message("\t\tFound " + str(parameters[p]) + " in this file.", "info")
+                            logger.info("\t\tFound " + str(parameters[p]) + " in this file.")
                         found = True
                 # Var injection via @Value
                 elif parameter_variable in file["content"][line]:

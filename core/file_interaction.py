@@ -1,18 +1,14 @@
-import ast
 import os
 import re
 import subprocess
-from configparser import ConfigParser
+from pathlib import Path, PurePosixPath
 
 import requests
 
-import output_generators.logger as logger
+from output_generators.logger import logger
 import core.technology_switch as tech_sw
 import tmp.tmp as tmp
 
-
-ini_config = ConfigParser()
-ini_config.read('config/config.ini')
 
 count = 0
 total_length = 0
@@ -25,63 +21,59 @@ repo_cache = dict()
 exception_counter_repo = 0
 
 
+def get_output_path(repo_path: str) -> str:
+    repo_path = repo_path.replace("/", "--")
+    return os.path.join(os.getcwd(), 'code2dfd_output', repo_path)
+
+
+def get_local_path(repo_path: str) -> str:
+    return os.path.join(os.getcwd(), "analysed_repositories", *repo_path.split("/")[1:])
+
+
+def clone_repo(repo_path, local_path):
+    # Create analysed_repositories folder in case it doesn't exist yet (issue #2)
+    os.makedirs(os.path.join(os.getcwd(), "analysed_repositories"), exist_ok=True)
+    if not repo_downloaded(local_path):
+        download_repo(repo_path, local_path)
+
+
 def repo_downloaded(repo_folder: str) -> bool:
     """Checks if repository has been downloaded from GitHub already.
     """
 
-    if os.path.isdir(repo_folder):
-        return True
-    return False
+    return os.path.isdir(repo_folder)
 
 
-def download_repo(repo_path: str):
+def download_repo(repo_path: str, local_path: str):
     """Downloads repository from GitHub for local querying.
     """
 
-    local_repo_path = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
-    clone_URL = "https://github.com/" + repo_path + ".git"
-    command = "git clone " + clone_URL + " " + local_repo_path
-
+    command = f"git clone https://github.com/{repo_path}.git {local_path}"
     os.system(command)
-
-    return True
 
 
 def detection_comment(file_name, line):
     """Checks if provided line is a comment. Based on language of the file, so only works for the ones with specified comment-delimiters.
     """
 
-    language = file_name.split(".")[-1]
-    if language == "js" and line.replace(" ", "")[:2] == "//":
-        return True
-    elif language == "java" and line.replace(" ", "")[:2] == "//":
-        return True
-    elif language == "yml" and line.replace(" ", "")[:1] == "#":
-        return True
-    return False
+    language = os.path.splitext(file_name)[1]
+    return (language == ".js" and line.replace(" ", "")[:2] == "//") or (
+            language == ".java" and line.replace(" ", "")[:2] == "//") or (
+            language == ".yml" and line.replace(" ", "")[:1] == "#")
 
 
 def detection_import(line):
     """Checks if provided line is an import statement.
     """
 
-    try:
-        if line.split()[0] == "import":
-            return True
-        else:
-            return False
-    except:
-        return False
+    return line.startswith("import")
 
 
 def detection_config(file_name):
     """Checks if provided file is a config file.
     """
 
-    if "config" in file_name.casefold():
-        return True
-    else:
-        return False
+    return "config" in file_name.casefold()
 
 
 def extract_import(line):
@@ -95,12 +87,7 @@ def extract_variable(line, submodule):
     """Extracts a variable that is changed based on some module.
     """
 
-    new_keyword = False
-    if "=" in line:         # line is an assignment
-        new_keyword = line.split("=")[0].strip().split()[-1]
-    else:       # line is declaration
-        new_keyword = line.split(";")[0].strip().split()[-1]
-    return new_keyword
+    return line.split("=")[0].strip().split()[-1] if "=" in line else line.split(";")[0].strip().split()[-1]
 
 
 def search_keywords(keywords: str):
@@ -108,52 +95,53 @@ def search_keywords(keywords: str):
     """
 
     repo_path = tmp.tmp_config["Repository"]["path"]
-    repo_folder = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
+    repo_folder = tmp.tmp_config["Repository"]["local_path"]
 
     results = dict()
 
     if not repo_downloaded(repo_folder):
-        download_repo(repo_path)
+        download_repo(repo_path, repo_folder)
 
-    if type(keywords) == str:
+    if isinstance(keywords, str):
         keywords = [keywords]
 
     for keyword in keywords:
         if keyword[-1] == "(":
             keyword = "\"" + keyword + "\""
-        out = subprocess.Popen(['grep', '-rn', keyword, repo_folder], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        out = subprocess.Popen(['grep', '-rn', keyword, repo_folder], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout, stderr = out.communicate()
         seen = set()
         for line in stdout.decode().splitlines():
-            try:
-                if line.split(":")[0] not in seen:
-                    seen.add(line.split(":")[0])
-                    full_path = line.split(":")[0]
+            if line.startswith("Binary file"):
+                continue
+            line_parts = line.split(":")
+            if len(line_parts) < 3:
+                continue
+            full_path = line_parts[0]
+            if full_path not in seen:
+                seen.add(full_path)
+                if not "test" in full_path and len(full_path) >= 3 and not os.path.splitext(full_path)[1] == ".md":
+                    path = os.path.relpath(full_path, start=repo_folder)
+                    name = os.path.basename(path)
+                    line_nr = line_parts[1]
+                    code_line = ":".join(line_parts[2:])
+                    match = re.search(keyword, code_line)
+                    if match is None:
+                        continue
+                    span = match.span()
+                    with open(full_path) as file:
+                        content = file.readlines()
 
-                    if not "test" in full_path and len(full_path) >= 3 and not full_path[-3:] == ".md":
-                        try:
-                            path = full_path.split(repo_folder)[1].strip("/")
-                        except:
-                            path = "/"
-                        line_nr = line.split(":")[1]
-                        name = path.split("/")[-1]
-                        code_line = ":".join(line.split(":")[2:])
-                        span = re.search(keyword, code_line).span()
-                        with open(full_path) as file:
-                            content = file.readlines()
-
-                        try:
-                            id = max(results.keys()) + 1
-                        except:
-                            id = 0
-                        results[id] = dict()
-                        results[id]["content"] = content
-                        results[id]["name"] = name
-                        results[id]["path"] = path
-                        results[id]["line_nr"] = line_nr
-                        results[id]["span"] = str(span)
-            except Exception as e:
-                pass
+                    try:
+                        id_ = max(results.keys()) + 1
+                    except:
+                        id_ = 0
+                    results[id_] = dict()
+                    results[id_]["content"] = content
+                    results[id_]["name"] = name
+                    results[id_]["path"] = path
+                    results[id_]["line_nr"] = line_nr
+                    results[id_]["span"] = str(span)
     return results
 
 
@@ -183,15 +171,15 @@ def pagList2lines(pagList) -> dict:
         for file in containing_files_URLs.keys():
             f = containing_files_URLs[file]
             try:
-                id = max(results.keys()) + 1
+                id_ = max(results.keys()) + 1
             except:
-                id = 0
-            results[id] = dict()
+                id_ = 0
+            results[id_] = dict()
 
-            results[id]["content"] = file_as_lines(f["download_url"])
-            results[id]["name"] = f["name"]
-            results[id]["path"] = f["path"]
-            results[id]["url"] = f["download_url"]
+            results[id_]["content"] = file_as_lines(f["download_url"])
+            results[id_]["name"] = f["name"]
+            results[id_]["path"] = f["path"]
+            results[id_]["url"] = f["download_url"]
 
         return results
 
@@ -203,14 +191,14 @@ def extract_downloadURL(files) -> dict:
     containing_files_URLs = dict()
     for f in files:
         try:
-            id = max(containing_files_URLs.keys()) + 1
+            id_ = max(containing_files_URLs.keys()) + 1
         except:
-            id = 0
-        containing_files_URLs[id] = dict()
+            id_ = 0
+        containing_files_URLs[id_] = dict()
 
-        containing_files_URLs[id]["path"] = f.path
-        containing_files_URLs[id]["download_url"] = f.download_url
-        containing_files_URLs[id]["name"] = f.name
+        containing_files_URLs[id_]["path"] = f.path
+        containing_files_URLs[id_]["download_url"] = f.download_url
+        containing_files_URLs[id_]["name"] = f.name
     return containing_files_URLs
 
 
@@ -234,14 +222,14 @@ def file_as_lines(raw_file):
     """
 
     local_path_parts = raw_file.split("githubusercontent.com/")[1].split("/")[1:]
-    local_path_parts.pop(1)
-    local_path = "./analysed_repositories/" + ("/").join(local_path_parts)
+    local_path = tmp.tmp_config.get("Repository", "local_path")
+    local_path = os.path.join(local_path, *(local_path_parts[2:]))
 
     try:
         with open(local_path, "r") as file:
             file_as_lines = file.readlines()
     except Exception as e:
-        file_as_lines = requests.get(raw_file, stream = True).text.split("\n")
+        file_as_lines = requests.get(raw_file, stream=True).text.split("\n")
     return file_as_lines
 
 
@@ -252,7 +240,7 @@ def detect_microservice(file_path, dfd):
     microservices_set = tech_sw.get_microservices(dfd)
     microservices = [microservices_set[x]["servicename"] for x in microservices_set.keys()]
 
-    file_path_parts = file_path.split("/")
+    file_path_parts = Path(file_path).parts
     count = 0
     part = 0
     found = False
@@ -307,9 +295,9 @@ def find_variable(parameter: str, file) -> str:
                             i += 1
                             if parameter_variable in fc["content"][linec + i] and "=" in fc["content"][linec + i]:
                                 variable = fc["content"][linec + i].split("=")[1].strip().strip(";").strip().strip("\"")
-            logger.write_log_message(f"Found {variable} in file {correct_file}", "info")
+            logger.info(f"Found {variable} in file {correct_file}")
         except:
-            logger.write_log_message(f"Could not find a definition for {parameter}", "info")
+            logger.info(f"Could not find a definition for {parameter}")
             return None
     else:           # means that it's a variable in this file -> go through lines to find it
         if parameter[-2:-1] == "()":
@@ -321,9 +309,9 @@ def find_variable(parameter: str, file) -> str:
                     if parameter_variable in file["content"][line] and "=" in file["content"][line] and ("private" in file["content"][line] or "public" in file["content"][line] or "protected" in file["content"][line]):
                         variable = file["content"][line].split("=")[1].strip().strip(";").strip().strip("\"")
                 name = file["name"]
-                logger.write_log_message(f"Found {variable} in this file ({name})", "info")
+                logger.info(f"Found {variable} in this file ({name})")
             except:
-                logger.write_log_message(f"Could not find a definition for {parameter}", "info")
+                logger.info(f"Could not find a definition for {parameter}")
                 return None
     return variable
 
@@ -343,8 +331,8 @@ def find_instances(class_of_interest: str) -> set:
         for line in range(len(f["content"])):
             match = re.search(regex, f["content"][line])
             if match:
-                object = f["content"][line].split(class_of_interest)[1].split(">")[-1].strip().strip(";").strip()
-                instances.add(object)
+                obj = f["content"][line].split(class_of_interest)[1].split(">")[-1].strip().strip(";").strip()
+                instances.add(obj)
 
     return instances
 
@@ -395,8 +383,7 @@ def resolve_url(url: str, microservice: str, dfd) -> str:
 def check_dockerfile(build_path: str):
     """Checks if under the service's build-path there is a dockerfile. If yes, returns it.
     """
-
-    repo_path = tmp.tmp_config["Repository"]["path"]
+    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
 
     # find docker-compose path, since build-path is relative to that
     raw_files = get_file_as_lines("docker-compose.yml")
@@ -404,24 +391,23 @@ def check_dockerfile(build_path: str):
         raw_files = get_file_as_lines("docker-compose.yaml")
     if len(raw_files) == 0:
         return
-    docker_compose_path = raw_files[0]["path"]
-    if docker_compose_path != "docker_compose.yaml" and docker_compose_path != "docker_compose.yml":
-        docker_compose_path = ("/").join(docker_compose_path.split("/")[:-1])
-        path = docker_compose_path + build_path.replace(repo_path, "").strip("-")
-    else:
-        path = build_path.replace(repo_path, "").strip("./-")
+    docker_compose_path = raw_files[0]["path"]  # TODO this assumes there is exactly 1 relevant docker-compose
+    docker_compose_dir = os.path.dirname(docker_compose_path)
+
+    build_path = PurePosixPath(build_path.strip("-'"))  # Build path is always posix, so resolve it accordingly
+    build_path = os.path.normpath(build_path)
+
+    docker_path = os.path.join(local_repo_path, os.path.join(docker_compose_dir, build_path))
 
     lines = list()
 
-    try:
-        repo_path = tmp.tmp_config["Repository"]["path"]
-        local_repo_path = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
-        dirs = list()
-        dirs.append(os.scandir(local_repo_path + "/" + path))
+    dirs = list()
 
+    if os.path.exists(docker_path):
+        dirs.append(os.scandir(docker_path))
         while dirs:
-            dir = dirs.pop()
-            for entry in dir:
+            d = dirs.pop()
+            for entry in d:
                 if entry.is_file():
                     if entry.name.casefold() == "dockerfile":
                         with open(entry.path, "r") as file:
@@ -429,25 +415,21 @@ def check_dockerfile(build_path: str):
                 elif entry.is_dir():
                     dirs.append(os.scandir(entry.path))
 
-    except:
-        pass
-
-
     return lines
 
 
-def file_exists(file_name: str, repo_path: str) -> bool:
+def file_exists(file_name: str) -> bool:
     """Checks if a file exists in the repository.
     """
 
-    local_repo_path = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
+    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
 
     dirs = list()
     dirs.append(os.scandir(local_repo_path))
 
     while dirs:
-        dir = dirs.pop()
-        for entry in dir:
+        d = dirs.pop()
+        for entry in d:
             if entry.is_file():
                 if entry.name.casefold() == file_name:
                     return True
@@ -463,20 +445,23 @@ def get_repo_contents_local(repo_path: str, path: str) -> set:
 
     repo = set()
 
-    local_repo_path = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
+    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
+    to_crawl = local_repo_path
 
     if not repo_downloaded(local_repo_path):
-        download_repo(repo_path)
+        download_repo(repo_path, local_repo_path)
 
     if path:
-        local_repo_path = local_repo_path + "/" + path.strip("/")
+        to_crawl = os.path.join(local_repo_path, path)
     try:
-        contents = os.scandir(local_repo_path)
+        contents = os.scandir(to_crawl)
     except Exception as e:
         return repo
     for content in contents:
-        path = tmp.tmp_config["Repository"]["path"]
-        download_url = "https://raw.githubusercontent.com/" + path + "/master/" + ("/").join(content.path.split("/")[3:])
+        repo_path = tmp.tmp_config["Repository"]["path"]
+        rel_path = os.path.relpath(content.path, start=local_repo_path)
+        rel_path_parts = Path(rel_path).parts
+        download_url = f"https://raw.githubusercontent.com/{repo_path}/master/{"/".join(rel_path_parts)}"
         repo.add((content.name, download_url, content.path))
 
     contents.close()
@@ -488,26 +473,24 @@ def get_file_as_yaml(filename: str) -> dict:
     """Looks for a file in the repository and downloads it if existing.
     """
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
     files = dict()
 
-    repo_folder = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
-    out = subprocess.Popen(['find', repo_folder, '-name', filename], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+    local_path = tmp.tmp_config["Repository"]["local_path"]
+    out = subprocess.Popen(['find', local_path, '-name', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = out.communicate()
 
     if stdout:
         for line in stdout.decode().splitlines():
             try:
-                id = max(files.keys()) + 1
+                id_ = max(files.keys()) + 1
             except:
-                id = 0
-            files[id] = dict()
+                id_ = 0
+            files[id_] = dict()
 
             with open(line, 'r') as file:
-                files[id]["content"] = file.read()
+                files[id_]["content"] = file.read()
 
-            relative_path = line.split(repo_folder)[1].strip("/")
-            files[id]["path"] = relative_path
+            files[id_]["path"] = os.path.relpath(line, start=local_path)
 
     return files
 
@@ -516,31 +499,25 @@ def get_file_as_lines(filename: str) -> dict:
     """Looks for a file in the repository and downloads it if existing.
     """
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
     files = dict()
 
-    repo_folder = "./analysed_repositories/" + ("/").join(repo_path.split("/")[1:])
-    out = subprocess.Popen(['find', repo_folder, '-name', filename], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+    local_path = tmp.tmp_config["Repository"]["local_path"]
+    out = subprocess.Popen(['find', local_path, '-name', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = out.communicate()
 
     if stdout:
         for line in stdout.decode().splitlines():
             try:
-                id = max(files.keys()) + 1
+                id_ = max(files.keys()) + 1
             except:
-                id = 0
-            files[id] = dict()
+                id_ = 0
+            files[id_] = dict()
 
             with open(line, 'r') as file:
-                files[id]["content"] = file.readlines()
+                files[id_]["content"] = file.readlines()
 
-            files[id]["name"] = line.split("/")[-1]
+            files[id_]["name"] = os.path.basename(line)
 
-            relative_path = line.split(repo_folder)[1].strip("/")
-            files[id]["path"] = relative_path
+            files[id_]["path"] = os.path.relpath(line, start=local_path)
 
     return files
-
-
-
-#
