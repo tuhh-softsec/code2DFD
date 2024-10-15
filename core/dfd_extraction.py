@@ -179,7 +179,7 @@ def classify_brokers(microservices: dict) -> dict:
     return microservices
 
 
-def classify_microservices(microservices: dict, information_flows: dict, external_components: dict, dfd) -> dict:
+def classify_microservices(microservices: dict, information_flows: dict, external_components: dict, dfd) -> tuple[dict, dict, dict]:
     """Tries to determine the microservice's funcitonality.
     """
 
@@ -245,7 +245,7 @@ def overwrite_port(microservices: dict) -> dict:
     return microservices
 
 
-def detect_miscellaneous(microservices: dict, information_flows: dict, external_components: dict) -> dict:
+def detect_miscellaneous(microservices: dict, information_flows: dict, external_components: dict) -> tuple[dict, dict, dict]:
     """Goes through properties extracted for each service to check for some things that don't fit anywhere else (mail servers, external websites, etc.).
     """
 
