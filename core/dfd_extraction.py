@@ -483,10 +483,13 @@ def merge_duplicate_annotations(collection: dict) -> dict:
             tagged_values_set = set()
             for tag, tagged_value in item["tagged_values"]:
                 if tag == "Port":
-                    try:
-                        tagged_value = int(tagged_value)
-                    except ValueError:
-                        pass
+                    if isinstance(tagged_value, str):
+                        tagged_value = tagged_value.split("/")[0]  # Could be a protocol like 3306/tcp
+                    if not isinstance(tagged_value, int):
+                        try:
+                            tagged_value = int(tagged_value)
+                        except ValueError:
+                            pass
                 elif isinstance(tagged_value, list):
                     tagged_value = str(tagged_value)
                 tagged_values_set.add((tag, tagged_value))
