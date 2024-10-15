@@ -420,7 +420,11 @@ def merge_duplicate_flows(information_flows: dict) -> dict:
     to_delete = set()
     keep = set()
     for i, flow_i in information_flows.items():
+        flow_i["sender"] = flow_i["sender"].casefold()
+        flow_i["receiver"] = flow_i["receiver"].casefold()
         for j, flow_j in information_flows.items():
+            flow_j["sender"] = flow_j["sender"].casefold()
+            flow_j["receiver"] = flow_j["receiver"].casefold()
             if not i == j and i not in keep and j not in keep:
                 if flow_i["sender"] == flow_j["sender"]:
                     if flow_i["receiver"] == flow_j["receiver"]:
@@ -447,7 +451,9 @@ def merge_duplicate_nodes(nodes: dict) -> dict:
     to_delete = set()
     keep = set()
     for i, node_i in nodes.items():
+        node_i["name"] = node_i["name"].casefold()
         for j, node_j in nodes.items():
+            node_j["name"] = node_j["name"].casefold()
             if not i == j and i not in keep and j not in keep:
                 if node_i["name"] == node_j["name"]:
                     # merge
