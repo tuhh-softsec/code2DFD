@@ -10,7 +10,7 @@ def detect_logstash(microservices: dict, information_flows: dict, external_compo
     trace_info = False
     for m in microservices.keys():
         if "logstash:" in microservices[m]["image"]:
-            logstash = microservices[m]["servicename"]
+            logstash = microservices[m]["name"]
             try:
                 microservices[m]["stereotype_instances"].append("logging_server")
             except:
@@ -35,8 +35,8 @@ def detect_logstash(microservices: dict, information_flows: dict, external_compo
                             # internal via name
                             logstash_host = logstash_server.split(":")[0]
                             for mi in microservices.keys():
-                                if logstash_host == microservices[mi]["servicename"]:
-                                    logstash = microservices[mi]["servicename"]
+                                if logstash_host == microservices[mi]["name"]:
+                                    logstash = microservices[mi]["name"]
                                     if "stereotype_instances" in microservices[mi]:
                                         microservices[mi]["stereotype_instances"].append("logging_server")
                                     else:
@@ -52,7 +52,7 @@ def detect_logstash(microservices: dict, information_flows: dict, external_compo
                                 for mi in microservices.keys():
                                     for prop2 in microservices[mi]["properties"]:
                                         if prop2[0] == "Port" and int(prop2[1]) == logstash_port:
-                                            logstash = microservices[mi]["servicename"]
+                                            logstash = microservices[mi]["name"]
                                             if "stereotype_instances" in microservices[mi]:
                                                 microservices[mi]["stereotype_instances"].append("logging_server")
                                             else:
@@ -87,12 +87,12 @@ def detect_logstash(microservices: dict, information_flows: dict, external_compo
                                 except:
                                     id = 0
                                 information_flows[id] = dict()
-                                information_flows[id]["sender"] = microservices[m]["servicename"]
+                                information_flows[id]["sender"] = microservices[m]["name"]
                                 information_flows[id]["receiver"] = "logstash"
                                 information_flows[id]["stereotype_instances"] = ["restful_http"]
 
                                 trace = dict()
-                                trace["item"] = microservices[m]["servicename"] + " -> " + "logstash"
+                                trace["item"] = microservices[m]["name"] + " -> " + "logstash"
                                 trace["file"] = trace_info[0]
                                 trace["line"] = trace_info[1]
                                 trace["span"] = trace_info[2]
@@ -114,7 +114,7 @@ def detect_logstash(microservices: dict, information_flows: dict, external_compo
         elasticsearch = False
         for m in microservices.keys():
             if ("Search Engine", "Elasticsearch") in microservices[m]["tagged_values"]:
-                elasticsearch = microservices[m]["servicename"]
+                elasticsearch = microservices[m]["name"]
         if elasticsearch:
             try:
                 id = max(information_flows.keys()) + 1
@@ -143,12 +143,12 @@ def detect_logstash(microservices: dict, information_flows: dict, external_compo
                         except:
                             id = 0
                         information_flows[id] = dict()
-                        information_flows[id]["sender"] = microservices[m]["servicename"]
+                        information_flows[id]["sender"] = microservices[m]["name"]
                         information_flows[id]["receiver"] = logstash
                         information_flows[id]["stereotype_instances"] = ["restful_http"]
 
                         trace = dict()
-                        trace["item"] = microservices[m]["servicename"] + " -> " + logstash
+                        trace["item"] = microservices[m]["name"] + " -> " + logstash
                         trace["file"] = prop[2][0]
                         trace["line"] = prop[2][1]
                         trace["span"] = prop[2][2]

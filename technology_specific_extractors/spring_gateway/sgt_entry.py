@@ -14,7 +14,7 @@ def detect_spring_cloud_gateway(microservices: dict, information_flows: dict, ex
         microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
         if microservice:
             for m in microservices.keys():
-                if microservices[m]["servicename"] == microservice:
+                if microservices[m]["name"] == microservice:
                     server = microservice
                     try:
                         microservices[m]["stereotype_instances"].append("gateway")
@@ -42,7 +42,7 @@ def detect_spring_cloud_gateway(microservices: dict, information_flows: dict, ex
         for m2 in microservices.keys():
             for s in microservices[m2]["stereotype_instances"]:
                 if s == "service_discovery":
-                    discovery_server = microservices[m2]["servicename"]
+                    discovery_server = microservices[m2]["name"]
                     break
         if discovery_server:
             for i in information_flows.keys():
@@ -65,7 +65,7 @@ def detect_spring_cloud_gateway(microservices: dict, information_flows: dict, ex
                 target_service = False
                 if prop[0] == "spring_cloud_gateway_route":
                     for m2 in microservices.keys():
-                        if microservices[m2]["servicename"] == prop[1]:
+                        if microservices[m2]["name"] == prop[1]:
                             target_service = prop[1]
                 if target_service:
                     try:

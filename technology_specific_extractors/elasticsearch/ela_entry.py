@@ -8,7 +8,7 @@ def detect_elasticsearch(microservices: dict, information_flows: dict, dfd) -> d
     elasticsearch = False
     for m in microservices.keys():
         if "elasticsearch:" in microservices[m]["image"]:
-            elasticsearch = microservices[m]["servicename"]
+            elasticsearch = microservices[m]["name"]
             if "stereotype_instances" in microservices[m]:
                 microservices[m]["stereotype_instances"].append("search_engine")
             else:
@@ -22,7 +22,7 @@ def detect_elasticsearch(microservices: dict, information_flows: dict, dfd) -> d
         kibana = False
         for m in microservices.keys():
             if ("Monitoring Dashboard", "Kibana") in microservices[m]["tagged_values"]:
-                kibana = microservices[m]["servicename"]
+                kibana = microservices[m]["name"]
 
         if kibana:
             try:

@@ -30,7 +30,7 @@ def set_information_flows(dfd):
                     address_parts = address.split("/")
                     for address_part in address_parts:
                         for m in microservices.keys():
-                            if address_part == microservices[m]["servicename"]:
+                            if address_part == microservices[m]["name"]:
                                 microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
                                 if microservice:
                                     try:
@@ -40,11 +40,11 @@ def set_information_flows(dfd):
                                     information_flows[id] = dict()
 
                                     information_flows[id]["sender"] = microservice
-                                    information_flows[id]["receiver"] = microservices[m]["servicename"]
+                                    information_flows[id]["receiver"] = microservices[m]["name"]
                                     information_flows[id]["stereotype_instances"] = stereotypes
 
                                     trace = dict()
-                                    trace["item"] = microservice + " -> " + microservices[m]["servicename"]
+                                    trace["item"] = microservice + " -> " + microservices[m]["name"]
                                     trace["file"] = results[r]["path"]
                                     trace["line"] = results[r]["line_nr"]
                                     trace["span"] = results[r]["span"]

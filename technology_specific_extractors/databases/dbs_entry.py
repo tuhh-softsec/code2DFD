@@ -25,7 +25,7 @@ def detect_databases(microservices: dict) -> dict:
                 microservices[m]["tagged_values"] = [("Database", database)]
 
             trace = dict()
-            trace["parent_item"] = microservices[m]["servicename"]
+            trace["parent_item"] = microservices[m]["name"]
             trace["item"] = "database"
             trace["file"] = "heuristic, based on image"
             trace["line"] = "heuristic, based on image"
@@ -63,7 +63,7 @@ def detect_via_docker(microservices: dict, m: int) -> dict:
         except:
             microservices[m]["tagged_values"] = [("Database", database)]
         trace = dict()
-        trace["parent_item"] = microservices[m]["servicename"]
+        trace["parent_item"] = microservices[m]["name"]
         trace["item"] = "database"
         trace["file"] = "heuristic, based on Dockerfile base image"
         trace["line"] = "heuristic, based on Dockerfile base image"

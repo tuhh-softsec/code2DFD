@@ -191,7 +191,7 @@ def match_incoming_to_outgoing_endpoints(microservices: dict, incoming_endpoints
     kafka_server = False
     for id in microservices.keys():
         if ("Message Broker", "Kafka") in microservices[id]["tagged_values"]:
-            kafka_server = microservices[id]["servicename"]
+            kafka_server = microservices[id]["name"]
 
     if kafka_server:
         for i in incoming_endpoints:
@@ -325,8 +325,8 @@ def detect_kafka_server(microservices: dict) -> dict:
                 image = file.get("services", {}).get(s).get("image")
                 if "kafka" in image.split("/")[-1].casefold():
                     for id in microservices.keys():
-                        if microservices[id]["servicename"] == s:
-                            kafka_server = microservices[id]["servicename"]
+                        if microservices[id]["name"] == s:
+                            kafka_server = microservices[id]["name"]
                             try:
                                 microservices[id]["stereotype_instances"].append("message_broker")
                             except:
@@ -337,7 +337,7 @@ def detect_kafka_server(microservices: dict) -> dict:
                                 microservices[id]["tagged_values"] = [("Message Broker", "Kafka")]
 
                             trace = dict()
-                            trace["parent_item"] = microservices[id]["servicename"]
+                            trace["parent_item"] = microservices[id]["name"]
                             trace["item"] = "message_broker"
                             trace["file"] = "heuristic, based on image in Docker Compose"
                             trace["line"] = "heuristic, based on image in Docker Compose"
@@ -352,8 +352,8 @@ def detect_kafka_server(microservices: dict) -> dict:
                 image = file.get(s).get("image")
                 if "kafka" in image.split("/")[-1].casefold():
                     for id in microservices.keys():
-                        if microservices[id]["servicename"] == s:
-                            kafka_server = microservices[id]["servicename"]
+                        if microservices[id]["name"] == s:
+                            kafka_server = microservices[id]["name"]
                             try:
                                 microservices[id]["stereotype_instances"].append("message_broker")
                             except:
@@ -364,7 +364,7 @@ def detect_kafka_server(microservices: dict) -> dict:
                                 microservices[id]["tagged_values"] = [("Message Broker", "Kafka")]
 
                             trace = dict()
-                            trace["parent_item"] = microservices[id]["servicename"]
+                            trace["parent_item"] = microservices[id]["name"]
                             trace["item"] = "message_broker"
                             trace["file"] = "heuristic, based on image in Docker Compose"
                             trace["line"] = "heuristic, based on image in Docker Compose"
@@ -399,14 +399,14 @@ def detect_stream_binders(microservices: dict, information_flows: dict, dfd) -> 
             # Outgoing
             results = fi.search_keywords("@SendTo")
             for r in results.keys():
-                if tech_sw.detect_microservice(results[r]["path"], dfd) == microservices[m]["servicename"]:
+                if tech_sw.detect_microservice(results[r]["path"], dfd) == microservices[m]["name"]:
                     try:
                         id = max(information_flows.keys()) + 1
                     except:
                         id = 0
                     information_flows[id] = dict()
 
-                    information_flows[id]["sender"] = microservices[m]["servicename"]
+                    information_flows[id]["sender"] = microservices[m]["name"]
                     information_flows[id]["receiver"] = kafka_server
                     information_flows[id]["stereotype_instances"] = ["message_producer_kafka", "restful_http"]
                     if out_topic:
@@ -414,7 +414,7 @@ def detect_stream_binders(microservices: dict, information_flows: dict, dfd) -> 
 
                     # Traceability
                     trace = dict()
-                    trace["item"] = str(microservices[m]["servicename"]) + " -> " + str(kafka_server)
+                    trace["item"] = str(microservices[m]["name"]) + " -> " + str(kafka_server)
                     trace["file"] = results[r]["path"]
                     trace["line"] = results[r]["line_nr"]
                     trace["span"] = results[r]["span"]
@@ -422,7 +422,7 @@ def detect_stream_binders(microservices: dict, information_flows: dict, dfd) -> 
                     traceability.add_trace(trace)
 
                     trace = dict()
-                    trace["parent_item"] = str(microservices[m]["servicename"]) + " -> " + str(kafka_server)
+                    trace["parent_item"] = str(microservices[m]["name"]) + " -> " + str(kafka_server)
                     trace["item"] = "message_producer_kafka"
                     trace["file"] = results[r]["path"]
                     trace["line"] = results[r]["line_nr"]
@@ -433,7 +433,7 @@ def detect_stream_binders(microservices: dict, information_flows: dict, dfd) -> 
             # Incoming
             results = fi.search_keywords("@StreamListener")
             for r in results.keys():
-                if tech_sw.detect_microservice(results[r]["path"], dfd) == microservices[m]["servicename"]:
+                if tech_sw.detect_microservice(results[r]["path"], dfd) == microservices[m]["name"]:
 
                     try:
                         id = max(information_flows.keys()) + 1
@@ -442,14 +442,14 @@ def detect_stream_binders(microservices: dict, information_flows: dict, dfd) -> 
                     information_flows[id] = dict()
 
                     information_flows[id]["sender"] = kafka_server
-                    information_flows[id]["receiver"] = microservices[m]["servicename"]
+                    information_flows[id]["receiver"] = microservices[m]["name"]
                     information_flows[id]["stereotype_instances"] = ["message_consumer_kafka", "restful_http"]
                     if in_topic:
                         information_flows[id]["tagged_values"] = {("Consumer Topic", in_topic)}
 
                     # Traceability
                     trace = dict()
-                    trace["item"] = str(kafka_server) + " -> " + str(microservices[m]["servicename"])
+                    trace["item"] = str(kafka_server) + " -> " + str(microservices[m]["name"])
                     trace["file"] = results[r]["path"]
                     trace["line"] = results[r]["line_nr"]
                     trace["span"] = results[r]["span"]
@@ -457,7 +457,7 @@ def detect_stream_binders(microservices: dict, information_flows: dict, dfd) -> 
                     traceability.add_trace(trace)
 
                     trace = dict()
-                    trace["parent_item"] = str(kafka_server) + " -> " + str(microservices[m]["servicename"])
+                    trace["parent_item"] = str(kafka_server) + " -> " + str(microservices[m]["name"])
                     trace["item"] = "message_consumer_kafka"
                     trace["file"] = results[r]["path"]
                     trace["line"] = results[r]["line_nr"]

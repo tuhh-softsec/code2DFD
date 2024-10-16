@@ -13,7 +13,7 @@ def detect_grafana(microservices: dict, information_flows: dict, dfd) -> dict:
     for r in results.keys():
         grafana_server = tech_sw.detect_microservice(results[r]["path"], dfd)
         for m in microservices.keys():
-            if microservices[m]["servicename"] == grafana_server:
+            if microservices[m]["name"] == grafana_server:
                 if "stereotype_instances" in microservices[m]:
                     microservices[m]["stereotype_instances"].append("monitoring_dashboard")
                 else:
@@ -24,7 +24,7 @@ def detect_grafana(microservices: dict, information_flows: dict, dfd) -> dict:
                     microservices[m]["tagged_values"] = [("Monitoring Dashboard", "Grafana")]
 
                 trace = dict()
-                trace["parent_item"] = microservices[m]["servicename"]
+                trace["parent_item"] = microservices[m]["name"]
                 trace["item"] = "monitoring_dashboard"
                 trace["file"] = results[r]["path"]
                 trace["line"] = results[r]["line_nr"]

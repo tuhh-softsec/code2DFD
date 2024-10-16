@@ -51,7 +51,7 @@ def clean_pom_names(microservices: dict) -> dict:
     """
 
     for m in microservices.keys():
-        microservices[m]["servicename"] = microservices[m]["servicename"].replace("pom_", "")
+        microservices[m]["name"] = microservices[m]["name"].replace("pom_", "")
 
     return microservices
 
@@ -92,7 +92,7 @@ def dictionarify(elements_set: set, properties_dict: dict) -> dict:
             id = 0
         elements[id] = dict()
 
-        elements[id]["servicename"] = e[0]
+        elements[id]["name"] = e[0]
         elements[id]["image"] = e[1]
         elements[id]["type"] = e[2]
         elements[id]["properties"] = properties
@@ -224,7 +224,7 @@ def detect_microservice(file_path: str, dfd) -> str:
     try:
         for m in microservices.keys():
             if microservices[m]["image"] == docker_image:
-                microservice = microservices[m]["servicename"]
+                microservice = microservices[m]["name"]
     except:
         pass
 

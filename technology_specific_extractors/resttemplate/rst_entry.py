@@ -130,7 +130,7 @@ def add_endpoints_tagged_values(endpoint_tuples: list, dfd):
 
     for endpoint in ordered_endpoints.keys():
         for m in microservices.keys():
-            if microservices[m]["servicename"] == endpoint:
+            if microservices[m]["name"] == endpoint:
                 if "tagged_values" in microservices[m].keys():
                     microservices[m]["tagged_values"].append(('Endpoints', list(ordered_endpoints[endpoint])))
                 else:
@@ -145,7 +145,7 @@ def get_outgoing_endpoints(information_flows: dict, dfd) -> set:
     microservices = tech_sw.get_microservices(dfd)
 
     if microservices != None:
-        microservices = [microservices[x]["servicename"] for x in microservices.keys()]
+        microservices = [microservices[x]["name"] for x in microservices.keys()]
     else:
         microservices = list()
     outgoing_endpoints = set()
@@ -188,7 +188,7 @@ def find_rst_variable(parameter: str, file: dict, line_nr: int, information_flow
     # check if service name in parameter, if yes, add flow directly
     microservices = tech_sw.get_microservices(dfd)
     for m in microservices.keys():
-        if microservices[m]["servicename"] in parameter:
+        if microservices[m]["name"] in parameter:
             try:
                 id = max(information_flows.keys()) + 1
             except:
@@ -196,11 +196,11 @@ def find_rst_variable(parameter: str, file: dict, line_nr: int, information_flow
             information_flows[id] = dict()
 
             information_flows[id]["sender"] = microservice
-            information_flows[id]["receiver"] = microservices[m]["servicename"]
+            information_flows[id]["receiver"] = microservices[m]["name"]
             information_flows[id]["stereotype_instances"] = ["restful_http"]
 
             trace = dict()
-            trace["item"] = microservice + " -> " + microservices[m]["servicename"]
+            trace["item"] = microservice + " -> " + microservices[m]["name"]
             trace["file"] = file["path"]
             trace["line"] = file["line_nr"]
             trace["span"] = file["span"]
@@ -332,7 +332,7 @@ def match_incoming_to_outgoing_endpoints(incoming_endpoints: list, outgoing_endp
         stereotype_instances.append("restful_http")
         tagged_values = list()
         for m in microservices.keys():
-            if microservices[m]["servicename"] == i[0]:
+            if microservices[m]["name"] == i[0]:
                 for prop in microservices[m]["properties"]:
                     if prop[0] == "load_balancer":
                         stereotype_instances.append("load_balanced_link")

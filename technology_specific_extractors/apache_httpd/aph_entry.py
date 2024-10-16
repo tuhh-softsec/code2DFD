@@ -96,12 +96,12 @@ def mark_server(microservices: dict, microservice: str) -> dict:
         except:
             id = 0
         microservices[id] = dict()
-        microservices[id]["servicename"] = microservice
+        microservices[id]["name"] = microservice
         microservices[id]["stereotype_instances"] = ["web_server"]
         microservices[id]["tagged_values"] = [("Web Server", "Apache httpd")]
     else:
         for m in microservices.keys():
-            if microservices[m]["servicename"] == microservice: # this is the service
+            if microservices[m]["name"] == microservice: # this is the service
                 try:
                     microservices[m]["stereotype_instances"].append("web_server")
                 except:
@@ -158,12 +158,12 @@ def add_connections(microservices: dict, information_flows: dict, file, microser
                                 for prop in microservices[m]["tagged_values"]:
                                     if prop[0] == "Port":
                                         if str(prop[1]) == str(port):
-                                            target_service = microservices[m]["servicename"]
+                                            target_service = microservices[m]["name"]
                             except Exception as e:
                                 pass
                     else:
                         for m in microservices.keys():
-                            if microservices[m]["servicename"] == host:
+                            if microservices[m]["name"] == host:
                                 target_service = host
                     if target_service:
                         try:

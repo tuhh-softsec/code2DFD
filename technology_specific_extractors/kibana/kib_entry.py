@@ -15,7 +15,7 @@ def detect_kibana(microservices: dict, information_flows: dict, dfd) -> dict:
             except:
                 microservices[m]["tagged_values"] = [("Monitoring Dashboard", "Kibana")]
             trace = dict()
-            trace["parent_item"] = microservices[m]["servicename"]
+            trace["parent_item"] = microservices[m]["name"]
             trace["item"] = "monitoring_dashboard"
             trace["file"] = "heuristic, based on image"
             trace["line"] = "heuristic, based on image"

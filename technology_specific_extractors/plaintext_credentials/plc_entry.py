@@ -51,7 +51,7 @@ def set_plaintext_credentials(microservices: dict) -> dict:
             else:
                 microservices[m]["stereotype_instances"] = ["plaintext_credentials"]
             trace = dict()
-            trace["parent_item"] = microservices[m]["servicename"]
+            trace["parent_item"] = microservices[m]["name"]
             trace["item"] = "plaintext_credentials"
             trace["file"] = trace_info[0]
             trace["line"] = trace_info[1]

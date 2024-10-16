@@ -161,7 +161,7 @@ def match_incoming_to_outgoing_endpoints(incoming_endpoints: set, outgoing_endpo
     rabbit_server = False
     for id in microservices.keys():
         if ("Message Broker", "RabbitMQ") in microservices[id]["tagged_values"]:
-            rabbit_server = microservices[id]["servicename"]
+            rabbit_server = microservices[id]["name"]
             rabbit_id = id
 
     if rabbit_server:
@@ -202,7 +202,7 @@ def match_incoming_to_outgoing_endpoints(incoming_endpoints: set, outgoing_endpo
             username, password, plaintext_credentials = False, False, False
 
             for m in microservices.keys():
-                if microservices[m]["servicename"] == o[2]:
+                if microservices[m]["name"] == o[2]:
                     if "properties" in microservices[m]:
                         for prop in microservices[m]["properties"]:
                             if prop[0] == "rabbit_username":
@@ -323,12 +323,12 @@ def detect_rabbitmq_server(microservices: dict) -> dict:
                 image = file.get("services", {}).get(s).get("image")
                 if "rabbitmq:" in image.split("/")[-1]:
                     for m in microservices.keys():
-                        if microservices[m]["servicename"] == s:
+                        if microservices[m]["name"] == s:
                             microservices[m]["stereotype_instances"].append("message_broker")
                             microservices[m]["tagged_values"].append(("Message Broker", "RabbitMQ"))
 
                             trace = dict()
-                            trace["parent_item"] = microservices[m]["servicename"]
+                            trace["parent_item"] = microservices[m]["name"]
                             trace["item"] = "message_broker"
                             trace["file"] = "heuristic, based on image in Docker Compose"
                             trace["line"] = "heuristic, based on image in Docker Compose"
@@ -341,12 +341,12 @@ def detect_rabbitmq_server(microservices: dict) -> dict:
                 build = file.get("services", {}).get(s).get("build")
                 if "rabbitmq" in build or "rabbit-mq" in build:
                     for m in microservices.keys():
-                        if microservices[m]["servicename"] == s:
+                        if microservices[m]["name"] == s:
                             microservices[m]["stereotype_instances"].append("message_broker")
                             microservices[m]["tagged_values"].append(("Message Broker", "RabbitMQ"))
 
                             trace = dict()
-                            trace["parent_item"] = microservices[m]["servicename"]
+                            trace["parent_item"] = microservices[m]["name"]
                             trace["item"] = "message_broker"
                             trace["file"] = "heuristic, based on image in Docker Compose"
                             trace["line"] = "heuristic, based on image in Docker Compose"
@@ -360,7 +360,7 @@ def detect_rabbitmq_server(microservices: dict) -> dict:
                 image = file.get(s).get("image")
                 if "rabbitmq:" in image.split("/")[-1]:
                     for m in microservices.keys():
-                        if microservices[m]["servicename"] == s:
+                        if microservices[m]["name"] == s:
                             microservices[m]["stereotype_instances"].append("message_broker")
                             microservices[m]["tagged_values"].append(("Message Broker", "RabbitMQ"))
 
@@ -377,7 +377,7 @@ def detect_rabbitmq_server(microservices: dict) -> dict:
                 build = file.get(s).get("build")
                 if "rabbitmq" in build or "rabbit-mq" in build:
                     for m in microservices.keys():
-                        if microservices[m]["servicename"] == s:
+                        if microservices[m]["name"] == s:
                             microservices[m]["stereotype_instances"].append("message_broker")
                             microservices[m]["tagged_values"].append(("Message Broker", "RabbitMQ"))
 

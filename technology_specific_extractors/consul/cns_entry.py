@@ -9,7 +9,7 @@ def detect_consul(microservices: dict, information_flows: dict, dfd) -> dict:
     consul_server = set()
     for m in microservices.keys():
         if "consul:" in microservices[m]["image"]:
-            consul_server.add(microservices[m]["servicename"])
+            consul_server.add(microservices[m]["name"])
             try:
                 microservices[m]["stereotype_instances"].append("service_discovery")
             except:
@@ -32,11 +32,11 @@ def detect_consul(microservices: dict, information_flows: dict, dfd) -> dict:
                                 id = 0
                             information_flows[id] = dict()
                             information_flows[id]["sender"] = consul
-                            information_flows[id]["receiver"] = microservices[m]["servicename"]
+                            information_flows[id]["receiver"] = microservices[m]["name"]
                             information_flows[id]["stereotype_instances"] = ["restful_http"]
 
                             trace = dict()
-                            trace["item"] = consul + " -> " + microservices[m]["servicename"]
+                            trace["item"] = consul + " -> " + microservices[m]["name"]
                             trace["file"] = prop[2][0]
                             trace["line"] = prop[2][1]
                             trace["span"] = prop[2][2]

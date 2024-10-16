@@ -13,7 +13,7 @@ def detect_load_balancers(microservices: dict, information_flows: dict, dfd) -> 
 
         correct_id = False
         for m in microservices.keys():
-            if microservices[m]["servicename"] == microservice:
+            if microservices[m]["name"] == microservice:
                 if "stereotype_instances" in microservices[m]:
                     microservices[m]["stereotype_instances"].append("load_balancer")
                 else:

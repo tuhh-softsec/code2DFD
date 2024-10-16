@@ -13,7 +13,7 @@ def detect_hystrix_dashboard(microservices: dict, information_flows: dict, dfd) 
         for line in results[r]["content"]:
             if "@EnableHystrixDashboard" in line:
                 for m in microservices.keys():
-                    if microservices[m]["servicename"] == microservice:
+                    if microservices[m]["name"] == microservice:
                         try:
                             microservices[m]["stereotype_instances"].append("monitoring_dashboard")
                         except:
@@ -24,7 +24,7 @@ def detect_hystrix_dashboard(microservices: dict, information_flows: dict, dfd) 
                             microservices[m]["tagged_values"] = [("Monitoring Dashboard", "Hystrix")]
 
                         trace = dict()
-                        trace["parent_item"] = microservices[m]["servicename"]
+                        trace["parent_item"] = microservices[m]["name"]
                         trace["item"] = "monitoring_dashboard"
                         trace["file"] = results[r]["path"]
                         trace["line"] = results[r]["line_nr"]
@@ -44,7 +44,7 @@ def detect_hystrix_circuit_breakers(microservices: dict, information_flows: dict
         for line in results[r]["content"]:
             if "@EnableHystrix" in line and not "@EnableHystrixDashboard" in line:
                 for m in microservices.keys():
-                    if microservices[m]["servicename"] == microservice:
+                    if microservices[m]["name"] == microservice:
                         try:
                             microservices[m]["stereotype_instances"].append("circuit_breaker")
                         except:
@@ -55,7 +55,7 @@ def detect_hystrix_circuit_breakers(microservices: dict, information_flows: dict
                             microservices[m]["tagged_values"] = [("Circuit Breaker", "Hystrix")]
 
                         trace = dict()
-                        trace["parent_item"] = microservices[m]["servicename"]
+                        trace["parent_item"] = microservices[m]["name"]
                         trace["item"] = "circuit_breaker"
                         trace["file"] = results[r]["path"]
                         trace["line"] = results[r]["line_nr"]

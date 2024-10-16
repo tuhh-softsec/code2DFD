@@ -13,7 +13,7 @@ def detect_circuit_breakers(microservices: dict, information_flows: dict, dfd) -
         circuit_breaker_tuple = False
         correct_id = False
         for m in microservices.keys():
-            if microservices[m]["servicename"] == microservice:
+            if microservices[m]["name"] == microservice:
                 correct_id = m
                 for prop in microservices[m]["properties"]:
                     if prop[0] == "circuit_breaker":
