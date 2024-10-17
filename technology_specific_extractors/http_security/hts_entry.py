@@ -40,7 +40,7 @@ def detect_configurations(dfd):
                             counter = line_nr
                             configuration = line.strip()
 
-                            while not found and counter < len(results[r]["content"]):
+                            while not found and counter < len(results[r]["content"]) - 1:
                                 counter += 1
                                 new_line = results[r]["content"][counter]
                                 new_line = new_line.strip()
