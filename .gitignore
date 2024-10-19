@@ -1,5 +1,6 @@
 *.pyc
 *.DS_Store
+.vscode/
 analysed_repositories/
 output/architecture/*
 output/codeable_models/*
