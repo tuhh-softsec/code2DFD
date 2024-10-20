@@ -23,7 +23,7 @@ exception_counter_repo = 0
 
 def get_output_path(repo_path: str) -> str:
     repo_path = repo_path.replace("/", "--")
-    return os.path.join(os.getcwd(), 'code2dfd_output', repo_path)
+    return os.path.join(os.getcwd(), 'code2DFD_output', repo_path)
 
 
 def get_local_path(repo_path: str) -> str:

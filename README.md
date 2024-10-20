@@ -42,20 +42,20 @@ This will spawn up a Flask server and you can trigger DFD-extractions by sending
 
 
 ##### 3. Output
-The tools puts the `PROJECT` analysis output into `code2dfd_output/PROJECT`
+The tools puts the `PROJECT` analysis output into `code2DFD_output/PROJECT`
 The tool creates multiple outputs:
-- The extracted DFD is saved as a UML diagram in `code2dfd_output/PROJECT/PROJECT_uml.txt`
-and as a .png rendered with [PlantUML](https://plantuml.com) in `code2dfd_output/PROJECT/PROJECT_uml.png`
+- The extracted DFD is saved as a UML diagram in `code2DFD_output/PROJECT/PROJECT_uml.txt`
+and as a .png rendered with [PlantUML](https://plantuml.com) in `code2DFD_output/PROJECT/PROJECT_uml.png`
 An internet connection is needed for this, otherwise no PNG will be created.
-- A machine-readable version of the DFD is created in JSON format in `code2dfd_output/PROJECT/PROJECT_json_architecture.json`
-  - Edges information only is saved in `code2dfd_output/PROJECT/PROJECT_edges.json`
-- A textual version of the results (list of microservices, external entities, and information flows) is created in `code2dfd_output/PROJECT/PROJECT_results.txt`.
-- Additionally, a version in [CodeableModels](https://github.com/uzdun/CodeableModels) format is created in `code2dfd_output/PROJECT/PROJECT.py`, if you want a more flexible format for further work.
+- A machine-readable version of the DFD is created in JSON format in `code2DFD_output/PROJECT/PROJECT_json_architecture.json`
+  - Edges information only is saved in `code2DFD_output/PROJECT/PROJECT_edges.json`
+- A textual version of the results (list of microservices, external entities, and information flows) is created in `code2DFD_output/PROJECT/PROJECT_results.txt`.
+- Additionally, a version in [CodeableModels](https://github.com/uzdun/CodeableModels) format is created in `code2DFD_output/PROJECT/PROJECT.py`, if you want a more flexible format for further work.
 To render these, you need to install CodeableModels as described on their site.
 Further, our metamodel [`microservice_dfds_metamodel.py`](microservice_dfds_metamodel.py) is needed for that.
 If interoperability with other software or further processing of the models is of no concern, this offers no advantages.
 The DFDs rendered by CodeableModels do not follow standard DFD-notation.
-- The traceability information for the DFD items is saved in `code2dfd_output/PROJECT/PROJECT_traceability.json`.
+- The traceability information for the DFD items is saved in `code2DFD_output/PROJECT/PROJECT_traceability.json`.
 Note that this is ongoing work and the traceability is not created for all items as of now.
 However, we implemented it for enough items to show that this technique works and the full traceability is only a question of further implementation work.
-- Logs are saved in `code2dfd_output/logs/`.
+- Logs are saved in `code2DFD_output/logs/`.
