@@ -81,7 +81,9 @@ def get_incoming_endpoints(dfd) -> set:
         else:
             microservice = tech_sw.detect_microservice(f["path"], dfd)
             for line in range(len(f["content"])):
-                if "@RabbitListener" in f["content"][line]:
+                l = f["content"][line]
+                if "@RabbitListener" in l and "queues" in l and "=" in l:
+                    
                     new_incoming_queue = f["content"][line].split("queues")[1].split("=")[1].strip().strip(")")
                     new_incoming_queue = fi.find_variable(new_incoming_queue, f)
 
