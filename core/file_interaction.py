@@ -145,22 +145,6 @@ def search_keywords(keywords: str):
     return results
 
 
-def enrich_output(results: list, microservices: dict):
-    """Adds fields "Config", "Import", and "Comment" to the outputs.
-    """
-
-    for o in results:
-        o["Config"] = detection_config(o["Filename"])
-        o["Import"] = detection_import(o["Line"])
-        o["Comment"] = detection_comment(o["Filename"], o["Line"])
-        o["Service"] = "None"
-        microservices = [microservices[x]["name"] for x in microservices.keys()]
-        for m in microservices.keys:
-            if m in o["Path"]:
-                o["Service"] = m
-    return results
-
-
 def pagList2lines(pagList) -> dict:
     """Converts paginated list into files as lines.
     """
