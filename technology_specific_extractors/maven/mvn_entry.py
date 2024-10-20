@@ -202,7 +202,7 @@ def extract_servicename_pom_file(pom_file: list, file_name: str) -> str:
 
             # traceability
             line_number = line_nr + 1
-            length_tuple = re.search(microservice[0], line).span()
+            length_tuple = re.search(re.escape(microservice[0]), line).span()
             span = "[" + str(length_tuple[0]) +  ":" + str(length_tuple[1]) + "]"
             trace = (file_name, line_number, span)
             microservice[1] = trace
