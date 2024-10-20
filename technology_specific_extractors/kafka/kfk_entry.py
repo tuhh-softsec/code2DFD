@@ -265,7 +265,7 @@ def match_incoming_to_outgoing_endpoints(microservices: dict, incoming_endpoints
                     if re.search(regex, o[0]):
                         information_flows_set.add((o[1], i[1], i[0], o[2], i[2], o[3]))
             except (TypeError, re.error) as e:
-                logger.info(f"Error in regex compiling {o[1]}: {e}")
+                logger.info(f"Error in regex compiling {i[0]}: {e}")
 
         # this next block is because i don't know if one can put regex as topic when sending as well. Since it's a set, this doesn't hurt
         for o in outgoing_endpoints:
