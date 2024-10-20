@@ -465,16 +465,12 @@ def get_file_as_yaml(filename: str) -> dict:
 
     if stdout:
         for line in stdout.decode().splitlines():
-            try:
-                id_ = max(files.keys()) + 1
-            except:
-                id_ = 0
-            files[id_] = dict()
+            if os.path.isfile(line):
+                id_ = max(files.keys(), default=-1) + 1
+                with open(line, 'r') as file:
+                    files[id_]["content"] = file.read()
 
-            with open(line, 'r') as file:
-                files[id_]["content"] = file.read()
-
-            files[id_]["path"] = os.path.relpath(line, start=local_path)
+                files[id_]["path"] = os.path.relpath(line, start=local_path)
 
     return files
 
