@@ -374,13 +374,15 @@ def merge_duplicate_flows(information_flows: dict):
     to_delete = set()
     for i, j in combinations(information_flows.keys(), 2):
         flow_i = information_flows[i]
-        flow_i["sender"] = flow_i["sender"].casefold()
-        flow_i["receiver"] = flow_i["receiver"].casefold()
+        if flow_i["sender"] and flow_i["receiver"]:
+            flow_i["sender"] = flow_i["sender"].casefold()
+            flow_i["receiver"] = flow_i["receiver"].casefold()
         if i == j:
             continue
         flow_j = information_flows[j]
-        flow_j["sender"] = flow_j["sender"].casefold()
-        flow_j["receiver"] = flow_j["receiver"].casefold()
+        if flow_j["sender"] and flow_j["receiver"]:
+            flow_j["sender"] = flow_j["sender"].casefold()
+            flow_j["receiver"] = flow_j["receiver"].casefold()
 
         if flow_i["sender"] == flow_j["sender"] and flow_i["receiver"] == flow_j["receiver"]:
             # merge

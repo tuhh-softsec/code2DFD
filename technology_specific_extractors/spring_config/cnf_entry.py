@@ -153,11 +153,12 @@ def detect_config_clients(microservices: dict, information_flows: dict, config_s
 
             if trace_file:
                 trace = dict()
-                trace["item"] = config_server + " -> " + microservices[m]["name"]
-                trace["file"] = trace_file
-                trace["line"] = trace_line
-                trace["span"] = trace_span
-                traceability.add_trace(trace)
+                if config_server:
+                    trace["item"] = config_server + " -> " + microservices[m]["name"]
+                    trace["file"] = trace_file
+                    trace["line"] = trace_line
+                    trace["span"] = trace_span
+                    traceability.add_trace(trace)
 
             if config_username:
                 information_flows[id]["stereotype_instances"].append("plaintext_credentials_link")
