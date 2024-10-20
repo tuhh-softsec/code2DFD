@@ -52,19 +52,19 @@ def weavescope(microservices):
         for m in microservices.keys():
             if ("Monitoring Dashboard", "Weave Scope") in microservices[m]["tagged_values"]:
                 for mi in microservices.keys():
-                    if not microservices[mi]["servicename"] == microservices[m]["servicename"]:
+                    if not microservices[mi]["name"] == microservices[m]["name"]:
                         try:
                             id = max(new_information_flows.keys()) + 1
                         except:
                             id = 0
                         new_information_flows[id] = dict()
 
-                        new_information_flows[id]["sender"] = microservices[mi]["servicename"]
-                        new_information_flows[id]["receiver"] = microservices[m]["servicename"]
+                        new_information_flows[id]["sender"] = microservices[mi]["name"]
+                        new_information_flows[id]["receiver"] = microservices[m]["name"]
                         new_information_flows[id]["stereotype_instances"] = ["restful_http"]
 
                         trace = dict()
-                        trace["item"] = microservices[mi]["servicename"] + " -> " + microservices[m]["servicename"]
+                        trace["item"] = microservices[mi]["name"] + " -> " + microservices[m]["name"]
                         trace["file"] = "implicit for weavescope"
                         trace["line"] = "implicit for weavescope"
                         trace["span"] = "implicit for weavescope"
@@ -99,11 +99,11 @@ def zuul(microservices):
                         if filename == "application.properties":
                             logger.info("Found application.properties here: " + str(c.path))
                             file_url = c.download_url
-                            new_information_flows = extract_routes_properties(file_url, microservices[m]["servicename"])
+                            new_information_flows = extract_routes_properties(file_url, microservices[m]["name"])
                         elif filename == "application.yaml" or filename == "application.yml" or filename == "bootstrap.yml" or filename == "bootstrap.yaml":
                             logger.info("Found properteis file here: " + str(c.path))
                             file_url = c.download_url
-                            new_information_flows = extract_routes_yaml(file_url, microservices[m]["servicename"])
+                            new_information_flows = extract_routes_yaml(file_url, microservices[m]["name"])
 
     return new_information_flows
 

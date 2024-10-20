@@ -1,5 +1,6 @@
 import ast
 from datetime import datetime
+from itertools import combinations
 
 import output_generators.codeable_model as codeable_model
 import core.technology_switch as tech_sw
@@ -95,15 +96,25 @@ def perform_analysis():
     print("Extracted information flows from API-calls, message brokers, and database connections")
 
     # Detect everything else / execute all technology implementations
+    print("Classifying all services")
     microservices = tech_sw.get_microservices(dfd)
     microservices, information_flows, external_components = classify_microservices(microservices, information_flows, external_components, dfd)
 
     # Merging
     print("Merging duplicate items")
-    information_flows = clean_database_connections(microservices, information_flows)
-    information_flows = merge_duplicate_flows(information_flows)
-    microservices, external_components = merge_duplicate_services(microservices, external_components)
-    microservices, information_flows, external_components = merge_duplicate_annotations(microservices, information_flows, external_components)
+
+    merge_duplicate_flows(information_flows)
+
+    merge_duplicate_nodes(microservices)
+    merge_duplicate_nodes(external_components)
+
+    merge_duplicate_annotations(microservices)
+    merge_duplicate_annotations(information_flows)
+    merge_duplicate_annotations(external_components)
+
+    print("Cleaning database connections")
+
+    clean_database_connections(microservices, information_flows)
 
     # Printing
     print("\nFinished extraction")
@@ -137,11 +148,10 @@ def classify_brokers(microservices: dict) -> dict:
     return microservices
 
 
-def classify_microservices(microservices: dict, information_flows: dict, external_components: dict, dfd) -> dict:
+def classify_microservices(microservices: dict, information_flows: dict, external_components: dict, dfd) -> tuple[dict, dict, dict]:
     """Tries to determine the microservice's funcitonality.
     """
 
-    print("Classifying all services")
     microservices, information_flows = detect_eureka(microservices, information_flows, dfd)
     microservices, information_flows, external_components = detect_zuul(microservices, information_flows, external_components, dfd)
     microservices, information_flows, external_components = detect_spring_cloud_gateway(microservices, information_flows, external_components, dfd)
@@ -178,11 +188,11 @@ def overwrite_port(microservices: dict) -> dict:
     """Writes port from properties to tagged vallues.
     """
 
-    for m in microservices.keys():
-        port = False
-        for prop in microservices[m]["properties"]:
+    for microservice in microservices.values():
+        for prop in microservice.get("properties", []):
             if prop[0] == "port":
-                if type(prop[1]) == str:
+                port = None
+                if isinstance(prop[1], str):
                     if "port" in prop[1].casefold():
                         port = prop[1].split(":")[1].strip("}")
                     else:
@@ -192,297 +202,240 @@ def overwrite_port(microservices: dict) -> dict:
                 if port:
                     # Traceability
                     trace = dict()
-                    trace["parent_item"] = microservices[m]["servicename"]
+                    trace["parent_item"] = microservice["name"]
                     trace["item"] = "Port"
                     trace["file"] = prop[2][0]
                     trace["line"] = prop[2][1]
                     trace["span"] = prop[2][2]
 
                     traceability.add_trace(trace)
-                    if "tagged_values" in microservices[m]:
-                        microservices[m]["tagged_values"].append(("Port", port))
-                    else:
-                        microservices[m]["tagged_values"] = [("Port", port)]
+                    microservice["tagged_values"] = microservice.get("tagged_values", list()) + [("Port", port)]
 
     return microservices
 
 
-def detect_miscellaneous(microservices: dict, information_flows: dict, external_components: dict) -> dict:
+def detect_miscellaneous(microservices: dict, information_flows: dict, external_components: dict) -> tuple[dict, dict, dict]:
     """Goes through properties extracted for each service to check for some things that don't fit anywhere else (mail servers, external websites, etc.).
     """
 
-    for m in microservices.keys():
-        if "properties" in microservices[m].keys():
-            for prop in microservices[m]["properties"]:
+    for microservice in microservices.values():
+        for prop in microservice.get("properties", []):
+            # external mail server
+            if prop[0] == "mail_host":
+                mail_username, mail_password = None, None
+                for prop2 in microservice["properties"]:
+                    if prop2[0] == "mail_password":
+                        mail_password = prop2[1]
+                    elif prop2[0] == "mail_username":
+                        mail_username = prop2[1]
+                # create external mail server
+                id_ = max(external_components.keys(), default=-1) + 1
+                external_components[id_] = dict()
+                external_components[id_]["name"] = "mail-server"
+                external_components[id_]["stereotype_instances"] = ["mail_server", "entrypoint", "exitpoint"]
+                external_components[id_]["tagged_values"] = [("Host", prop[1])]
+                if mail_password:
+                    external_components[id_]["tagged_values"].append(("Password", mail_password))
+                    external_components[id_]["stereotype_instances"].append("plaintext_credentials")
+                if mail_username:
+                    external_components[id_]["tagged_values"].append(("Username", mail_username))
 
-                # external mail server
-                if prop[0] == "mail_host":
-                    mail_username, mail_password = False, False
-                    for prop2 in microservices[m]["properties"]:
-                        if prop2[0] == "mail_password":
-                            mail_password = prop2[1]
-                        elif prop2[0] == "mail_username":
-                            mail_username = prop2[1]
-                    # create external mail server
-                    try:
-                        id = max(external_components.keys()) + 1
-                    except:
-                        id = 0
-                    external_components[id] = dict()
-                    external_components[id]["name"] = "mail-server"
-                    external_components[id]["stereotype_instances"] = ["mail_server", "entrypoint", "exitpoint"]
-                    external_components[id]["tagged_values"] = [("Host", prop[1])]
-                    if mail_password:
-                        external_components[id]["tagged_values"].append(("Password", mail_password))
-                        external_components[id]["stereotype_instances"].append("plaintext_credentials")
-                    if mail_username:
-                        external_components[id]["tagged_values"].append(("Username", mail_username))
+                trace = dict()
+                trace["item"] = "mail-server"
+                trace["file"] = prop[2][0]
+                trace["line"] = prop[2][1]
+                trace["span"] = prop[2][2]
 
-                    trace = dict()
-                    trace["item"] = "mail-server"
-                    trace["file"] = prop[2][0]
-                    trace["line"] = prop[2][1]
-                    trace["span"] = prop[2][2]
+                traceability.add_trace(trace)
 
-                    traceability.add_trace(trace)
+                trace["parent_item"] = "mail-server"
+                trace["item"] = "entrypoint"
+                trace["file"] = "heuristic"
+                trace["line"] = "heuristic"
+                trace["span"] = "heuristic"
 
-                    trace["parent_item"] = "mail-server"
-                    trace["item"] = "entrypoint"
-                    trace["file"] = "heuristic"
-                    trace["line"] = "heuristic"
-                    trace["span"] = "heuristic"
+                traceability.add_trace(trace)
 
-                    traceability.add_trace(trace)
+                trace["parent_item"] = "mail-server"
+                trace["item"] = "exitpoint"
+                trace["file"] = "heuristic"
+                trace["line"] = "heuristic"
+                trace["span"] = "heuristic"
 
-                    trace["parent_item"] = "mail-server"
-                    trace["item"] = "exitpoint"
-                    trace["file"] = "heuristic"
-                    trace["line"] = "heuristic"
-                    trace["span"] = "heuristic"
+                traceability.add_trace(trace)
 
-                    traceability.add_trace(trace)
+                trace["parent_item"] = "mail-server"
+                trace["item"] = "mail_server"
+                trace["file"] = "heuristic"
+                trace["line"] = "heuristic"
+                trace["span"] = "heuristic"
 
-                    trace["parent_item"] = "mail-server"
-                    trace["item"] = "mail_server"
-                    trace["file"] = "heuristic"
-                    trace["line"] = "heuristic"
-                    trace["span"] = "heuristic"
+                traceability.add_trace(trace)
 
-                    traceability.add_trace(trace)
+                # create connection
+                id2 = max(information_flows.keys(), default=-1) + 1
+                information_flows[id2] = dict()
+                information_flows[id2]["sender"] = microservice["name"]
+                information_flows[id2]["receiver"] = "mail-server"
+                information_flows[id2]["stereotype_instances"] = ["restful_http"]
+                if mail_password:
+                    information_flows[id2]["stereotype_instances"].append("plaintext_credentials_link")
 
-                    # create connection
-                    try:
-                        id2 = max(information_flows.keys()) + 1
-                    except:
-                        id2 = 0
-                    information_flows[id2] = dict()
-                    information_flows[id2]["sender"] = microservices[m]["servicename"]
-                    information_flows[id2]["receiver"] = "mail-server"
-                    information_flows[id2]["stereotype_instances"] = ["restful_http"]
-                    if mail_password:
-                        information_flows[id2]["stereotype_instances"].append("plaintext_credentials_link")
+                trace = dict()
+                trace["item"] = microservice["name"] + " -> mail-server"
+                trace["file"] = prop[2][0]
+                trace["line"] = prop[2][1]
+                trace["span"] = prop[2][2]
 
-                    trace = dict()
-                    trace["item"] = microservices[m]["servicename"] + " -> mail-server"
-                    trace["file"] = prop[2][0]
-                    trace["line"] = prop[2][1]
-                    trace["span"] = prop[2][2]
+                traceability.add_trace(trace)
 
-                    traceability.add_trace(trace)
+            # external api rate website
+            elif prop[0] == "rates_url":
+                # create external component
+                id_ = max(external_components.keys(), default=-1) + 1
+                external_components[id_] = dict()
+                external_components[id_]["name"] = "external-website"
+                external_components[id_]["stereotype_instances"] = ["external_website", "entrypoint", "exitpoint"]
+                external_components[id_]["tagged_values"] = [("URL", prop[1])]
 
-                # external api rate website
-                elif prop[0] == "rates_url":
-                    # create external component
-                    try:
-                        id = max(external_components.keys()) + 1
-                    except:
-                        id = 0
-                    external_components[id] = dict()
-                    external_components[id]["name"] = "external-website"
-                    external_components[id]["stereotype_instances"] = ["external_website", "entrypoint", "exitpoint"]
-                    external_components[id]["tagged_values"] = [("URL", prop[1])]
+                trace = dict()
+                trace["item"] = "external-website"
+                trace["file"] = prop[2][0]
+                trace["line"] = prop[2][1]
+                trace["span"] = prop[2][2]
 
-                    trace = dict()
-                    trace["item"] = "external-website"
-                    trace["file"] = prop[2][0]
-                    trace["line"] = prop[2][1]
-                    trace["span"] = prop[2][2]
+                traceability.add_trace(trace)
 
-                    traceability.add_trace(trace)
+                trace["parent_item"] = "external-website"
+                trace["item"] = "entrypoint"
+                trace["file"] = "heuristic"
+                trace["line"] = "heuristic"
+                trace["span"] = "heuristic"
 
-                    trace["parent_item"] = "external-website"
-                    trace["item"] = "entrypoint"
-                    trace["file"] = "heuristic"
-                    trace["line"] = "heuristic"
-                    trace["span"] = "heuristic"
+                traceability.add_trace(trace)
 
-                    traceability.add_trace(trace)
+                trace["parent_item"] = "external-website"
+                trace["item"] = "exitpoint"
+                trace["file"] = "heuristic"
+                trace["line"] = "heuristic"
+                trace["span"] = "heuristic"
 
-                    trace["parent_item"] = "external-website"
-                    trace["item"] = "exitpoint"
-                    trace["file"] = "heuristic"
-                    trace["line"] = "heuristic"
-                    trace["span"] = "heuristic"
+                traceability.add_trace(trace)
 
-                    traceability.add_trace(trace)
+                trace["parent_item"] = "external-website"
+                trace["item"] = "external_website"
+                trace["file"] = "heuristic"
+                trace["line"] = "heuristic"
+                trace["span"] = "heuristic"
 
-                    trace["parent_item"] = "external-website"
-                    trace["item"] = "external_website"
-                    trace["file"] = "heuristic"
-                    trace["line"] = "heuristic"
-                    trace["span"] = "heuristic"
+                traceability.add_trace(trace)
 
-                    traceability.add_trace(trace)
+                # create connection
+                id2 = max(information_flows.keys(), default=-1) + 1
+                information_flows[id2] = dict()
+                information_flows[id2]["sender"] = "external-website"
+                information_flows[id2]["receiver"] = microservice["name"]
+                information_flows[id2]["stereotype_instances"] = ["restful_http"]
 
-                    # create connection
-                    try:
-                        id2 = max(information_flows.keys()) + 1
-                    except:
-                        id2 = 0
-                    information_flows[id2] = dict()
-                    information_flows[id2]["sender"] = "external-website"
-                    information_flows[id2]["receiver"] = microservices[m]["servicename"]
-                    information_flows[id2]["stereotype_instances"] = ["restful_http"]
+                trace = dict()
+                trace["item"] = "external-website -> " + microservice["name"]
+                trace["file"] = prop[2][0]
+                trace["line"] = prop[2][1]
+                trace["span"] = prop[2][2]
 
-                    trace = dict()
-                    trace["item"] = "external-website -> " + microservices[m]["servicename"]
-                    trace["file"] = prop[2][0]
-                    trace["line"] = prop[2][1]
-                    trace["span"] = prop[2][2]
+                traceability.add_trace(trace)
 
-                    traceability.add_trace(trace)
+            # connection config to services
+            elif prop[0] == "config_connected":
+                for m2 in microservices.values():
+                    for stereotype in m2.get("stereotype_instances", []):
+                        if stereotype == "configuration_server":
+                            id_ = max(information_flows.keys(), default=-1) + 1
+                            information_flows[id_] = dict()
+                            information_flows[id_]["sender"] = m2["name"]
+                            information_flows[id_]["receiver"] = microservice["name"]
+                            information_flows[id_]["stereotype_instances"] = ["restful_http"]
 
-                # connection config to services
-                elif prop[0] == "config_connected":
-                    for m2 in microservices.keys():
-                        for stereotype in microservices[m2]["stereotype_instances"]:
-                            if stereotype == "configuration_server":
-                                try:
-                                    id = max(information_flows.keys()) + 1
-                                except:
-                                    id = 0
-                                information_flows[id] = dict()
-                                information_flows[id]["sender"] = microservices[m2]["servicename"]
-                                information_flows[id]["receiver"] = microservices[m]["servicename"]
-                                information_flows[id]["stereotype_instances"] = ["restful_http"]
+                            trace = dict()
+                            trace["item"] = m2["name"] + " -> " + microservice["name"]
+                            trace["file"] = prop[2][0]
+                            trace["line"] = prop[2][1]
+                            trace["span"] = prop[2][2]
 
-                                trace = dict()
-                                trace["item"] = microservices[m2]["servicename"] + " -> " + microservices[m]["servicename"]
-                                trace["file"] = prop[2][0]
-                                trace["line"] = prop[2][1]
-                                trace["span"] = prop[2][2]
+                            traceability.add_trace(trace)
 
-                                traceability.add_trace(trace)
     return microservices, information_flows, external_components
 
 
-def merge_duplicate_flows(information_flows: dict) -> dict:
+def merge_duplicate_flows(information_flows: dict):
     """Multiple flows with the same sender and receiver might occur. They are merged here.
     """
 
     to_delete = set()
-    keep = set()
-    for i in information_flows.keys():
-        for j in information_flows.keys():
-            if not i == j and not i in keep and not j in keep:
-                if information_flows[i]["sender"] == information_flows[j]["sender"]:
-                    if information_flows[i]["receiver"] == information_flows[j]["receiver"]:
-                        # merge
-                        for property in information_flows[j].keys():
-                            if not property == "sender" and not property == "receiver":
-                                try:        # flow i has same propert -> merge them
-                                    information_flows[i][property] = information_flows[i][property] + information_flows[j][property]
-                                except:     # flow i does not have this property -> set it
-                                    information_flows[i][property] = information_flows[j][property]
-                        to_delete.add(j)
-                        keep.add(i)
+    for i, j in combinations(information_flows.keys(), 2):
+        flow_i = information_flows[i]
+        flow_i["sender"] = flow_i["sender"].casefold()
+        flow_i["receiver"] = flow_i["receiver"].casefold()
+        if i == j:
+            continue
+        flow_j = information_flows[j]
+        flow_j["sender"] = flow_j["sender"].casefold()
+        flow_j["receiver"] = flow_j["receiver"].casefold()
 
-    information_flows_new = dict()
-    for old in information_flows.keys():
-        if old not in to_delete:
-            information_flows_new[old] = information_flows[old]
-
-    return information_flows_new
+        if flow_i["sender"] == flow_j["sender"] and flow_i["receiver"] == flow_j["receiver"]:
+            # merge
+            for field, j_value in flow_j.items():
+                if field not in ["sender", "receiver"]:
+                    flow_i[field] = flow_i.get(field, list()) + list(j_value)
+            to_delete.add(j)
+    for k in to_delete:
+        del information_flows[k]
 
 
-def merge_duplicate_services(microservices: dict, external_components: dict) -> dict:
-    """Merge duplicate microservices
+def merge_duplicate_nodes(nodes: dict):
+    """Merge duplicate nodes
     """
 
     # Microservices
     to_delete = set()
-    keep = set()
-    for i in microservices.keys():
-        for j in microservices.keys():
-            if not i == j and not i in keep and not j in keep:
-                if microservices[i]["servicename"] == microservices[j]["servicename"]:
-                    # merge
-                    for property in microservices[j].keys():
-                        if not property == "servicename":
-                            try:        # service i has same propert -> merge them
-                                microservices[i][property] = microservices[i][property] + microservices[j][property]
-                            except:     # service i does not have this property -> set it
-                                microservices[i][property] = microservices[j][property]
-                    to_delete.add(j)
-                    keep.add(i)
+    for i, j in combinations(nodes.keys(), 2):
+        node_i = nodes[i]
+        node_i["name"] = node_i["name"].casefold()
+        if i == j:
+            continue
+        node_j = nodes[j]
+        node_j["name"] = node_j["name"].casefold()
 
-    microservices_new = dict()
-    for old in microservices.keys():
-        if old not in to_delete:
-            microservices_new[old] = microservices[old]
-
-    # External components
-    to_delete = set()
-    keep = set()
-    for i in external_components.keys():
-        for j in external_components.keys():
-            if not i == j and not i in keep and not j in keep:
-                if external_components[i]["name"] == external_components[j]["name"]:
-                    # merge
-                    for property in external_components[j].keys():
-                        if not property == "name":
-                            try:        # service i has same propert -> merge them
-                                external_components[i][property] = external_components[i][property] + external_components[j][property]
-                            except:     # service i does not have this property -> set it
-                                external_components[i][property] = external_components[j][property]
-                    to_delete.add(j)
-                    keep.add(i)
-
-    external_components_new = dict()
-    for old in external_components.keys():
-        if old not in to_delete:
-            external_components_new[old] = external_components[old]
-
-    return microservices_new, external_components_new
+        if node_i["name"] == node_j["name"]:
+            # merge
+            for field, j_value in node_j.items():
+                if field not in ["name", "type"]:
+                    node_i[field] = node_i.get(field, list()) + list(j_value)
+            to_delete.add(j)
+    for k in to_delete:
+        del nodes[k]
 
 
-def merge_duplicate_annotations(microservices: dict, information_flows: dict, external_components: dict) -> dict:
+def merge_duplicate_annotations(collection: dict):
     """Merge annotations of all items
     """
 
-    for collection in [microservices, information_flows, external_components]:
-        for id in collection.keys():
-            if "stereotype_instances" in collection[id]:
-                stereotype_set = set()
-                for stereotype in collection[id]["stereotype_instances"]:
-                    stereotype_set.add(stereotype)
-                collection[id]["stereotype_instances"] = list(stereotype_set)
+    for item in collection.values():
+        if "stereotype_instances" in item:
+            item["stereotype_instances"] = list(set(item["stereotype_instances"]))
 
-            if "tagged_values" in collection[id]:
-                tagged_values_set = set()
-                for tagged_value in collection[id]["tagged_values"]:
-                    if tagged_value[0] == "Port":
+        if "tagged_values" in item:
+            tagged_values_set = set()
+            for tag, tagged_value in item["tagged_values"]:
+                if tag == "Port":
+                    if isinstance(tagged_value, str):
+                        tagged_value = tagged_value.split("/")[0]  # Could be a protocol like 3306/tcp
+                    if not isinstance(tagged_value, int):
                         try:
-                            tagged_values_set.add((tagged_value[0], int(tagged_value[1])))
-                        except:
+                            tagged_value = int(tagged_value)
+                        except ValueError:
                             pass
-                    elif type(tagged_value[1]) == list:
-                        endpoints = list()
-                        for e in tagged_value[1]:
-                            endpoints.append(e)
-                        tagged_values_set.add((tagged_value[0], str(endpoints)))
-                    else:
-                        tagged_values_set.add((tagged_value[0], tagged_value[1]))
-                collection[id]["tagged_values"] = list(tagged_values_set)
-
-    return microservices, information_flows, external_components
+                elif isinstance(tagged_value, list):
+                    tagged_value = str(tagged_value)
+                tagged_values_set.add((tag, tagged_value))
+            item["tagged_values"] = list(tagged_values_set)

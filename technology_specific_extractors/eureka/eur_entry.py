@@ -15,7 +15,7 @@ def detect_eureka(microservices: dict, information_flows: dict, dfd) -> dict:
         eureka_server = tech_sw.detect_microservice(results[r]["path"], dfd)
 
         for m in microservices.keys():
-            if microservices[m]["servicename"] == eureka_server:        # this is the eureka server
+            if microservices[m]["name"] == eureka_server:        # this is the eureka server
                 try:
                     microservices[m]["stereotype_instances"].append("service_discovery")
                 except:
@@ -51,13 +51,13 @@ def detect_eureka(microservices: dict, information_flows: dict, dfd) -> dict:
         for result_path in result_paths:
             service = tech_sw.detect_microservice(result_path[0], dfd)
             for m in microservices.keys():
-                if microservices[m]["servicename"] == service:
-                    participants.add((microservices[m]["servicename"], result_path[0], result_path[1], result_path[2]))
+                if microservices[m]["name"] == service:
+                    participants.add((microservices[m]["name"], result_path[0], result_path[1], result_path[2]))
 
         for m in microservices.keys():
             for prop in microservices[m]["properties"]:
-                if prop[0] == "eureka_connected" and microservices[m]["servicename"] not in participants:
-                    participants.add((microservices[m]["servicename"], prop[2][0], prop[2][1], prop[2][2]))
+                if prop[0] == "eureka_connected" and microservices[m]["name"] not in participants:
+                    participants.add((microservices[m]["name"], prop[2][0], prop[2][1], prop[2][2]))
 
         for participant in participants:
             if not participant[0] == eureka_server:
@@ -104,7 +104,7 @@ def detect_eureka_server_only(microservices: dict, dfd):
 
     for e in eureka_servers:
         for m in microservices.keys():
-            if microservices[m]["servicename"] == e:        # this is the eureka server
+            if microservices[m]["name"] == e:        # this is the eureka server
                 try:
                     microservices[m]["stereotype_instances"].append("service_discovery")
                 except:

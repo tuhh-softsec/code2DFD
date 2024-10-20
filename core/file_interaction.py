@@ -154,7 +154,7 @@ def enrich_output(results: list, microservices: dict):
         o["Import"] = detection_import(o["Line"])
         o["Comment"] = detection_comment(o["Filename"], o["Line"])
         o["Service"] = "None"
-        microservices = [microservices[x]["servicename"] for x in microservices.keys()]
+        microservices = [microservices[x]["name"] for x in microservices.keys()]
         for m in microservices.keys:
             if m in o["Path"]:
                 o["Service"] = m
@@ -238,7 +238,7 @@ def detect_microservice(file_path, dfd):
     """
 
     microservices_set = tech_sw.get_microservices(dfd)
-    microservices = [microservices_set[x]["servicename"] for x in microservices_set.keys()]
+    microservices = [microservices_set[x]["name"] for x in microservices_set.keys()]
 
     file_path_parts = Path(file_path).parts
     count = 0
@@ -358,17 +358,17 @@ def resolve_url(url: str, microservice: str, dfd) -> str:
                         for prop in microservices[m]["tagged_values"]:
                             if prop[0] == "Port":
                                 if port == prop[1]:
-                                    target_service = microservices[m]["servicename"]
+                                    target_service = microservices[m]["name"]
         else:
             for m in microservices.keys():
                 url_parts = url.split("/")
                 for url_part in url_parts:
-                    if microservices[m]["servicename"] in url_part.split(":")[0]:
-                        target_service = microservices[m]["servicename"]
+                    if microservices[m]["name"] in url_part.split(":")[0]:
+                        target_service = microservices[m]["name"]
     elif url[0] == "$":  # is environment variable
         if microservice:
             for m in microservices.keys():
-                if microservices[m]["servicename"] == microservice:
+                if microservices[m]["name"] == microservice:
                     try:
                         if "Spring Config" in microservices[m]["properties"]:
                             for mi in microservices.keys():

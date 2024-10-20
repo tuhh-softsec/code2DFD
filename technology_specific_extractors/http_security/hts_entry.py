@@ -129,7 +129,7 @@ def interpret_configurations(microservices: dict, configuration_tuples: list) ->
                 traceability.add_trace(trace)
 
         for m in microservices.keys():
-            if microservices[m]["servicename"] == configuration_tuple[0]:
+            if microservices[m]["name"] == configuration_tuple[0]:
                 try:
                     microservices[m]["stereotype_instances"] += stereotypes
                 except:

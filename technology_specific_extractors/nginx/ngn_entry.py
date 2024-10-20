@@ -65,7 +65,7 @@ def detect_nginx(microservices: dict, information_flows: dict, external_componen
 
     for m in microservices.keys():
         if "nginx:" in microservices[m]["image"]:
-            web_app = microservices[m]["servicename"]
+            web_app = microservices[m]["name"]
             correct_id = m
             try:
                 microservices[m]["stereotype_instances"].append("web_application")
@@ -82,7 +82,7 @@ def detect_nginx(microservices: dict, information_flows: dict, external_componen
             web_service = tech_sw.detect_microservice(results[r]["path"], dfd)
             if web_service:
                 for m in microservices.keys():
-                    if microservices[m]["servicename"] == web_service:
+                    if microservices[m]["name"] == web_service:
                         web_app = web_service
                         correct_id = m
                         if "stereotype_instances" in microservices[m]:
@@ -135,7 +135,7 @@ def detect_nginx(microservices: dict, information_flows: dict, external_componen
                             if image == docker_path:
                                 service_name = s
 
-                microservices[id]["servicename"] = service_name
+                microservices[id]["name"] = service_name
                 microservices[id]["image"] = "nginx"
                 microservices[id]["type"] = "service"
                 microservices[id]["docker_path"] = docker_path
@@ -180,18 +180,18 @@ def detect_nginx(microservices: dict, information_flows: dict, external_componen
                                         if ":" in target:
                                             target_service = target.split(":")[0]
                                             for m in microservices.keys():
-                                                if microservices[m]["servicename"] == target_service:
-                                                    gateway = microservices[m]["servicename"]
+                                                if microservices[m]["name"] == target_service:
+                                                    gateway = microservices[m]["name"]
                                             if not gateway:
                                                 target_port = target.split(":")[1]
                                                 for m in microservices.keys():
                                                     for prop in microservices[m]["tagged_values"]:
                                                         if prop[0] == "Port" and int(prop[1]) == int(target_port):
-                                                            gateway = microservices[m]["servicename"]
+                                                            gateway = microservices[m]["name"]
                                         else:
                                             for m in microservices.keys():
-                                                if microservices[m]["servicename"] == target:
-                                                    gateway = microservices[m]["servicename"]
+                                                if microservices[m]["name"] == target:
+                                                    gateway = microservices[m]["name"]
                                     counter += 1
                             elif "listen " in line2:
                                 try:
@@ -216,12 +216,12 @@ def detect_nginx(microservices: dict, information_flows: dict, external_componen
         if not gateway:
             for m in microservices.keys():
                 if "stereotype_instances" in microservices[m] and "gateway" in microservices[m]["stereotype_instances"]:
-                    gateway = microservices[m]["servicename"]
+                    gateway = microservices[m]["name"]
 
         if gateway:
             # adjust gateway annotations
             for m in microservices.keys():
-                if microservices[m]["servicename"] == gateway:
+                if microservices[m]["name"] == gateway:
                     if "stereotype_instances" in microservices[m]:
                         if not "gateway" in microservices[m]["stereotype_instances"]:
                             microservices[m]["stereotype_instances"].append("gateway")
@@ -230,7 +230,7 @@ def detect_nginx(microservices: dict, information_flows: dict, external_componen
                             discovery_server = False
                             for mi in microservices.keys():
                                 if "stereotype_instances" in microservices[mi] and "service_discovery" in microservices[mi]["stereotype_instances"]:
-                                    discovery_server = microservices[mi]["servicename"]
+                                    discovery_server = microservices[mi]["name"]
                             if discovery_server:
                                 for i in information_flows:
                                     if information_flows[i]["sender"] == gateway and information_flows[i]["receiver"] == discovery_server:

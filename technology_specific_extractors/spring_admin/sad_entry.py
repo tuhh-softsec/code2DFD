@@ -12,7 +12,7 @@ def detect_spring_admin_server(microservices: dict, information_flows: dict, dfd
     for r in results.keys():
         admin_server = tech_sw.detect_microservice(results[r]["path"], dfd)
         for m in microservices.keys():
-            if microservices[m]["servicename"] == admin_server:
+            if microservices[m]["name"] == admin_server:
                 try:
                     microservices[m]["stereotype_instances"].append("administration_server")
                 except:
@@ -21,7 +21,7 @@ def detect_spring_admin_server(microservices: dict, information_flows: dict, dfd
                     microservices[m]["tagged_values"].append(("Administration Server", "Spring Boot Admin"))
                 except:
                     microservices[m]["tagged_values"] = ("Administration Server", "Spring Boot Admin")
-                admin_server = microservices[m]["servicename"]
+                admin_server = microservices[m]["name"]
 
                 # Traceability
                 trace = dict()
@@ -54,13 +54,13 @@ def detect_spring_admin_server(microservices: dict, information_flows: dict, dfd
             if reverse: # flow admin -> service-discovery
                 found = False
                 for i in information_flows.keys():
-                    if information_flows[i]["sender"] == admin_server and information_flows[i]["receiver"] == microservices[m]["servicename"]:
+                    if information_flows[i]["sender"] == admin_server and information_flows[i]["receiver"] == microservices[m]["name"]:
                         found = True
-                        information_flows[i]["sender"] = microservices[m]["servicename"]
+                        information_flows[i]["sender"] = microservices[m]["name"]
                         information_flows[i]["receiver"] = admin_server
 
                         trace = dict()
-                        trace["item"] = microservices[m]["servicename"] + " -> " + admin_server
+                        trace["item"] = microservices[m]["name"] + " -> " + admin_server
                         trace["file"] = trace_info[0]
                         trace["line"] = trace_info[1]
                         trace["span"] = trace_info[2]
@@ -74,12 +74,12 @@ def detect_spring_admin_server(microservices: dict, information_flows: dict, dfd
                         id = 0
                     information_flows[id] = dict()
 
-                    information_flows[id]["sender"] = microservices[m]["servicename"]
+                    information_flows[id]["sender"] = microservices[m]["name"]
                     information_flows[id]["receiver"] = admin_server
                     information_flows[id]["stereotype_instances"] = ["restful_http"]
 
                     trace = dict()
-                    trace["item"] = microservices[m]["servicename"] + " -> " + admin_server
+                    trace["item"] = microservices[m]["name"] + " -> " + admin_server
                     trace["file"] = trace_info[0]
                     trace["line"] = trace_info[1]
                     trace["span"] = trace_info[2]
@@ -90,13 +90,13 @@ def detect_spring_admin_server(microservices: dict, information_flows: dict, dfd
             elif config_reverse:
                 found = False
                 for i in information_flows.keys():
-                    if information_flows[i]["sender"] == microservices[m]["servicename"] and information_flows[i]["receiver"] == admin_server:
+                    if information_flows[i]["sender"] == microservices[m]["name"] and information_flows[i]["receiver"] == admin_server:
                         found = True
                         information_flows[i]["sender"] = admin_server
-                        information_flows[i]["receiver"] = microservices[m]["servicename"]
+                        information_flows[i]["receiver"] = microservices[m]["name"]
 
                         trace = dict()
-                        trace["item"] = admin_server + " -> " + microservices[m]["servicename"]
+                        trace["item"] = admin_server + " -> " + microservices[m]["name"]
                         trace["file"] = trace_info[0]
                         trace["line"] = trace_info[1]
                         trace["span"] = trace_info[2]
@@ -111,11 +111,11 @@ def detect_spring_admin_server(microservices: dict, information_flows: dict, dfd
                     information_flows[id] = dict()
 
                     information_flows[id]["sender"] = admin_server
-                    information_flows[id]["receiver"] = microservices[m]["servicename"]
+                    information_flows[id]["receiver"] = microservices[m]["name"]
                     information_flows[id]["stereotype_instances"] = ["restful_http"]
 
                     trace = dict()
-                    trace["item"] = admin_server + " -> " + microservices[m]["servicename"]
+                    trace["item"] = admin_server + " -> " + microservices[m]["name"]
                     trace["file"] = trace_info[0]
                     trace["line"] = trace_info[1]
                     trace["span"] = trace_info[2]
@@ -130,11 +130,11 @@ def detect_spring_admin_server(microservices: dict, information_flows: dict, dfd
 
                 information_flows[id] = dict()
                 information_flows[id]["sender"] = admin_server
-                information_flows[id]["receiver"] = microservices[m]["servicename"]
+                information_flows[id]["receiver"] = microservices[m]["name"]
                 information_flows[id]["stereotype_instances"] = ["restful_http"]
 
                 trace = dict()
-                trace["item"] = admin_server + " -> " + microservices[m]["servicename"]
+                trace["item"] = admin_server + " -> " + microservices[m]["name"]
                 trace["file"] = trace_info[0]
                 trace["line"] = trace_info[1]
                 trace["span"] = trace_info[2]
