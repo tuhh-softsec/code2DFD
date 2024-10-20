@@ -7,6 +7,7 @@ import core.file_interaction as fi
 import core.technology_switch as tech_sw
 import tmp.tmp as tmp
 import output_generators.traceability as traceability
+from output_generators.logger import logger
 
 
 def set_information_flows(dfd) -> set:
@@ -266,22 +267,23 @@ def match_incoming_to_outgoing_endpoints(incoming_endpoints: set, outgoing_endpo
         information_flows_set = set()
         information_flows = dict()
         for o in outgoing_endpoints:
-            regex = re.compile(o[1])
-            for i in incoming_endpoints:
-                if re.search(regex, i[0]):
-                    information_flows_set.add((o[2], i[1], o[0], i[0], o[1], i[2], o[3]))
-        for i in information_flows_set:
             try:
-                id = max(information_flows.keys()) + 1
-            except:
-                id = 0
-            information_flows[id] = dict()
-            information_flows[id]["sender"] = i[0]
-            information_flows[id]["receiver"] = i[1]
-            information_flows[id]["exchange"] = i[2]
-            information_flows[id]["queue"] = i[3]
-            information_flows[id]["stereotype_instances"] = ["message_producer_rabbitmq"]
-            information_flows[id]["tagged_values"] = {"Producer Exchange": i[2], "Queue": i[3], "Routing Key": i[4]}
+                regex = re.compile(o[1])
+                for i in incoming_endpoints:
+                    if re.search(regex, i[0]):
+                        information_flows_set.add((o[2], i[1], o[0], i[0], o[1], i[2], o[3]))
+            except (TypeError, re.error) as e:
+                logger.info(f"Error in regex compiling {o[1]}: {e}")
+        
+        for i in information_flows_set:
+            id_ = max(information_flows.keys(), default=-1) + 1
+            information_flows[id_] = dict()
+            information_flows[id_]["sender"] = i[0]
+            information_flows[id_]["receiver"] = i[1]
+            information_flows[id_]["exchange"] = i[2]
+            information_flows[id_]["queue"] = i[3]
+            information_flows[id_]["stereotype_instances"] = ["message_producer_rabbitmq"]
+            information_flows[id_]["tagged_values"] = {"Producer Exchange": i[2], "Queue": i[3], "Routing Key": i[4]}
 
             # Traceability
             trace = dict()
