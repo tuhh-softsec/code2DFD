@@ -75,7 +75,7 @@ def set_microservices(dfd) -> dict:
     for m in nested_microservices:
         microservices_set.add(m)
 
-    tmp.tmp_config.set("DFD", "microservices", str(microservices))
+    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))   # Need to escape single percentage signs for ConfigParser
 
     return microservices
 
