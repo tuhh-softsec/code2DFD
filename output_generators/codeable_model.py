@@ -37,15 +37,15 @@ def output_codeable_model(microservices, information_flows, external_components)
                 stereotypes = str(list(stereotypes))
                 stereotypes = stereotypes.replace("'", "")
 
-        name = str(microservices[m]["servicename"]).replace("-", "_")
+        name = str(microservices[m]["name"]).replace("-", "_")
 
         # Create entry
         if stereotypes and tagged_values:
-            new_line = "\n" + name + " = CClass(service, \"" + str(microservices[m]["servicename"]) + "\", stereotype_instances = " + str(stereotypes) + ", tagged_values = " + str(tagged_values) + ")"
+            new_line = "\n" + name + " = CClass(service, \"" + str(microservices[m]["name"]) + "\", stereotype_instances = " + str(stereotypes) + ", tagged_values = " + str(tagged_values) + ")"
         elif stereotypes:
-            new_line = "\n" + name + " = CClass(service, \"" + str(microservices[m]["servicename"]) + "\", stereotype_instances = " + str(stereotypes) + ")"
+            new_line = "\n" + name + " = CClass(service, \"" + str(microservices[m]["name"]) + "\", stereotype_instances = " + str(stereotypes) + ")"
         else:
-            new_line = "\n" + name + " = CClass(service, \"" + str(microservices[m]["servicename"]) + "\")"
+            new_line = "\n" + name + " = CClass(service, \"" + str(microservices[m]["name"]) + "\")"
 
         file_content += new_line
         last_node = name

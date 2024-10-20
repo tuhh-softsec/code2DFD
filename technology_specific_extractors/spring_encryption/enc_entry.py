@@ -35,7 +35,7 @@ def detect_passwordEncoder(microservices: dict, dfd) -> dict:
             for line in results[r]["content"]:
                 if encoder + ".encode" in line:
                     for m in microservices.keys():
-                        if microservices[m]["servicename"] == microservice:
+                        if microservices[m]["name"] == microservice:
                             if "stereotype_instances" in microservices[m]:
                                 microservices[m]["stereotype_instances"].append("encryption")
                             else:
@@ -64,7 +64,7 @@ def detect_bytesEncryptor(microservices: dict, dfd) -> dict:
                     if password:
                         tagged_values = [("Encrypted String", password)]
             for m in microservices.keys():
-                if microservices[m]["servicename"] == microservice:
+                if microservices[m]["name"] == microservice:
                     if "stereotype_instances" in microservices[m]:
                         microservices[m]["stereotype_instances"] += stereotypes
                     else:
@@ -94,7 +94,7 @@ def detect_keyGenerator(microservices: dict, dfd) -> dict:
                     if "Keygenerator." + command + "().generateKey" in line:
                         microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
                         for m in microservices.keys():
-                            if microservices[m]["servicename"] == microservice:
+                            if microservices[m]["name"] == microservice:
                                 try:
                                     microservices[m]["stereotypes"].append("keygenerator")
                                 except:
@@ -109,7 +109,7 @@ def detect_keyGenerator(microservices: dict, dfd) -> dict:
         for r in results.keys():
             microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
             for m in microservices.keys():
-                if microservices[m]["servicename"] == microservice:
+                if microservices[m]["name"] == microservice:
                     try:
                         microservices[m]["stereotypes"].append("keygenerator")
                     except:

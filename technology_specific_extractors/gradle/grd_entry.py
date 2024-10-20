@@ -37,7 +37,7 @@ def set_microservices(dfd) -> dict:
                     id = 0
                 microservices[id] = dict()
 
-                microservices[id]["servicename"] = microservice[0]
+                microservices[id]["name"] = microservice[0]
                 microservices[id]["image"] = image
                 microservices[id]["type"] = "internal"
                 microservices[id]["gradle_path"] = gradle_file["path"]
@@ -165,7 +165,7 @@ def detect_microservice(file_path, dfd):
         for m in microservices.keys():
             try:
                 if microservices[m]["gradle_path"] == gradle_path:
-                    microservice[0] = microservices[m]["servicename"]
+                    microservice[0] = microservices[m]["name"]
             except:
                 pass
         if not microservice[0]:
@@ -182,7 +182,7 @@ def detect_microservice(file_path, dfd):
                 image = microservices[m]["image"]
                 path = os.path.dirname(file_path)
                 if image in path:
-                    microservice[0] = microservices[m]["servicename"]
+                    microservice[0] = microservices[m]["name"]
             except:
                 pass
 

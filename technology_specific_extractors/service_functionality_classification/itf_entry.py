@@ -39,7 +39,7 @@ def classify_internal_infrastructural(microservices: dict) -> dict:
                 microservices[m]["type"] = "service"
                 if deciding_stereotype:
                     trace = dict()
-                    trace["parent_item"] = microservices[m]["servicename"]
+                    trace["parent_item"] = microservices[m]["name"]
                     trace["item"] = "infrastructural"
                     trace["file"] = "heuristic, based on stereotype " + deciding_stereotype
                     trace["line"] = "heuristic, based on stereotype " + deciding_stereotype
@@ -53,7 +53,7 @@ def classify_internal_infrastructural(microservices: dict) -> dict:
                     microservices[m]["stereotype_instances"] = ["internal"]
 
                 trace = dict()
-                trace["parent_item"] = microservices[m]["servicename"]
+                trace["parent_item"] = microservices[m]["name"]
                 trace["item"] = "internal"
                 trace["file"] = "heuristic"
                 trace["line"] = "heuristic"

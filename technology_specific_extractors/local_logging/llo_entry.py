@@ -31,7 +31,7 @@ def detect_loggerfactory(microservices: dict, dfd) -> dict:
                         for c in ["info", "error", "debug", "trace", "warn"]:
                             if (logger.casefold() + "." + c) in line2.casefold():       # logger is used -> find mciroservice and add stereotype
                                 for m in microservices.keys():
-                                    if microservices[m]["servicename"] == microservice:
+                                    if microservices[m]["name"] == microservice:
                                         try:
                                             microservices[m]["stereotype_instances"] += ["local_logging"]
                                         except:
@@ -39,7 +39,7 @@ def detect_loggerfactory(microservices: dict, dfd) -> dict:
                                         found = True
 
                                         trace = dict()
-                                        trace["parent_item"] = microservices[m]["servicename"]
+                                        trace["parent_item"] = microservices[m]["name"]
                                         trace["item"] = "local_logging"
                                         trace["file"] = results[r]["path"]
                                         trace["line"] = results[r]["line_nr"]
@@ -80,7 +80,7 @@ def detect_lombok(microservices: dict, dfd) -> dict:
             if annotation_found and use_found:
                 microservice = tech_sw.detect_microservice(results[r]["path"], dfd)
                 for m in microservices.keys():
-                    if microservices[m]["servicename"] == microservice:
+                    if microservices[m]["name"] == microservice:
                         try:
                             microservices[m]["stereotype_instances"].append("local_logging")
                         except:
@@ -90,7 +90,7 @@ def detect_lombok(microservices: dict, dfd) -> dict:
                         except:
                             microservices[m]["tagged_values"] = [("Logging Technology", "Lombok")]
                         trace = dict()
-                        trace["parent_item"] = microservices[m]["servicename"]
+                        trace["parent_item"] = microservices[m]["name"]
                         trace["item"] = "local_logging"
                         trace["file"] = results[r]["path"]
                         trace["line"] = results[r]["line_nr"]

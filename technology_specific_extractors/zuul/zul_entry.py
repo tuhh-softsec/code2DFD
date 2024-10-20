@@ -24,7 +24,7 @@ def detect_zuul(microservices: dict, information_flows: dict, external_component
     for r in results.keys():
         zuul_server = tech_sw.detect_microservice(results[r]["path"], dfd)
         for m in microservices.keys():
-            if microservices[m]["servicename"] == zuul_server:    # this is the Zuul server
+            if microservices[m]["name"] == zuul_server:    # this is the Zuul server
                 try:
                     microservices[m]["stereotype_instances"] += ["gateway", "load_balancer"]
                 except:
@@ -49,7 +49,7 @@ def detect_zuul(microservices: dict, information_flows: dict, external_component
                 for m2 in microservices.keys():
                     for s in microservices[m2]["stereotype_instances"]:
                         if s == "service_discovery":
-                            discovery_server = microservices[m2]["servicename"]
+                            discovery_server = microservices[m2]["name"]
                             break
                 if discovery_server:
                     traceability.revert_flow(zuul_server, discovery_server)
@@ -78,13 +78,13 @@ def detect_zuul(microservices: dict, information_flows: dict, external_component
                         if prop[0] == "zuul_route" or prop[0] == "zuul_route_serviceId":
                             for m in microservices.keys():
                                 for part in prop[1].split("/"):
-                                    if microservices[m]["servicename"] in part.casefold():
-                                        receiver = microservices[m]["servicename"]
+                                    if microservices[m]["name"] in part.casefold():
+                                        receiver = microservices[m]["name"]
                         else:
                             for m in microservices.keys():
                                 for part in prop[1].split("://"):
-                                    if microservices[m]["servicename"] in part.split(":")[0].casefold():
-                                        receiver = microservices[m]["servicename"]
+                                    if microservices[m]["name"] in part.split(":")[0].casefold():
+                                        receiver = microservices[m]["name"]
                         if receiver:
                             try:
                                 id = max(information_flows.keys()) + 1

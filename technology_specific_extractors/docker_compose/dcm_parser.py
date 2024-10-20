@@ -92,7 +92,7 @@ def extract_microservices(file_content, file_name) -> set:
             if s == "networks":
                 exists = True
             for id in microservices_dict.keys():
-                if microservices_dict[id]["servicename"] == s:
+                if microservices_dict[id]["name"] == s:
                     exists = True
                     correct_id = id
 
@@ -124,8 +124,8 @@ def extract_microservices(file_content, file_name) -> set:
                     pom_path = Path(microservices_dict[id]["pom_path"])
                     if new_image.split("/")[-1] == pom_path.parts[-2]:
                         exists = True
-                        if "pom_" in microservices_dict[id]["servicename"]:
-                            microservices_dict[id]["servicename"] = s
+                        if "pom_" in microservices_dict[id]["name"]:
+                            microservices_dict[id]["name"] = s
             except:
                 pass
 
@@ -136,8 +136,8 @@ def extract_microservices(file_content, file_name) -> set:
                     pom_path = Path(microservices_dict[id]["pom_path"])
                     if new_build.split("/")[-1] == pom_path.parts[-2]:
                         exists = True
-                        if "pom_" in microservices_dict[id]["servicename"]:
-                            microservices_dict[id]["servicename"] = s
+                        if "pom_" in microservices_dict[id]["name"]:
+                            microservices_dict[id]["name"] = s
             except:
                 pass
 
@@ -366,7 +366,7 @@ def extract_microservices(file_content, file_name) -> set:
             if s == "networks":
                 exists = True
             for id in microservices_dict.keys():
-                if microservices_dict[id]["servicename"] == s:
+                if microservices_dict[id]["name"] == s:
                     exists = True
                     correct_id = id
 
@@ -397,8 +397,8 @@ def extract_microservices(file_content, file_name) -> set:
                     pom_path = Path(microservices_dict[id]["pom_path"])
                     if new_image.split("/")[-1] == pom_path.parts[-2]:
                         exists = True
-                        if "pom_" in microservices_dict[id]["servicename"]:
-                            microservices_dict[id]["servicename"] = s
+                        if "pom_" in microservices_dict[id]["name"]:
+                            microservices_dict[id]["name"] = s
             except:
                 pass
 
@@ -409,8 +409,8 @@ def extract_microservices(file_content, file_name) -> set:
                     pom_path = Path(microservices_dict[id]["pom_path"])
                     if new_build.split("/")[-1] == pom_path.parts[-2]:
                         exists = True
-                        if "pom_" in microservices_dict[id]["servicename"]:
-                            microservices_dict[id]["servicename"] = s
+                        if "pom_" in microservices_dict[id]["name"]:
+                            microservices_dict[id]["name"] = s
             except:
                 pass
 
@@ -633,9 +633,9 @@ def extract_information_flows(file_content, microservices, information_flows):
     discovery_server, config_server = False, False
     for m in microservices.keys():
         if "stereotype_instances" in microservices[m] and "service_discovery" in microservices[m]["stereotype_instances"]:
-            discovery_server = microservices[m]["servicename"]
+            discovery_server = microservices[m]["name"]
         if "stereotype_instances" in microservices[m] and "configuration_server" in microservices[m]["stereotype_instances"]:
-            config_server = microservices[m]["servicename"]
+            config_server = microservices[m]["name"]
 
     file = yaml.load(file_content)
 
@@ -647,7 +647,7 @@ def extract_information_flows(file_content, microservices, information_flows):
                 for link in links:
                     found_service = False
                     for m in microservices.keys():
-                        if microservices[m]["servicename"] == link:
+                        if microservices[m]["name"] == link:
                             found_service = True
                     if found_service and not link in {discovery_server, config_server}:
                         try:
@@ -668,7 +668,7 @@ def extract_information_flows(file_content, microservices, information_flows):
                 for link in links:
                     found_service = False
                     for m in microservices.keys():
-                        if microservices[m]["servicename"] == link:
+                        if microservices[m]["name"] == link:
                             found_service = True
                     if found_service and not link in {discovery_server, config_server}:
                         try:

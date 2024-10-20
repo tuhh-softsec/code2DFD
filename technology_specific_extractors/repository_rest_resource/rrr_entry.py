@@ -17,7 +17,7 @@ def detect_endpoints(microservices: dict, dfd) -> dict:
                     endpoint = "/" + endpoint
                     endpoints.add(endpoint)
                     for m in microservices.keys():
-                        if microservices[m]["servicename"] == microservice:
+                        if microservices[m]["name"] == microservice:
                             try:
                                 microservices[m]["tagged_values"].append(("Endpoints", list(endpoints)))
                             except:

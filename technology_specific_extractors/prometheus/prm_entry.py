@@ -27,7 +27,7 @@ def detect_server_docker(microservices: dict, information_flows: dict, dfd) -> d
         prometheus_server = tech_sw.detect_microservice(results[r]["path"], dfd) # check if any of the builds correspond to this path. If yes, that's the service
 
         for m in microservices.keys():
-            if microservices[m]["servicename"] == prometheus_server:
+            if microservices[m]["name"] == prometheus_server:
                 if "stereotype_instances" in microservices[m]:
                     microservices[m]["stereotype_instances"].append("metrics_server")
                 else:
@@ -45,7 +45,7 @@ def detect_server_docker(microservices: dict, information_flows: dict, dfd) -> d
             except:
                 id = 0
             microservices[id] = dict()
-            microservices[id]["servicename"] = "prometheus_server"
+            microservices[id]["name"] = "prometheus_server"
             microservices[id]["image"] = results[r]["path"]
             microservices[id]["stereotype_instances"] = ["metrics_server"]
             microservices[id]["tagged_values"] = [("Metrics Server", "Prometheus")]
@@ -86,16 +86,16 @@ def detect_connections(microservices: dict, information_flows: dict, dockerfile,
                                     for prop in microservices[m]["tagged_values"]:
                                         if prop[0] == "Port":
                                             if str(prop[1]) == str(part):
-                                                target_service = microservices[m]["servicename"]
+                                                target_service = microservices[m]["name"]
                                 except:
-                                    print("failed tagged_values for" + microservices[m]["servicename"])
+                                    print("failed tagged_values for" + microservices[m]["name"])
                     else:
                         parts = line.split(":")
                         for part in parts:
                             part = part.strip().strip("[]\'\" ")
                             for m in microservices.keys():
-                                if microservices[m]["servicename"] == part:
-                                    target_service = microservices[m]["servicename"]
+                                if microservices[m]["name"] == part:
+                                    target_service = microservices[m]["name"]
                 if target_service:
                     try:
                         id = max(information_flows.keys()) + 1
