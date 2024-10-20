@@ -97,9 +97,9 @@ def get_incoming_endpoints(dfd) -> list:
 
 def extract_endpoint_part(line: str) -> str:
     endpoint_part = ""
-    if "path" in line:          # not found in documentation, but used in piggy to name endpoint
+    if "path" in line and "," in line and "\"" in line:          # not found in documentation, but used in piggy to name endpoint
         endpoint_part = line.split("path")[1].split(",")[0].split('\"')[1]
-    elif "value" in line:       # usual keyword to describe path
+    elif "value" in line and "," in line and "\"" in line:       # usual keyword to describe path
         endpoint_part = line.split("value")[1].split(",")[0].split('\"')[1]
     elif not "," in line and "/" in line:       # only for the "/" endpoint
         endpoint_part = line.split('\"')[1]
