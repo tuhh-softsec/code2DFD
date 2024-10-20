@@ -2,12 +2,5 @@
 *.DS_Store
 .vscode/
 analysed_repositories/
-code2DFD_output/architecture/*
-code2DFD_output/codeable_models/*
-code2DFD_output/logs/*
-code2DFD_output/png/*
-code2DFD_output/results/*
-code2DFD_output/traceability/*
-code2DFD_output/edges/*
-code2DFD_output/json_architecture/*
+code2DFD_output/*
 output/*
