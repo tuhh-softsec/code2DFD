@@ -467,6 +467,7 @@ def get_file_as_yaml(filename: str) -> dict:
         for line in stdout.decode().splitlines():
             if os.path.isfile(line):
                 id_ = max(files.keys(), default=-1) + 1
+                files[id_] = dict()
                 with open(line, 'r') as file:
                     files[id_]["content"] = file.read()
 

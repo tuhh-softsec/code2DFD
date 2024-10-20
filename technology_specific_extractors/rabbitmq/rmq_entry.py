@@ -37,7 +37,7 @@ def set_information_flows(dfd) -> set:
             id = 0
         information_flows[id] = new_information_flows[ni]
 
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows))
+    tmp.tmp_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
     return information_flows
 
 
@@ -302,7 +302,7 @@ def match_incoming_to_outgoing_endpoints(incoming_endpoints: set, outgoing_endpo
 
             traceability.add_trace(trace)
 
-    tmp.tmp_config.set("DFD", "microservices", str(microservices))
+    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
     return information_flows
 
 

@@ -112,5 +112,5 @@ def detect_zuul(microservices: dict, information_flows: dict, external_component
                                 except:
                                     information_flows[id]["tagged_values"] = [("Load Balancer", load_balancer)]
 
-    tmp.tmp_config.set("DFD", "external_components", str(external_components))
+    tmp.tmp_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
     return microservices, information_flows, external_components

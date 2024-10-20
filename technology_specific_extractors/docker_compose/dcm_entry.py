@@ -29,7 +29,7 @@ def set_microservices(dfd) -> None:
         if len(raw_files) == 0:
             microservices = tech_sw.get_microservices(dfd)
             microservices = clean_pom_names(microservices)
-            tmp.tmp_config.set("DFD", "microservices", str(microservices))
+            tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
             return
         docker_compose_content = raw_files[0]["content"]
 
@@ -38,12 +38,12 @@ def set_microservices(dfd) -> None:
     if not microservices_set:
         microservices = tech_sw.get_microservices(dfd)
         microservices = clean_pom_names(microservices)
-        tmp.tmp_config.set("DFD", "microservices", str(microservices))
+        tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
         return
     microservices = dictionarify(microservices_set, properties_dict)
     microservices = clean_pom_names(microservices)
 
-    tmp.tmp_config.set("DFD", "microservices", str(microservices))
+    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
 
 
 def clean_pom_names(microservices: dict) -> dict:
@@ -135,7 +135,7 @@ def set_information_flows(dfd):
 
     information_flows = dcm_parser.extract_information_flows(docker_compose_content, microservices, information_flows)
 
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows))
+    tmp.tmp_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
     return information_flows
 
 

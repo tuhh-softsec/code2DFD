@@ -24,9 +24,9 @@ def set_information_flows(dfd) -> set:
 
     microservices, information_flows, external_components = check_properties(microservices, information_flows, external_components)
 
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows))
-    tmp.tmp_config.set("DFD", "microservices", str(microservices))
-    tmp.tmp_config.set("DFD", "external_components", str(external_components))
+    tmp.tmp_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
+    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+    tmp.tmp_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
     return microservices, information_flows
 
 
@@ -220,7 +220,7 @@ def check_properties(microservices: dict, information_flows: dict, external_comp
                 except:
                     information_flows[id]["tagged_values"] = [("Username", username.strip())]
 
-            tmp.tmp_config.set("DFD", "external_components", str(external_components))
+            tmp.tmp_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
 
             trace = dict()
             trace["item"] = "database-" + str(microservices[m]["name"]) + " -> " + microservices[m]["name"]

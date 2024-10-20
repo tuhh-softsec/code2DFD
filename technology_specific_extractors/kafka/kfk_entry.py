@@ -38,7 +38,7 @@ def set_information_flows(dfd) -> set:
 
     information_flows = detect_stream_binders(microservices, information_flows, dfd)
 
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows))
+    tmp.tmp_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
 
     return information_flows
 

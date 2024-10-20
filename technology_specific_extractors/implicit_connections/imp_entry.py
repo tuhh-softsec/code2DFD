@@ -41,7 +41,7 @@ def set_information_flows(dfd) -> dict:
             id = 0
         information_flows[id] = new_information_flows[ni]
 
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows))
+    tmp.tmp_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
     return information_flows
 
 

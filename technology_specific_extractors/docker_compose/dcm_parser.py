@@ -619,7 +619,7 @@ def extract_microservices(file_content, file_name) -> set:
                 else:
                     microservices_dict[correct_id]["properties"] = properties
 
-    tmp.tmp_config.set("DFD", "microservices", str(microservices_dict))
+    tmp.tmp_config.set("DFD", "microservices", str(microservices_dict).replace("%", "%%"))
     return microservices_set, properties_dict
 
 

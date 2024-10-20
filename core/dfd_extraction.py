@@ -77,10 +77,10 @@ def perform_analysis():
 
     # Check authentication information of services
     microservices = detect_authentication_scopes(microservices, dfd)
-    tmp.tmp_config.set("DFD", "microservices", str(microservices))
+    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
 
     # Get information flows
-    tmp.tmp_config.set("DFD", "external_components", str(external_components))
+    tmp.tmp_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
 
     new_information_flows = tech_sw.get_information_flows(dfd)
     external_components = ast.literal_eval(tmp.tmp_config["DFD"]["external_components"])
@@ -120,9 +120,9 @@ def perform_analysis():
     print("\nFinished extraction")
 
     # Saving
-    tmp.tmp_config.set("DFD", "microservices", str(microservices))
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows))
-    tmp.tmp_config.set("DFD", "external_components", str(external_components))
+    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+    tmp.tmp_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
+    tmp.tmp_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
 
     plaintext.write_plaintext(microservices, information_flows, external_components)
     codeable_models, codeable_models_path = codeable_model.output_codeable_model(microservices, information_flows, external_components)
@@ -144,7 +144,7 @@ def classify_brokers(microservices: dict) -> dict:
 
     microservices = detect_rabbitmq_server(microservices)
     microservices = detect_kafka_server(microservices)
-    tmp.tmp_config.set("DFD", "microservices", str(microservices))
+    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
     return microservices
 
 

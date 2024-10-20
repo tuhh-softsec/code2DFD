@@ -56,7 +56,7 @@ def set_microservices(dfd) -> dict:
                 except:
                     pass
 
-    tmp.tmp_config.set("DFD", "microservices", str(microservices))
+    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
 
     return microservices
 

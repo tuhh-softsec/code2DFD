@@ -52,5 +52,5 @@ def set_information_flows(dfd):
 
                 except:
                     pass
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows))
+    tmp.tmp_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
     return information_flows

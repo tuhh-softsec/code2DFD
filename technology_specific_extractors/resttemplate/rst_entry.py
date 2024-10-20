@@ -31,7 +31,7 @@ def set_information_flows(dfd) -> dict:
             id = 0
         information_flows[id] = new_information_flows[ni]
 
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows))
+    tmp.tmp_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
     return information_flows
 
 
@@ -135,7 +135,7 @@ def add_endpoints_tagged_values(endpoint_tuples: list, dfd):
                     microservices[m]["tagged_values"].append(('Endpoints', list(ordered_endpoints[endpoint])))
                 else:
                     microservices[m]["tagged_values"] = [('Endpoints', list(ordered_endpoints[endpoint]))]
-    tmp.tmp_config.set("DFD", "microservices", str(microservices))
+    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
 
 
 def get_outgoing_endpoints(information_flows: dict, dfd) -> set:
