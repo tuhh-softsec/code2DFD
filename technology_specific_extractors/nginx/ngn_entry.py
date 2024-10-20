@@ -1,4 +1,5 @@
 import ruamel.yaml
+import os
 
 import core.external_components as ext
 import core.file_interaction as fi
@@ -101,8 +102,8 @@ def detect_nginx(microservices: dict, information_flows: dict, external_componen
                 microservices[id] = dict()
 
                 local_repo_path = tmp.tmp_config["Repository"]["local_path"]
-                docker_path = ("/").join(results[r]["path"].split("/")[:-1]) + "/"
-                docker_path = docker_path.replace(local_repo_path, "")
+                docker_path = os.path.dirname(results[r]["path"])
+                docker_path = os.path.relpath(docker_path, start=local_repo_path)
 
                 service_name = "web-app"
                 # go through dockercompose and see if a build or image fits this. if yes, use that name
@@ -157,7 +158,7 @@ def detect_nginx(microservices: dict, information_flows: dict, external_componen
                 if "COPY " in line and ".conf" in line:
                     config_name = line.strip().split(" ")[1]
             if config_name:
-                config_path = ("/").join(results[r]["path"].split("/")[:-1]) + "/" + config_name
+                config_path = os.path.join(os.path.dirname(results[r]["path"]), config_name)
                 config_results = fi.get_file_as_lines(config_name)
 
                 for cr in config_results:

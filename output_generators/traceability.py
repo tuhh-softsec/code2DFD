@@ -132,8 +132,6 @@ def convert_path_to_url(path: str) -> str:
         return path
 
     repo_path = tmp.tmp_config["Repository"]["path"]
-    if "analysed_repositories" in path:
-        path = ("/").join(path.split("/")[3:])
     url = "https://github.com/" + str(repo_path) + "/blob/master/" + str(path)
 
     return url
@@ -172,9 +170,10 @@ def write_to_file():
     """Writes tracebility info from dict to json file.
     """
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
-    repo_path = repo_path.replace("/", "_")
-    filename = "./output/traceability/" + repo_path + "_traceability.json"
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-    with open(filename, "w") as file:
-        file.write(json.dumps(traceability, indent=4))
+    output_path = tmp.tmp_config["Analysis Settings"]["output_path"]
+    filename = f"{os.path.split(output_path)[1]}_traceability.json"
+    output_path = os.path.join(output_path, filename)
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, 'w') as architecture_file:
+        json.dump(traceability, architecture_file, indent=4)

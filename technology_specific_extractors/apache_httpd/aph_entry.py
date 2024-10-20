@@ -1,4 +1,5 @@
 import re
+import os
 
 import core.external_components as ext
 import core.file_interaction as fi
@@ -125,8 +126,8 @@ def add_connections_docker(microservices: dict, information_flows: dict, file, d
             config_file_path = line.strip().split(" ")[1]
     if config_file_path:
         if docker_path:
-            complete_config_file_path = ("/").join(docker_path.split("/")[:-1]) + "/" + config_file_path
-            config_file_name = complete_config_file_path.split("/")[-1]
+            complete_config_file_path = os.path.join(os.path.dirname(docker_path), config_file_path)
+            config_file_name = os.path.basename(complete_config_file_path)
             files = fi.get_file_as_lines(config_file_name)
             for f in files:
                 if files[f]["path"] == complete_config_file_path:

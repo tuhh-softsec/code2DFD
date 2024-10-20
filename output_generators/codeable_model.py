@@ -126,14 +126,16 @@ def output_codeable_model(microservices, information_flows, external_components)
 def create_file(model_name: str, content: str):
     """Writes content to file.
     """
-
     model_name = model_name.replace("-", "_")
-    file_path = "./output/codeable_models/" + model_name + ".py"
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
-    with open(file_path, "w") as file:
+    output_path = tmp.tmp_config["Analysis Settings"]["output_path"]
+    filename = f"{model_name}.py"
+    output_path = os.path.join(output_path, filename)
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "w") as file:
         file.write(content)
 
-    return file_path
+    return output_path
 
 
 def header():
