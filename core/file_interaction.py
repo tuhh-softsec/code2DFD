@@ -461,7 +461,7 @@ def get_repo_contents_local(repo_path: str, path: str) -> set:
         repo_path = tmp.tmp_config["Repository"]["path"]
         rel_path = os.path.relpath(content.path, start=local_repo_path)
         rel_path_parts = Path(rel_path).parts
-        download_url = f"https://raw.githubusercontent.com/{repo_path}/master/{"/".join(rel_path_parts)}"
+        download_url = f"https://raw.githubusercontent.com/{repo_path}/master/{'/'.join(rel_path_parts)}"
         repo.add((content.name, download_url, content.path))
 
     contents.close()
