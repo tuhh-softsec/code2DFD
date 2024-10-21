@@ -183,7 +183,7 @@ def get_outgoing_endpoints(information_flows: dict, dfd) -> set:
     return outgoing_endpoints, information_flows
 
 
-def find_rst_variable(parameter: str, file: dict, line_nr: int, information_flows: dict, microservice: str, dfd):
+def find_rst_variable(parameter: str, file: dict, line_nr: int, information_flows: dict, microservice: str, dfd, count=0):
 
     # check if service name in parameter, if yes, add flow directly
     microservices = tech_sw.get_microservices(dfd)
@@ -243,7 +243,8 @@ def find_rst_variable(parameter: str, file: dict, line_nr: int, information_flow
                                     parameters[p] = fc["content"][linec + i].split("=")[1].strip().strip(";").strip().strip("\"")
                                     print("\t\tFound " + str(parameters[p]) + " in file " + str(correct_file))
                                     if parameters[p][0] != "\"" or parameters[p][-1] != "\"":
-                                        parameters[p], x = find_rst_variable(parameters[p], fc, linec)     # recursive step
+                                        if count < 50:
+                                            parameters[p], x = find_rst_variable(parameters[p], fc, linec, information_flows, microservices, dfd, count + 1)     # recursive step
             except:
                 print("\tCould not find a definition for " + str(parameters[p]) + ".")
                 return False, information_flows
@@ -257,7 +258,8 @@ def find_rst_variable(parameter: str, file: dict, line_nr: int, information_flow
                     parameters[p] = file["content"][line].split("=")[1].strip().strip(";").strip()
                     if parameters[p].strip("\"").strip() != "":
                         if parameters[p][0] != "\"" or parameters[p][-1] != "\"":
-                            parameters[p], x = find_rst_variable(parameters[p], file, line)      # recursive step
+                            if count < 50:
+                                parameters[p], x = find_rst_variable(parameters[p], file, line, information_flows, microservices, dfd, count + 1)      # recursive step
                         if parameters[p] != False:
                             parameters[p] = parameters[p].strip("\"").strip()
                             logger.info("\t\tFound " + str(parameters[p]) + " in this file.")
