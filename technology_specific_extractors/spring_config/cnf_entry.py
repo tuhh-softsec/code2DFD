@@ -215,21 +215,16 @@ def parse_config_files(config_server: str, config_file_path: str, config_file_pa
         config_file_path = ""
     if config_repo_uri:
         information_flows, external_components = set_repo(information_flows, external_components, config_repo_uri, config_server)
-        repo_path = config_repo_uri.split("github.com/")[1].split(".")[0]
-    else:
-        repo_path = tmp.tmp_config["Repository"]["path"]
     gh_contents = False
     contents = set()
 
     if config_file_path:
-        new_contents = fi.get_repo_contents_local(repo_path, config_file_path)
-        for file in new_contents:
-            contents.add(file)
+        new_contents = fi.get_repo_contents_local(config_file_path)
+        contents.update(new_contents)
 
     else:
-        new_contents = fi.get_repo_contents_local(repo_path, False)
-        for file in new_contents:
-            contents.add(file)
+        new_contents = fi.get_repo_contents_local(False)
+        contents.update(new_contents)
 
     # external (other github repository) didn't work, look locally
     if config_file_path_local:
@@ -237,21 +232,17 @@ def parse_config_files(config_server: str, config_file_path: str, config_file_pa
         local_path = tmp.tmp_config["Repository"]["local_path"]
         config_file_path_local = os.path.relpath(config_file_path_local, start=local_path)
 
-        new_contents = fi.get_repo_contents_local(repo_path, config_file_path_local)
-        for file in new_contents:
-            contents.add(file)
+        new_contents = fi.get_repo_contents_local(config_file_path_local)
+        contents.update(new_contents)
 
 
     if not gh_contents and not contents:
-        repo_path = tmp.tmp_config["Repository"]["path"]
-
-        new_contents = fi.get_repo_contents_local(repo_path, config_file_path)
-        for file in new_contents:
-            contents.add(file)
+        new_contents = fi.get_repo_contents_local(config_file_path)
+        contents.update(new_contents)
 
     if gh_contents:
         for file in gh_contents:
-            contents.add((file.name, file.download_url, file.path))
+            contents.add((file.name, file.path))
 
     if contents:
         for file in contents:
@@ -276,7 +267,7 @@ def parse_config_files(config_server: str, config_file_path: str, config_file_pa
             if microservice:
                 if ending:
                     if ending == "yml" or ending == "yaml":
-                        name, properties = parse.parse_yaml_file(file[1], file[2])
+                        name, properties = parse.parse_yaml_file(file[1])
                         name = name[0]
                     elif ending == "properties":
                         name, properties = parse.parse_properties_file(file[1])

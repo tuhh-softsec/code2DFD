@@ -3,8 +3,6 @@ import re
 import subprocess
 from pathlib import Path, PurePosixPath
 
-import requests
-
 from output_generators.logger import logger
 import core.technology_switch as tech_sw
 import tmp.tmp as tmp
@@ -19,37 +17,6 @@ exception_counter_keyword = int()
 
 repo_cache = dict()
 exception_counter_repo = 0
-
-
-def get_output_path(repo_path: str) -> str:
-    repo_path = repo_path.replace("/", "--")
-    return os.path.join(os.getcwd(), 'code2DFD_output', repo_path)
-
-
-def get_local_path(repo_path: str) -> str:
-    return os.path.join(os.getcwd(), "analysed_repositories", *repo_path.split("/")[1:])
-
-
-def clone_repo(repo_path, local_path):
-    # Create analysed_repositories folder in case it doesn't exist yet (issue #2)
-    os.makedirs(os.path.join(os.getcwd(), "analysed_repositories"), exist_ok=True)
-    if not repo_downloaded(local_path):
-        download_repo(repo_path, local_path)
-
-
-def repo_downloaded(repo_folder: str) -> bool:
-    """Checks if repository has been downloaded from GitHub already.
-    """
-
-    return os.path.isdir(repo_folder)
-
-
-def download_repo(repo_path: str, local_path: str):
-    """Downloads repository from GitHub for local querying.
-    """
-
-    command = f"git clone https://github.com/{repo_path}.git {local_path}"
-    os.system(command)
 
 
 def detection_comment(file_name, line):
@@ -94,13 +61,9 @@ def search_keywords(keywords: str):
     """Searches keywords locally using grep.
     """
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
     repo_folder = tmp.tmp_config["Repository"]["local_path"]
 
     results = dict()
-
-    if not repo_downloaded(repo_folder):
-        download_repo(repo_path, repo_folder)
 
     if isinstance(keywords, str):
         keywords = [keywords]
@@ -161,10 +124,9 @@ def pagList2lines(pagList) -> dict:
                 id_ = 0
             results[id_] = dict()
 
-            results[id_]["content"] = file_as_lines(f["download_url"])
+            results[id_]["content"] = file_as_lines(f["path"])
             results[id_]["name"] = f["name"]
             results[id_]["path"] = f["path"]
-            results[id_]["url"] = f["download_url"]
 
         return results
 
@@ -182,7 +144,6 @@ def extract_downloadURL(files) -> dict:
         containing_files_URLs[id_] = dict()
 
         containing_files_URLs[id_]["path"] = f.path
-        containing_files_URLs[id_]["download_url"] = f.download_url
         containing_files_URLs[id_]["name"] = f.name
     return containing_files_URLs
 
@@ -202,19 +163,15 @@ def get_struct(repo):
     return struct
 
 
-def file_as_lines(raw_file):
+def file_as_lines(path):
     """Downloads and splits raw file into lines.
     """
 
-    local_path_parts = raw_file.split("githubusercontent.com/")[1].split("/")[1:]
     local_path = tmp.tmp_config.get("Repository", "local_path")
-    local_path = os.path.join(local_path, *(local_path_parts[2:]))
+    local_path = os.path.join(local_path, path)
 
-    try:
-        with open(local_path, "r") as file:
-            file_as_lines = file.readlines()
-    except Exception as e:
-        file_as_lines = requests.get(raw_file, stream=True).text.split("\n")
+    with open(local_path, "r") as file:
+        file_as_lines = file.readlines()
     return file_as_lines
 
 
@@ -424,7 +381,7 @@ def file_exists(file_name: str) -> bool:
     return False
 
 
-def get_repo_contents_local(repo_path: str, path: str) -> set:
+def get_repo_contents_local(path: str) -> set:
     """Creates a set of all files in the repository given as path.
     """
 
@@ -433,9 +390,6 @@ def get_repo_contents_local(repo_path: str, path: str) -> set:
     local_repo_path = tmp.tmp_config["Repository"]["local_path"]
     to_crawl = local_repo_path
 
-    if not repo_downloaded(local_repo_path):
-        download_repo(repo_path, local_repo_path)
-
     if path:
         to_crawl = os.path.join(local_repo_path, path)
     try:
@@ -443,11 +397,7 @@ def get_repo_contents_local(repo_path: str, path: str) -> set:
     except Exception as e:
         return repo
     for content in contents:
-        repo_path = tmp.tmp_config["Repository"]["path"]
-        rel_path = os.path.relpath(content.path, start=local_repo_path)
-        rel_path_parts = Path(rel_path).parts
-        download_url = f"https://raw.githubusercontent.com/{repo_path}/master/{'/'.join(rel_path_parts)}"
-        repo.add((content.name, download_url, content.path))
+        repo.add((content.name, content.path))
 
     contents.close()
 
