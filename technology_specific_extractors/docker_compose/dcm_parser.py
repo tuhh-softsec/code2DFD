@@ -81,9 +81,11 @@ def extract_microservices(file_content, file_name) -> set:
             # Traceability
             lines = file_content.splitlines()
             line_number = file["services"][s].lc.line - 1
-            length_tuple = re.search(s, lines[line_number]).span()
-            span = "[" + str(length_tuple[0]) +  ":" + str(length_tuple[1]) + "]"
-            trace = (file_name, line_number + 1, span)
+            length_tuple = re.search(s, lines[line_number])
+            if length_tuple:
+                length_tuple = length_tuple.span()
+                span = "[" + str(length_tuple[0]) +  ":" + str(length_tuple[1]) + "]"
+                trace = (file_name, line_number + 1, span)
 
             properties = set()
             exists = False

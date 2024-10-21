@@ -412,7 +412,10 @@ def merge_duplicate_nodes(nodes: dict):
             # merge
             for field, j_value in node_j.items():
                 if field not in ["name", "type"]:
-                    node_i[field] = node_i.get(field, list()) + list(j_value)
+                    try:
+                        node_i[field] = node_i.get(field, list()) + list(j_value)
+                    except:
+                        node_i[field] = list(j_value).append(node_i.get(field, list()))
             to_delete.add(j)
     for k in to_delete:
         del nodes[k]
