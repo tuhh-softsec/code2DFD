@@ -129,19 +129,20 @@ def search_keywords(keywords: str):
                     if match is None:
                         continue
                     span = match.span()
-                    with open(full_path) as file:
-                        content = file.readlines()
-
                     try:
-                        id_ = max(results.keys()) + 1
+                        with open(full_path) as file:
+                            content = file.readlines()
                     except:
-                        id_ = 0
-                    results[id_] = dict()
-                    results[id_]["content"] = content
-                    results[id_]["name"] = name
-                    results[id_]["path"] = path
-                    results[id_]["line_nr"] = line_nr
-                    results[id_]["span"] = str(span)
+                        content = False
+
+                    if content:
+                        id_ = max(results.keys(), default=-1) + 1
+                        results[id_] = dict()
+                        results[id_]["content"] = content
+                        results[id_]["name"] = name
+                        results[id_]["path"] = path
+                        results[id_]["line_nr"] = line_nr
+                        results[id_]["span"] = str(span)
     return results
 
 
