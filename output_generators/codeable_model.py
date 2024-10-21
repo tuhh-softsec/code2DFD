@@ -22,7 +22,7 @@ def output_codeable_model(microservices, information_flows, external_components)
         tagged_values = dict()
         if "tagged_values" in microservices[m]:
             for t in microservices[m]["tagged_values"]:
-                if t[0] == "Port":
+                if t[0] == "Port" and isinstance(t[1], int):
                     tagged_values[t[0]] = int(t[1])
                 else:
                     tagged_values[t[0]] = t[1]
