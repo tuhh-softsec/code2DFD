@@ -244,7 +244,7 @@ def find_rst_variable(parameter: str, file: dict, line_nr: int, information_flow
                                     print("\t\tFound " + str(parameters[p]) + " in file " + str(correct_file))
                                     if parameters[p][0] != "\"" or parameters[p][-1] != "\"":
                                         if count < 50:
-                                            parameters[p], x = find_rst_variable(parameters[p], fc, linec, information_flows, microservices, dfd, count + 1)     # recursive step
+                                            parameters[p], x = find_rst_variable(parameters[p], fc, linec, information_flows, microservice, dfd, count + 1)     # recursive step
             except:
                 print("\tCould not find a definition for " + str(parameters[p]) + ".")
                 return False, information_flows
@@ -259,7 +259,7 @@ def find_rst_variable(parameter: str, file: dict, line_nr: int, information_flow
                     if parameters[p].strip("\"").strip() != "":
                         if parameters[p][0] != "\"" or parameters[p][-1] != "\"":
                             if count < 50:
-                                parameters[p], x = find_rst_variable(parameters[p], file, line, information_flows, microservices, dfd, count + 1)      # recursive step
+                                parameters[p], x = find_rst_variable(parameters[p], file, line, information_flows, microservice, dfd, count + 1)      # recursive step
                         if parameters[p] != False:
                             parameters[p] = parameters[p].strip("\"").strip()
                             logger.info("\t\tFound " + str(parameters[p]) + " in this file.")
