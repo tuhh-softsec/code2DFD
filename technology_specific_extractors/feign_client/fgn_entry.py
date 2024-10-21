@@ -44,10 +44,10 @@ def set_information_flows(dfd) -> dict:
                     if prop[0] == "feign_ribbon_disabled":
                         load_balancer = "Spring Cloud Load Balancer" # Load balancer if Ribbon is explicitely disabled (also, recently recommended)
                     elif prop[0] == "circuit_breaker":
-                        stereotype_instances.add("circuit_breaker_link")
+                        stereotype_instances.append("circuit_breaker_link")
                         tagged_values.add(("Circuit Breaker", prop[1]))
                     elif prop[0] == "feign_hystrix":
-                        stereotype_instances.add("circuit_breaker_link")
+                        stereotype_instances.append("circuit_breaker_link")
                         tagged_values.add(("Circuit Breaker", "Hystrix"))
 
         tagged_values.add(("Load Balancer", load_balancer))
