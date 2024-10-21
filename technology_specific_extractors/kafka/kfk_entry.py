@@ -57,7 +57,7 @@ def get_incoming_endpoints(dfd) -> set:
             pass
         else:
             for line in range(len(file["content"])):
-                if "@KafkaListener" in file["content"][line]:
+                if "@KafkaListener" in file["content"][line] and "topics" in file["content"][line]:
                     new_listening_topic = file["content"][line].split("topics")[1]
                     if "," in new_listening_topic:
                         new_listening_topic = new_listening_topic.split(",")[0]
