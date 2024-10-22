@@ -149,7 +149,7 @@ def add_connections(microservices: dict, information_flows: dict, file, microser
         if "ProxyPass " in line:
             parts = line.split(" ")
             for part in parts:
-                if "http" in part:
+                if "http" in part and "://" in part:
                     target_service = False
                     host = part.split("://")[1].split(":")[0]
                     if host == "localhost":
