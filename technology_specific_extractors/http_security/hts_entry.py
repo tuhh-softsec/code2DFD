@@ -29,35 +29,36 @@ def detect_configurations(dfd):
                 if "configure(" + c_class in line:
                     objects.append(line.split(c_class)[1].split(")")[0].strip())
             for object in objects:
-                for line_nr in range(len(results[r]["content"])):
-                    line = results[r]["content"][line_nr]
-                    configuration = False
-                    if object in line:
-                        if ";" in line:
-                            configuration = line.split(object)[1].split(";")[0].strip(" .")
-                        else:   # multi-line
-                            found = False
-                            counter = line_nr
-                            configuration = line.strip()
+                if object:
+                    for line_nr in range(len(results[r]["content"])):
+                        line = results[r]["content"][line_nr]
+                        configuration = False
+                        if object in line:
+                            if ";" in line:
+                                configuration = line.split(object)[1].split(";")[0].strip(" .")
+                            else:   # multi-line
+                                found = False
+                                counter = line_nr
+                                configuration = line.strip()
 
-                            while not found and counter < len(results[r]["content"]) - 1:
-                                counter += 1
-                                new_line = results[r]["content"][counter]
-                                new_line = new_line.strip()
+                                while not found and counter < len(results[r]["content"]) - 1:
+                                    counter += 1
+                                    new_line = results[r]["content"][counter]
+                                    new_line = new_line.strip()
 
-                                if not new_line.strip()[0:2] == "//":
-                                    new_configuration = configuration + new_line
-                                    configuration = new_configuration
+                                    if not new_line.strip()[0:2] == "//":
+                                        new_configuration = configuration + new_line
+                                        configuration = new_configuration
 
-                                if ";" in new_line:
-                                    found = True
+                                    if ";" in new_line:
+                                        found = True
 
-                    if configuration:
-                        configuration = configuration.replace(" ", "")
-                        if "{" in configuration:
-                            configuration = configuration.split("{")[1]
-                        if object + "." in configuration:
-                            configurations.add((configuration, results[r]["path"], results[r]["line_nr"], results[r]["span"]))
+                        if configuration:
+                            configuration = configuration.replace(" ", "")
+                            if "{" in configuration:
+                                configuration = configuration.split("{")[1]
+                            if object + "." in configuration:
+                                configurations.add((configuration, results[r]["path"], results[r]["line_nr"], results[r]["span"]))
             configuration_tuples.append((microservice, configurations))
 
     return configuration_tuples
