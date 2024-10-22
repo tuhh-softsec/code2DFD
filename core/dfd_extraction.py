@@ -70,9 +70,9 @@ def perform_analysis():
         repo_name = git_repo.project_name
         tmp.tmp_config.set("Analysis Settings", "output_path", os.path.join(os.getcwd(), "code2DFD_output", repo_name.replace("/", "--"), commit))
         git_repo.checkout(commit)
-        print(f"\nStart extraction of DFD for {repo_name} on commit {commit} at {datetime.now().strftime("%H:%M:%S")}")
+        print(f"\nStart extraction of DFD for {repo_name} on commit {commit} at {datetime.now().strftime('%H:%M:%S')}")
         codeable_models, traceability_content = DFD_extraction()
-        print(f"Finished: {datetime.now().strftime("%H:%M:%S")}")
+        print(f"Finished: {datetime.now().strftime('%H:%M:%S')}")
 
         git_repo.checkout(head)
 
