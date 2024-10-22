@@ -5,6 +5,7 @@ import ruamel.yaml
 
 import core.file_interaction as fi
 import tmp.tmp as tmp
+from output_generators.logger import logger
 
 
 # The following is taken from ruamel.yaml's authro as a workaround for getting line count for str objects
@@ -79,11 +80,14 @@ def parse_properties_file(download_url: str) -> str:
 
         # Port
         elif "server.port" in line:
-            port = int(line.split("=")[1].strip()) if "=" in line else None
-            if port:
-                span = re.search("server.port", line).span()
-                trace = (file_name, i, span)
-                properties.add(("port", port, trace))
+            try:
+                port = int(line.split("=")[1].strip()) if "=" in line else None
+                if port:
+                    span = re.search("server.port", line).span()
+                    trace = (file_name, i, span)
+                    properties.add(("port", port, trace))
+            except:
+                logger.debug(f"Port is not an integer in line {line}")
 
         # Datasource
         elif "spring.datasource.url" in line:
