@@ -87,7 +87,6 @@ def parse_properties_file(gradle_path: str):
     properties = set()
     microservice = [False, False]
     # find properties file
-    repo_path = tmp.tmp_config["Repository"]["path"]
     path = os.path.dirname(gradle_path)
 
     local_repo_path = tmp.tmp_config["Repository"]["local_path"]
@@ -100,22 +99,19 @@ def parse_properties_file(gradle_path: str):
         for entry in dir:
             if entry.is_file():
                 if not "test" in entry.path:
-                    if os.path.basename(entry.path) in ["application.properties", "bootstrap.properties"]:
+                    filename = os.path.basename(entry.path)
+                    if filename in ["application.properties", "bootstrap.properties"]:
                         logger.info("Found application.properties here: " + str(entry.path))
                         file_path = os.path.relpath(entry.path, start=local_repo_path)
-                        file_path_parts = Path(file_path).parts
-                        file_url = "https://raw.githubusercontent.com/" + repo_path + "/master/" + ("/").join(file_path_parts)
-                        new_microservice, new_properties = parse.parse_properties_file(file_url)
+                        new_microservice, new_properties = parse.parse_properties_file(file_path)
                         if new_microservice[0]:
                             microservice = new_microservice
                         if new_properties:
                             properties = properties.union(new_properties)
-                    elif os.path.basename(entry.path) in ["application.yaml", "application.yml", "bootstrap.yml", "bootstrap.yaml", "filebeat.yml", "filebeat.yaml"]:
+                    elif filename in ["application.yaml", "application.yml", "bootstrap.yml", "bootstrap.yaml", "filebeat.yml", "filebeat.yaml"]:
                         logger.info("Found properties file here: " + str(entry.path))
                         file_path = os.path.relpath(entry.path, start=local_repo_path)
-                        file_path_parts = Path(file_path).parts
-                        file_url = "https://raw.githubusercontent.com/" + repo_path + "/master/" + ("/").join(file_path_parts)
-                        new_microservice, new_properties = parse.parse_yaml_file(file_url, file_path)
+                        new_microservice, new_properties = parse.parse_yaml_file(file_path)
                         if new_microservice[0]:
                             microservice = new_microservice
                         if new_properties:
@@ -136,27 +132,23 @@ def detect_microservice(file_path, dfd):
     microservice = [False, False]
     microservices = tech_sw.get_microservices(dfd)
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
 
-    path = file_path
     found_gradle = False
 
     local_repo_path = tmp.tmp_config["Repository"]["local_path"]
 
     dirs = list()
-    path = os.path.dirname(path)
+    path = os.path.dirname(file_path)
     while not found_gradle and path != "":
         dirs.append(os.scandir(os.path.join(local_repo_path, path)))
         while dirs:
             dir = dirs.pop()
             for entry in dir:
                 if entry.is_file():
-                    if entry.name.casefold() == "build.gradle":
+                    if os.path.basename(entry.path).casefold() == "build.gradle":
                         logger.info("Found build.gradle here: " + str(entry.path))
                         gradle_path = os.path.relpath(entry.path, start=local_repo_path)
-                        gradle_path_parts = Path(gradle_path).parts
                         found_gradle = True
-                        gradle_file_url = "https://raw.githubusercontent.com/" + repo_path + "/master/" + "/".join(gradle_path_parts)
         path = os.path.dirname(path)
 
     if found_gradle:
@@ -170,7 +162,7 @@ def detect_microservice(file_path, dfd):
                 pass
         if not microservice[0]:
 
-            gradle_file["content"] = fi.file_as_lines(gradle_file_url)
+            gradle_file["content"] = fi.file_as_lines(gradle_path)
             microservice, properties = parse_configurations(gradle_file)
     else:
         logger.info("Did not find microservice")
@@ -187,6 +179,3 @@ def detect_microservice(file_path, dfd):
                 pass
 
     return microservice[0]
-
-
-#

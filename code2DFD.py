@@ -2,15 +2,14 @@
 #
 # Author: Simon Schneider, 2023
 # Contact: simon.schneider@tuhh.de
-
+import os
 from configparser import ConfigParser
 from datetime import datetime
 import argparse
 
-import core.dfd_extraction as dfd_extraction
+from core.dfd_extraction import perform_analysis
 from output_generators.logger import logger
 import tmp.tmp as tmp
-from core.file_interaction import get_output_path, get_local_path, clone_repo
 
 CONFIG_SECTIONS = ["Analysis Settings", "Repository", "Technology Profiles", "DFD"]
 COMMUNICATIONS_TECH_LIST = '[("RabbitMQ", "rmq"), ("Kafka", "kfk"), ("RestTemplate", "rst"),\
@@ -24,32 +23,34 @@ DEFAULT_CONFIG.set("Analysis Settings", "development_mode", "False")
 DEFAULT_CONFIG.set("Technology Profiles", "communication_techs_list", COMMUNICATIONS_TECH_LIST)
 
 
-def api_invocation(path: str) -> dict:
+def api_invocation(url: str, commit: str) -> dict:
     """Entry function for when tool is called via API call.
     """
 
-    print("New call for " + path)
-    response = dict()
+    print("New call for " + url)
 
     start_time = datetime.now()
 
     logger.info("*** New execution ***")
-    logger.debug("Copying config file to tmp file")
+    logger.debug("Initializing config to tmp file")
+    for section in CONFIG_SECTIONS:  # Copying what is needed from default to temp
+        tmp.tmp_config.add_section(section)
+        for entry in DEFAULT_CONFIG[section]:
+            tmp.tmp_config.set(section, entry, DEFAULT_CONFIG[section][entry])
 
     # Overwrite repo_path from config file with the one from the API call
-    repo_path = str(path)
-    tmp.tmp_config.set("Repository", "path", repo_path)
-
-    local_path = get_local_path(repo_path)
-    tmp.tmp_config.set("Repository", "local_path", local_path)
-
-    clone_repo(repo_path, local_path)
+    tmp.tmp_config.set("Repository", "url", url)
+    tmp.tmp_config.set("Repository", "local_path",
+                       os.path.join(os.getcwd(), "analysed_repositories"))
+    if commit is not None:
+        tmp.tmp_config.set("Analysis Settings", "commit", commit)
 
     # Call extraction
-    codeable_models, traceability = dfd_extraction.perform_analysis()
+    codeable_models, traceability = perform_analysis()
 
+    response = dict()
     response["codeable_models_file"] = codeable_models
-    response["traceability"] = traceability
+    response["traceability_file"] = traceability
 
     # Execution time
     end_time = datetime.now()
@@ -61,47 +62,54 @@ def api_invocation(path: str) -> dict:
     return response
 
 
-def main():
+def cli_invocation():
     parser = argparse.ArgumentParser()
-    source = parser.add_mutually_exclusive_group(required=True)
-    source.add_argument("--config_path", type=str, help="Path to the config file to use")
-    source.add_argument("--github_path", type=str, help="Path to the repository on GitHub as 'repository/path'")
-    now = datetime.now()
-    start_time = now.strftime("%H:%M:%S")
+    parser.add_argument("--config_path", type=str, help="Path to the config file to use (can be replaced with following CLI arguments")
+    repository = parser.add_argument_group("Repository", "Repository information")
+    repository.add_argument("--repo_url", type=str, help="URL to clone the repository from (might be local path)")
+    repository.add_argument("--repo_local_path", type=str, help="Location to clone repository to (default: 'analysed_repositories' in CWD)")
+    settings = parser.add_argument_group("Analysis Settings", "Parameters for additional analysis settings")
+    settings.add_argument("--commit", type=str, help="Analyze repository at this commit")
+    settings.add_argument("--development_mode", action='store_true', help="Switch on development mode")
 
     args = parser.parse_args()
 
     logger.info("*** New execution ***")
-    logger.debug("Copying config file to tmp file")
 
-    if args.config_path is not None:
+    if args.config_path:
         # Copy config to tmp file
+        logger.debug("Copying config file to tmp file")
         tmp.tmp_config.read(args.config_path)
-        repo_path = tmp.tmp_config.get("Repository", "path")
-
-    elif args.github_path is not None:
+    else:
         # global ini_config
+        logger.debug("Initializing tmp file with default config")
         for section in CONFIG_SECTIONS:  # Copying what is needed from default to temp
             tmp.tmp_config.add_section(section)
             for entry in DEFAULT_CONFIG[section]:
                 tmp.tmp_config.set(section, entry, DEFAULT_CONFIG[section][entry])
-        repo_path = args.github_path.strip()
-        tmp.tmp_config.set("Repository", "path", repo_path) # overwrite with user-provided path
 
-    local_path = get_local_path(repo_path)
-    clone_repo(repo_path, local_path)
-    tmp.tmp_config.set("Repository", "local_path", local_path)
-    tmp.tmp_config.set("Analysis Settings", "output_path", get_output_path(repo_path))
+    if args.repo_url:
+        tmp.tmp_config.set("Repository", "url", args.repo_url)
+    elif not tmp.tmp_config.has_option("Repository", "url"):
+        raise AttributeError("Parameter [Repository][url] must be provided either in config file or by --repo_url")
 
-    # calling the actual extraction
-    dfd_extraction.perform_analysis()
+    if args.repo_local_path:
+        tmp.tmp_config.set("Repository", "local_path", args.local_path)
+    elif not tmp.tmp_config.has_option("Repository", "local_path"):
+        tmp.tmp_config.set("Repository", "local_path", os.path.join(os.getcwd(), "analysed_repositories"))
 
-    now = datetime.now()
-    end_time = now.strftime("%H:%M:%S")
+    if args.development_mode:
+        tmp.tmp_config.set("Analysis Settings", "development_mode", "True")
 
-    print("\nStarted", start_time)
-    print("Finished", end_time)
+    if args.commit is not None:
+        commit = args.commit[:7]
+        tmp.tmp_config.set("Analysis Settings", "commit", commit)
+    elif tmp.tmp_config.has_option("Analysis Settings", "commit"):
+        commit = tmp.tmp_config.get("Analysis Settings", "commit")[:7]
+        tmp.tmp_config.set("Analysis Settings", "commit", commit)
+
+    perform_analysis()
 
 
 if __name__ == '__main__':
-    main()
+    cli_invocation()

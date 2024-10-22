@@ -1,6 +1,6 @@
 import re
+import os
 
-import requests
 import ruamel.yaml
 
 import core.file_interaction as fi
@@ -55,18 +55,15 @@ class MyConstructor(ruamel.yaml.constructor.RoundTripConstructor):
 
 
 
-def parse_properties_file(download_url: str) -> str:
+def parse_properties_file(file_path: str) -> str:
     """Extracts servicename from a .properties file.
     """
 
-    repo_path = tmp.tmp_config["Repository"]["path"]
-    file_name = download_url.split(repo_path)[1].strip("/")
-    file_name = '/'.join(file_name.split("/")[1:])
 
     properties = set()
     microservice = [False, False]
 
-    file = fi.file_as_lines(download_url)
+    file = fi.file_as_lines(file_path)
 
     i = 0
     for line in file:
@@ -76,7 +73,7 @@ def parse_properties_file(download_url: str) -> str:
                 microservice[0] = line.split("=")[1].strip()
 
                 # Traceability
-                microservice[1] = create_trace(microservice[0], file_name, file, i)
+                microservice[1] = create_trace(microservice[0], file_path, file, i)
 
         # Port
         elif "server.port" in line:
@@ -84,7 +81,7 @@ def parse_properties_file(download_url: str) -> str:
                 port = int(line.split("=")[1].strip()) if "=" in line else None
                 if port:
                     span = re.search("server.port", line).span()
-                    trace = (file_name, i, span)
+                    trace = (file_path, i, span)
                     properties.add(("port", port, trace))
             except:
                 logger.debug(f"Port is not an integer in line {line}")
@@ -94,19 +91,19 @@ def parse_properties_file(download_url: str) -> str:
             data_url = line.split("=")[1]
             if data_url:
                 span = re.search("spring.datasource.url", line).span()
-                trace = (file_name, i, span)
+                trace = (file_path, i, span)
                 properties.add(("datasource_url", data_url, trace))
         elif "spring.datasource.password" in line:
             password = line.split("=")[1]
             if password:
                 span = re.search("spring.datasource.password", line).span()
-                trace = (file_name, i, span)
+                trace = (file_path, i, span)
                 properties.add(("datasource_password", password, trace))
         elif "spring.datasource.username" in line:
             username = line.split("=")[1]
             if username:
                 span = re.search("spring.datasource.username", line).span()
-                trace = (file_name, i, span)
+                trace = (file_path, i, span)
                 properties.add(("datasource_username", username, trace))
 
         # Config
@@ -114,13 +111,13 @@ def parse_properties_file(download_url: str) -> str:
             config_uri = line.split("=")[1]
             if config_uri:
                 span = re.search("spring.cloud.config.server.git.uri", line).span()
-                trace = (file_name, i, span)
+                trace = (file_path, i, span)
                 properties.add(("config_repo_uri", config_uri, trace))
         elif "spring.cloud.config.uri" in line:
             config_uri = line.split("=")[1]
             if config_uri:
                 span = re.search("spring.cloud.config.uri", line).span()
-                trace = (file_name, i, span)
+                trace = (file_path, i, span)
                 properties.add(("config_uri", config_uri, trace))
                 properties.add(("config_connected", True, trace))
 
@@ -129,41 +126,41 @@ def parse_properties_file(download_url: str) -> str:
             # Default for enabled is true when ssl keyword is given
 
             span = re.search("server.ssl", line).span()
-            trace = (file_name, i, span)
+            trace = (file_path, i, span)
             properties.add(("ssl_enabled", True, trace))
             # Check if disabled
             if "server.ssl.enabled" in line:
                 ssl_enabled = line.split("=")[1]
                 if ssl_enabled != None:
                     span = re.search("server.ssl.enabled", line).span()
-                    trace = (file_name, i, span)
+                    trace = (file_path, i, span)
                     properties.add(("ssl_enabled", ssl_enabled, trace))
 
         # Eureka
         elif "eureka.client.serviceUrl.defaultZone" in line:
             span = re.search("eureka.client.serviceUrl.defaultZone", line).span()
-            trace = (file_name, i, span)
+            trace = (file_path, i, span)
             properties.add(("eureka_connected", True, trace))
 
         # Kafka
         elif "spring.cloud.stream.kafka.binder.brokers" in line:
             kafka_server = line.split("=")[1].strip().strip("\"").strip()
             span = re.search("spring.cloud.stream.kafka.binder.brokers", line).span()
-            trace = (file_name, i, span)
+            trace = (file_path, i, span)
             properties.add(("kafka_stream_binder", kafka_server, trace))
         elif "spring.cloud.stream.bindings.output.destination" in line:
             span = re.search("spring.cloud.stream.bindings.output.destination", line).span()
-            trace = (file_name, i, span)
+            trace = (file_path, i, span)
             properties.add(("kafka_stream_topic_out", line.split("=")[1].strip(), trace))
         elif "spring.cloud.stream.bindings.input.destination" in line:
             span = re.search("spring.cloud.stream.bindings.input.destination", line).span()
-            trace = (file_name, i, span)
+            trace = (file_path, i, span)
             properties.add(("kafka_stream_topic_in", line.split("=")[1].strip(), trace))
 
         # Admin server
         elif "spring.boot.admin.url" in line:
             span = re.search("spring.boot.admin.url", line).span()
-            trace = (file_name, i, span)
+            trace = (file_path, i, span)
             properties.add(("admin_server_url", line.split("=")[1].split(",")[0], trace))
 
 
@@ -171,35 +168,29 @@ def parse_properties_file(download_url: str) -> str:
     return microservice, properties
 
 
-def parse_yaml_file(download_url: str, file_path: str) -> str:
+def parse_yaml_file(file_path: str) -> str:
     """Extracts servicename from a .yml or .yaml file.
     """
 
 
+    local_path = tmp.tmp_config.get("Repository", "local_path")
+    file_path = os.path.join(local_path, file_path)
     yaml = ruamel.yaml.YAML()
     yaml.Constructor = MyConstructor
 
     properties = set()
     microservice = [False, False]
     lines = False
-    try:    # local
-        with open(file_path, "r") as file:
-            lines = list()
-            for line in file.readlines():
-                lines.append(line.strip("\n"))
-    except Exception as e:  # online
-        raw_file = requests.get(download_url)
-        lines = raw_file.text.splitlines()
+    with open(file_path, "r") as file:
+        lines = list()
+        for line in file.readlines():
+            lines.append(line.strip("\n"))
     if not lines:
         return microservice, properties
 
     content = False
-    try:    # local
-        with open(file_path, "r") as file:
-                content = file.read()
-    except Exception as e:  # online
-        raw_file = requests.get(download_url)
-        content = raw_file.text
+    with open(file_path, "r") as file:
+            content = file.read()
     if not content:
         return microservice, properties
 
