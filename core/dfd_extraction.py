@@ -403,12 +403,18 @@ def merge_duplicate_flows(information_flows: dict):
         if flow_i["sender"] and flow_i["receiver"]:
             flow_i["sender"] = flow_i["sender"].casefold()
             flow_i["receiver"] = flow_i["receiver"].casefold()
+        else:
+            to_delete.add(i)
+            continue
         if i == j:
             continue
         flow_j = information_flows[j]
         if flow_j["sender"] and flow_j["receiver"]:
             flow_j["sender"] = flow_j["sender"].casefold()
             flow_j["receiver"] = flow_j["receiver"].casefold()
+        else:
+            to_delete.add(j)
+            continue
 
         if flow_i["sender"] == flow_j["sender"] and flow_i["receiver"] == flow_j["receiver"]:
             # merge
