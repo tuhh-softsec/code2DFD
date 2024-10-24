@@ -86,17 +86,17 @@ def detect_zipkin_server(microservices: dict, information_flows: dict, iterative
                 microservices[correct_id]["tagged_values"] =[("Tracing Server", "Zipkin")]
 
     if not zipkin_server_exists and connections_exist:
-        port = connections_exist.split("http:")[1].split(":")[1].strip("/").strip()
-        try:
-            id = max(microservices.keys()) + 1
-        except:
-            id = 0
-        microservices[id] = dict()
-        microservices[id]["name"] = "zipkin-server"
-        microservices[id]["image"] = "placeholder_image"
-        microservices[id]["properties"] = [("port", port, ("file", "line", "span"))]
-        microservices[id]["stereotype_instances"] = ["tracing_server"]
-        microservices[id]["tagged_values"] = [("Tracing Server", "Zipkin")]
+        if "http:" in connections_exist:
+            port = connections_exist.split("http:")[1]
+            if ":" in port:
+                port = port.split(":")[1].strip("/").strip()
+        id_ = max(microservices.keys(), default=-1) + 1
+        microservices[id_] = dict()
+        microservices[id_]["name"] = "zipkin-server"
+        microservices[id_]["image"] = "placeholder_image"
+        microservices[id_]["properties"] = [("port", port, ("file", "line", "span"))]
+        microservices[id_]["stereotype_instances"] = ["tracing_server"]
+        microservices[id_]["tagged_values"] = [("Tracing Server", "Zipkin")]
 
 
         if not iterative:
