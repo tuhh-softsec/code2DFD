@@ -59,7 +59,7 @@ def set_information_flows(dfd) -> dict:
                     target_service = line.split("name")[1].split(",")[0].strip().strip("=)\"").strip()
                 elif "value" in line:
                     target_service = line.split("value")[1].split(",")[0].strip().strip("=)\"").strip()
-                else:
+                elif "," in line:
                     target_service = line.split("FeignClient(")[1].split(",")[0].strip().strip(")").strip().strip("\"").strip()
                 if not is_microservice(target_service, dfd):
                     target_service = False
@@ -102,6 +102,8 @@ def is_microservice(service: str, dfd) -> bool:
     """Checks if input service is in the list of microservices.
     """
 
+    if not service:
+        return False
     is_microservice = False
     microservices = tech_sw.get_microservices(dfd)
     for m in microservices.keys():
