@@ -420,7 +420,10 @@ def merge_duplicate_flows(information_flows: dict):
             # merge
             for field, j_value in flow_j.items():
                 if field not in ["sender", "receiver"]:
-                    flow_i[field] = flow_i.get(field, list()) + list(j_value)
+                    try:
+                        flow_i[field] = flow_i.get(field, list()) + list(j_value)
+                    except:
+                        flow_i[field] = list(j_value).append(flow_i.get(field, list()))
             to_delete.add(j)
     for k in to_delete:
         del information_flows[k]
