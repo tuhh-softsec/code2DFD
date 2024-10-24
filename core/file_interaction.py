@@ -88,7 +88,11 @@ def search_keywords(keywords: str):
                     name = os.path.basename(path)
                     line_nr = line_parts[1]
                     code_line = ":".join(line_parts[2:])
-                    match = re.search(keyword, code_line)
+                    try:
+                        match = re.search(keyword, code_line)
+                    except Exception as e:
+                        logger.info(f"Error in regex matching for regex keyword {keyword}: {e}")
+                        match = None
                     if match is None:
                         continue
                     span = match.span()
