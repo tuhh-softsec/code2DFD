@@ -68,6 +68,7 @@ def cli_invocation():
     repository = parser.add_argument_group("Repository", "Repository information")
     repository.add_argument("--repo_url", type=str, help="URL to clone the repository from (might be local path)")
     repository.add_argument("--repo_local_path", type=str, help="Location to clone repository to (default: 'analysed_repositories' in CWD)")
+    repository.add_argument("--github_handle", type=str, help="Handle of a GitHub repository containing the application to be analyzed")
     settings = parser.add_argument_group("Analysis Settings", "Parameters for additional analysis settings")
     settings.add_argument("--commit", type=str, help="Analyze repository at this commit")
     settings.add_argument("--development_mode", action='store_true', help="Switch on development mode")
@@ -90,6 +91,8 @@ def cli_invocation():
 
     if args.repo_url:
         tmp.tmp_config.set("Repository", "url", args.repo_url)
+    elif args.github_handle:
+        tmp.tmp_config.set("Repository", "url", f"https://github.com/{args.github_handle.strip('/')}")
     elif not tmp.tmp_config.has_option("Repository", "url"):
         raise AttributeError("Parameter [Repository][url] must be provided either in config file or by --repo_url")
 
