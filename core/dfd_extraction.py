@@ -219,7 +219,7 @@ def overwrite_port(microservices: dict) -> dict:
             if prop[0] == "port":
                 port = None
                 if isinstance(prop[1], str):
-                    if "port" in prop[1].casefold():
+                    if "port" in prop[1].casefold() and ":" in prop[1]:
                         port = prop[1].split(":")[1].strip("}")
                     else:
                         port = int(prop[1].strip())
