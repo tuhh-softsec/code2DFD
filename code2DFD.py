@@ -3,19 +3,12 @@
 # Author: Simon Schneider, 2023
 # Contact: simon.schneider@tuhh.de
 import os
-from configparser import ConfigParser
 from datetime import datetime
 import argparse
 
 from core.dfd_extraction import perform_analysis
 from output_generators.logger import logger
 import core.config as tmp
-
-CONFIG_SECTIONS = ["Analysis Settings", "Repository"]
-DEFAULT_CONFIG = ConfigParser()
-for section in CONFIG_SECTIONS:
-    DEFAULT_CONFIG.add_section(section)
-DEFAULT_CONFIG.set("Analysis Settings", "development_mode", "False")
 
 
 def api_invocation(url: str, commit: str) -> dict:
@@ -27,11 +20,7 @@ def api_invocation(url: str, commit: str) -> dict:
     start_time = datetime.now()
 
     logger.info("*** New execution ***")
-    logger.debug("Initializing config to tmp file")
-    for section in CONFIG_SECTIONS:  # Copying what is needed from default to temp
-        tmp.code2dfd_config.add_section(section)
-        for entry in DEFAULT_CONFIG[section]:
-            tmp.code2dfd_config.set(section, entry, DEFAULT_CONFIG[section][entry])
+    logger.debug("Initializing config")
 
     # Overwrite repo_path from config file with the one from the API call
     tmp.code2dfd_config.set("Repository", "url", url)
@@ -74,15 +63,9 @@ def cli_invocation():
 
     if args.config_path:
         # Copy config to tmp file
-        logger.debug("Copying config file to tmp file")
+        logger.debug("Copying config file to internal config")
         tmp.code2dfd_config.read(args.config_path)
-    else:
         # global ini_config
-        logger.debug("Initializing tmp file with default config")
-        for section in CONFIG_SECTIONS:  # Copying what is needed from default to temp
-            tmp.code2dfd_config.add_section(section)
-            for entry in DEFAULT_CONFIG[section]:
-                tmp.code2dfd_config.set(section, entry, DEFAULT_CONFIG[section][entry])
 
     if args.repo_url:
         tmp.code2dfd_config.set("Repository", "url", args.repo_url)
