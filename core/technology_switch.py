@@ -13,6 +13,10 @@ import technology_specific_extractors.rabbitmq.rmq_entry as rmq
 import technology_specific_extractors.resttemplate.rst_entry as rst
 import tmp.tmp as tmp
 
+COMMUNICATIONS_TECH_LIST = {"RabbitMQ": rmq, "Kafka": kfk, "RestTemplate": rst, "FeignClient": fgn,
+                            "Implicit Connections": imp, "Database Connections": dbc, "HTML": html,
+                            "Docker-Compose": dcm}
+
 
 def get_microservices(dfd) -> dict:
     """Calls get_microservices from correct container technology or returns existing list.
@@ -38,9 +42,8 @@ def get_information_flows(dfd) -> dict:
         return ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])
     else:
         logger.info("Information flows not set yet, start extraction")
-        communication_techs_list = ast.literal_eval(tmp.tmp_config["Technology Profiles"]["communication_techs_list"])
-        for com_tech in communication_techs_list:
-            eval(com_tech[1]).set_information_flows(dfd)
+        for func in COMMUNICATIONS_TECH_LIST.values():
+            func.set_information_flows(dfd)
 
         if tmp.tmp_config.has_option("DFD", "information_flows"):
             return ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])

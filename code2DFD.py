@@ -11,16 +11,11 @@ from core.dfd_extraction import perform_analysis
 from output_generators.logger import logger
 import tmp.tmp as tmp
 
-CONFIG_SECTIONS = ["Analysis Settings", "Repository", "Technology Profiles"]
-COMMUNICATIONS_TECH_LIST = '[("RabbitMQ", "rmq"), ("Kafka", "kfk"), ("RestTemplate", "rst"),\
-                            ("FeignClient", "fgn"), ("Implicit Connections", "imp"),\
-                            ("Database Connections", "dbc"), ("HTML", "html"),\
-                            ("Docker-Compose", "dcm")]'
+CONFIG_SECTIONS = ["Analysis Settings", "Repository"]
 DEFAULT_CONFIG = ConfigParser()
 for section in CONFIG_SECTIONS:
     DEFAULT_CONFIG.add_section(section)
 DEFAULT_CONFIG.set("Analysis Settings", "development_mode", "False")
-DEFAULT_CONFIG.set("Technology Profiles", "communication_techs_list", COMMUNICATIONS_TECH_LIST)
 
 
 def api_invocation(url: str, commit: str) -> dict:
