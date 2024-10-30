@@ -11,7 +11,7 @@ from core.dfd_extraction import perform_analysis
 from output_generators.logger import logger
 import tmp.tmp as tmp
 
-CONFIG_SECTIONS = ["Analysis Settings", "Repository", "Technology Profiles", "DFD"]
+CONFIG_SECTIONS = ["Analysis Settings", "Repository", "Technology Profiles"]
 COMMUNICATIONS_TECH_LIST = '[("RabbitMQ", "rmq"), ("Kafka", "kfk"), ("RestTemplate", "rst"),\
                             ("FeignClient", "fgn"), ("Implicit Connections", "imp"),\
                             ("Database Connections", "dbc"), ("HTML", "html"),\

@@ -57,6 +57,7 @@ def perform_analysis():
     """
     local_path = tmp.tmp_config.get("Repository", "local_path")
     url_path = tmp.tmp_config.get("Repository", "url")
+    tmp.tmp_config.add_section("DFD")
 
     os.makedirs(local_path, exist_ok=True)
     repository = Repository(path_to_repo=url_path, clone_repo_to=local_path)
