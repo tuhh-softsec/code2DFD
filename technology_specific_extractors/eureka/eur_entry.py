@@ -10,7 +10,7 @@ def detect_eureka(dfd):
     # Server (/microservice classification)
     results = fi.search_keywords("@EnableEurekaServer")
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     information_flows = dfd["information_flows"]
     eureka_server = False
     for r in results.keys():

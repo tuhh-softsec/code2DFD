@@ -4,7 +4,6 @@ import subprocess
 from pathlib import Path, PurePosixPath
 
 from output_generators.logger import logger
-import core.technology_switch as tech_sw
 from core.config import code2dfd_config
 
 
@@ -179,38 +178,6 @@ def file_as_lines(path):
     return file_as_lines
 
 
-def detect_microservice(file_path, dfd):
-    """Finds microservice that a file belongs to.
-    """
-
-    microservices_set = tech_sw.get_microservices(dfd)
-    microservices = [microservices_set[x]["name"] for x in microservices_set.keys()]
-
-    file_path_parts = Path(file_path).parts
-    count = 0
-    part = 0
-    found = False
-
-    while part < len(file_path_parts) and not found:
-        for m in microservices:
-            if m == file_path_parts[part]:
-                microservice = m
-                count += 1
-        if count > 0:
-            found = True
-        part += 1
-    if count == 1:
-        return microservice
-    else:
-        print("\tFound " + str(count) + " microservices for file " + str(file_path) +". \
-        \n\tPlease choose microservice that the file belongs to: ")
-        i = 1
-        for m in microservices:
-            print("\t[" + str(i) + "] " + str(m))
-            i += 1
-        return microservices[int(input("\n\t > ")) - 1]
-
-
 def find_variable(parameter: str, file) -> str:
     """ Looks for passed ´parameter´ in passed ´file´ or other files.
     """
@@ -287,7 +254,7 @@ def resolve_url(url: str, microservice: str, dfd) -> str:
     """Tries to resolve a url into one of the microserices.
     """
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     target_service = False
 
     if "http" in url:

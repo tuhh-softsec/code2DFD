@@ -12,7 +12,7 @@ def detect_zuul(dfd):
     results = fi.search_keywords("@EnableZuulServer")
     new_results = fi.search_keywords("@EnableZuulProxy")
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     information_flows = dfd["information_flows"]
     external_components = dfd["external_components"]
 

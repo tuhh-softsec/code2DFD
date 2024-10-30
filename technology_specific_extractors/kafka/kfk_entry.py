@@ -15,7 +15,7 @@ def set_information_flows(dfd):
     """Connects incoming endpoints, outgoing endpoints, and routings to information flows
     """
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     information_flows = dfd["information_flows"]
 
     incoming_endpoints = get_incoming_endpoints(dfd)

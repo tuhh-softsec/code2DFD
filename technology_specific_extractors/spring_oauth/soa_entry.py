@@ -8,7 +8,7 @@ def detect_spring_oauth(dfd):
     """Detect Spring OAuth Server and connections to it.
     """
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     information_flows = dfd["information_flows"]
 
     microservices = detect_authorization_server(microservices, dfd)

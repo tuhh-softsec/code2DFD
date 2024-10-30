@@ -149,7 +149,7 @@ def match_incoming_to_outgoing_endpoints(information_flows: dict, incoming_endpo
     # outgoing: (exchange, routingkey, microservice, (file, line, span))
     # incoming: (queue, microservice, (file, line, span))
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     rabbit_server = False
     for id in microservices.keys():
         if ("Message Broker", "RabbitMQ") in microservices[id]["tagged_values"]:

@@ -2,7 +2,6 @@ import os
 
 import core.file_interaction as fi
 from output_generators.logger import logger
-import core.technology_switch as tech_sw
 import technology_specific_extractors.docker_compose.dcm_parser as dcm_parser
 from core.config import code2dfd_config
 import output_generators.traceability as traceability
@@ -109,7 +108,7 @@ def set_information_flows(dfd):
 
     global docker_compose_content
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     information_flows = dfd["information_flows"]
 
     # Download docker-compose file
@@ -160,7 +159,7 @@ def detect_microservice(file_path: str, dfd) -> str:
     """Detects, which service a file belongs to based on image given in docker-compose file and dockerfile belonging to file given as input.
     """
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     microservice = False
     dockerfile_path = False
 

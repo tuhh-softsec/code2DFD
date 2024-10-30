@@ -3,7 +3,6 @@ import os
 import core.file_interaction as fi
 from output_generators.logger import logger
 import core.parse_files as parse
-import core.technology_switch as tech_sw
 from core.config import code2dfd_config
 import output_generators.traceability as traceability
 
@@ -123,7 +122,7 @@ def detect_microservice(file_path, dfd):
         return False
 
     microservice = [False, False]
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
 
 
     found_gradle = False

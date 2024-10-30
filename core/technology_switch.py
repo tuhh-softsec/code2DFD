@@ -1,4 +1,3 @@
-from output_generators.logger import logger
 import technology_specific_extractors.database_connections.dbc_entry as dbc
 import technology_specific_extractors.docker_compose.dcm_entry as dcm
 import technology_specific_extractors.feign_client.fgn_entry as fgn
@@ -15,33 +14,23 @@ COMMUNICATIONS_TECH_LIST = {"RabbitMQ": rmq, "Kafka": kfk, "RestTemplate": rst, 
                             "Docker-Compose": dcm}
 
 
-def get_microservices(dfd) -> dict:
+def set_microservices(dfd):
     """Calls get_microservices from correct container technology or returns existing list.
     """
 
-    if len(dfd["microservices"]) > 0:
-        return dfd["microservices"]
-    else:
-        logger.info("Microservices not set yet, start extraction")
-
-        mvn.set_microservices(dfd)
-        grd.set_microservices(dfd)
-        dcm.set_microservices(dfd)
-        return dfd["microservices"]
+    mvn.set_microservices(dfd)
+    grd.set_microservices(dfd)
+    dcm.set_microservices(dfd)
 
 
-def get_information_flows(dfd) -> dict:
+def set_information_flows(dfd) -> dict:
     """Calls get_information_flows from correct communication technology.
     """
 
-    if len(dfd["information_flows"]) > 0:
-        return dfd["information_flows"]
-    else:
-        logger.info("Information flows not set yet, start extraction")
-        for func in COMMUNICATIONS_TECH_LIST.values():
-            func.set_information_flows(dfd)
+    for func in COMMUNICATIONS_TECH_LIST.values():
+        func.set_information_flows(dfd)
 
-        return dfd["information_flows"]
+    return dfd["information_flows"]
 
 
 def detect_microservice(file_path: str, dfd) -> str:

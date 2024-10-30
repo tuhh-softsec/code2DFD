@@ -4,7 +4,6 @@ import yaml
 
 import core.file_interaction as fi
 from output_generators.logger import logger
-import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
@@ -12,7 +11,7 @@ def set_information_flows(dfd):
     """Adds connections based on parsed config files.
     """
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     information_flows = dfd["information_flows"]
 
     # Weavescope

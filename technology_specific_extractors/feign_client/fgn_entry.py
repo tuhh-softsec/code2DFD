@@ -7,8 +7,7 @@ def set_information_flows(dfd):
     """Detects uses of Feign Client in the code.
     """
 
-    microservices = tech_sw.get_microservices(dfd)
-
+    microservices = dfd["microservices"]
     information_flows = dfd["information_flows"]
 
     # check for circuit breaker
@@ -98,7 +97,7 @@ def is_microservice(service: str, dfd) -> bool:
     if not service:
         return False
     is_microservice = False
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     for m in microservices.keys():
         if service.casefold() == microservices[m]["name"].casefold():
             is_microservice = True

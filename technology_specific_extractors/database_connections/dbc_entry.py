@@ -1,13 +1,11 @@
 import technology_specific_extractors.environment_variables as env
-import core.technology_switch as tech_sw
-from core.config import code2dfd_config
 import output_generators.traceability as traceability
 
 
 def set_information_flows(dfd):
     """Goes through services and checks if there are connections to databases.
     """
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     information_flows = dfd["information_flows"]
     external_components = dfd["external_components"]
 

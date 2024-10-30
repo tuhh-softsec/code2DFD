@@ -85,7 +85,8 @@ def DFD_extraction():
         "external_components": dict()
     }
 
-    tech_sw.get_microservices(dfd)
+    print("Extracting microservices")
+    tech_sw.set_microservices(dfd)
     
     detect_databases(dfd)
     overwrite_port(dfd)
@@ -104,7 +105,8 @@ def DFD_extraction():
     detect_authentication_scopes(dfd)
 
     # Get information flows
-    tech_sw.get_information_flows(dfd)
+    print("Extracting information flows")
+    tech_sw.set_information_flows(dfd)
 
     print("Extracted information flows from API-calls, message brokers, and database connections")
 

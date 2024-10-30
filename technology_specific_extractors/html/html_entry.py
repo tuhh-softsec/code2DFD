@@ -7,7 +7,7 @@ def set_information_flows(dfd):
     """Looks for connections between services via html sites / href's.
     """
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     information_flows = dfd["information_flows"]
 
     results = fi.search_keywords("href")

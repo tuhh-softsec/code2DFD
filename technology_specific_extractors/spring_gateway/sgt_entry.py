@@ -8,7 +8,7 @@ def detect_spring_cloud_gateway(dfd):
     """Detetcs Spring Cloud Gateway.
     """
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     information_flows = dfd["information_flows"]
     external_components = dfd["external_components"]
 

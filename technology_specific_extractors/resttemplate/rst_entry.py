@@ -111,7 +111,7 @@ def add_endpoints_tagged_values(endpoint_tuples: list, dfd):
     """Adds tagged values containing the endpoitns to the microservices.
     """
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     ordered_endpoints = dict()
 
     for endpoint_tuple in endpoint_tuples:
@@ -134,7 +134,7 @@ def get_outgoing_endpoints(information_flows: dict, dfd) -> set:
     """Finds API calls from one service to another if restTemplate.exchange() is used in the application.
     """
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
 
     if microservices != None:
         microservices = [microservices[x]["name"] for x in microservices.keys()]
@@ -178,7 +178,7 @@ def get_outgoing_endpoints(information_flows: dict, dfd) -> set:
 def find_rst_variable(parameter: str, file: dict, line_nr: int, information_flows: dict, microservice: str, dfd, count=0):
 
     # check if service name in parameter, if yes, add flow directly
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     for m in microservices.keys():
         if microservices[m]["name"] in parameter:
             try:
@@ -303,7 +303,7 @@ def match_incoming_to_outgoing_endpoints(incoming_endpoints: list, outgoing_endp
     """ Find information flows by matching incomgin to outgoing endpoints. Returns list of flows.
     """
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     information_flows_set = set()
     information_flows = dict()
     for o in outgoing_endpoints:
