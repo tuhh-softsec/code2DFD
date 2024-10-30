@@ -67,8 +67,8 @@ def extract_microservices(file_content, file_name) -> set:
 
     image = False
     build = False
-    if tmp.tmp_config.has_option("DFD", "microservices"):
-        microservices_dict =  ast.literal_eval(tmp.tmp_config["DFD"]["microservices"])
+    if tmp.code2dfd_config.has_option("DFD", "microservices"):
+        microservices_dict =  ast.literal_eval(tmp.code2dfd_config["DFD"]["microservices"])
     else:
         microservices_dict= dict()
     microservices_set = set()
@@ -621,7 +621,7 @@ def extract_microservices(file_content, file_name) -> set:
                 else:
                     microservices_dict[correct_id]["properties"] = properties
 
-    tmp.tmp_config.set("DFD", "microservices", str(microservices_dict).replace("%", "%%"))
+    tmp.code2dfd_config.set("DFD", "microservices", str(microservices_dict).replace("%", "%%"))
     return microservices_set, properties_dict
 
 

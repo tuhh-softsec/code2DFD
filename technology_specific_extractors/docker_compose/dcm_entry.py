@@ -29,7 +29,7 @@ def set_microservices(dfd) -> None:
         if len(raw_files) == 0:
             microservices = tech_sw.get_microservices(dfd)
             microservices = clean_pom_names(microservices)
-            tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+            tmp.code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
             return
         docker_compose_content = raw_files[0]["content"]
 
@@ -38,12 +38,12 @@ def set_microservices(dfd) -> None:
     if not microservices_set:
         microservices = tech_sw.get_microservices(dfd)
         microservices = clean_pom_names(microservices)
-        tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+        tmp.code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
         return
     microservices = dictionarify(microservices_set, properties_dict)
     microservices = clean_pom_names(microservices)
 
-    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+    tmp.code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
 
 
 def clean_pom_names(microservices: dict) -> dict:
@@ -60,8 +60,8 @@ def dictionarify(elements_set: set, properties_dict: dict) -> dict:
     """Turns set of services into dictionary.
     """
 
-    if tmp.tmp_config.has_option("DFD", "microservices"):
-        elements = ast.literal_eval(tmp.tmp_config["DFD"]["microservices"])
+    if tmp.code2dfd_config.has_option("DFD", "microservices"):
+        elements = ast.literal_eval(tmp.code2dfd_config["DFD"]["microservices"])
     else:
         elements = dict()
 
@@ -115,8 +115,8 @@ def set_information_flows(dfd):
 
     global docker_compose_content
 
-    if tmp.tmp_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])
+    if tmp.code2dfd_config.has_option("DFD", "information_flows"):
+        information_flows = ast.literal_eval(tmp.code2dfd_config["DFD"]["information_flows"])
     else:
         information_flows = dict()
 
@@ -135,7 +135,7 @@ def set_information_flows(dfd):
 
     information_flows = dcm_parser.extract_information_flows(docker_compose_content, microservices, information_flows)
 
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
+    tmp.code2dfd_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
     return information_flows
 
 
@@ -176,7 +176,7 @@ def detect_microservice(file_path: str, dfd) -> str:
     microservice = False
     dockerfile_path = False
 
-    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
+    local_repo_path = tmp.code2dfd_config["Repository"]["local_path"]
 
     # Find corresponding dockerfile
     dirs = list()

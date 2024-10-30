@@ -229,7 +229,7 @@ def parse_config_files(config_server: str, config_file_path: str, config_file_pa
     # external (other github repository) didn't work, look locally
     if config_file_path_local:
 
-        local_path = tmp.tmp_config["Repository"]["local_path"]
+        local_path = tmp.code2dfd_config["Repository"]["local_path"]
         config_file_path_local = os.path.relpath(config_file_path_local, start=local_path)
 
         new_contents = fi.get_repo_contents_local(config_file_path_local)

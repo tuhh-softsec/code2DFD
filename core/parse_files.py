@@ -173,7 +173,7 @@ def parse_yaml_file(file_path: str) -> str:
     """
 
 
-    local_path = tmp.tmp_config.get("Repository", "local_path")
+    local_path = tmp.code2dfd_config.get("Repository", "local_path")
     file_path = os.path.join(local_path, file_path)
     yaml = ruamel.yaml.YAML()
     yaml.Constructor = MyConstructor

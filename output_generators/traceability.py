@@ -154,7 +154,7 @@ def write_to_file():
     """Writes tracebility info from dict to json file.
     """
 
-    output_path = tmp.tmp_config["Analysis Settings"]["output_path"]
+    output_path = tmp.code2dfd_config["Analysis Settings"]["output_path"]
     parts = Path(output_path).parts
     filename = f"{parts[-2]}--{parts[-1]}_traceability.json"
     output_path = os.path.join(output_path, filename)

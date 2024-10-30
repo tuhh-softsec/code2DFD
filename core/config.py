@@ -1,3 +1,3 @@
 from configparser import ConfigParser
 
-tmp_config = ConfigParser()
+code2dfd_config = ConfigParser()

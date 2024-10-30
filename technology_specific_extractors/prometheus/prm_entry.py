@@ -59,7 +59,7 @@ def detect_connections(microservices: dict, information_flows: dict, dockerfile,
     """Parses config file to find connections to prometheus.
     """
 
-    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
+    local_repo_path = tmp.code2dfd_config["Repository"]["local_path"]
 
     for line in dockerfile["content"]:
         if "ADD" in line:

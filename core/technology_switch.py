@@ -22,31 +22,31 @@ def get_microservices(dfd) -> dict:
     """Calls get_microservices from correct container technology or returns existing list.
     """
 
-    if tmp.tmp_config.has_option("DFD", "microservices"):
-        return ast.literal_eval(tmp.tmp_config["DFD"]["microservices"])
+    if tmp.code2dfd_config.has_option("DFD", "microservices"):
+        return ast.literal_eval(tmp.code2dfd_config["DFD"]["microservices"])
     else:
         logger.info("Microservices not set yet, start extraction")
 
         mvn.set_microservices(dfd)
         grd.set_microservices(dfd)
         dcm.set_microservices(dfd)
-        if tmp.tmp_config.has_option("DFD", "microservices"):
-            return ast.literal_eval(tmp.tmp_config["DFD"]["microservices"])
+        if tmp.code2dfd_config.has_option("DFD", "microservices"):
+            return ast.literal_eval(tmp.code2dfd_config["DFD"]["microservices"])
 
 
 def get_information_flows(dfd) -> dict:
     """Calls get_information_flows from correct communication technology.
     """
 
-    if tmp.tmp_config.has_option("DFD", "information_flows"):
-        return ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])
+    if tmp.code2dfd_config.has_option("DFD", "information_flows"):
+        return ast.literal_eval(tmp.code2dfd_config["DFD"]["information_flows"])
     else:
         logger.info("Information flows not set yet, start extraction")
         for func in COMMUNICATIONS_TECH_LIST.values():
             func.set_information_flows(dfd)
 
-        if tmp.tmp_config.has_option("DFD", "information_flows"):
-            return ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])
+        if tmp.code2dfd_config.has_option("DFD", "information_flows"):
+            return ast.literal_eval(tmp.code2dfd_config["DFD"]["information_flows"])
 
 
 def detect_microservice(file_path: str, dfd) -> str:

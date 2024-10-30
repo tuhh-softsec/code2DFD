@@ -17,8 +17,8 @@ def set_microservices(dfd) -> dict:
     if not used_in_application():
         return False
 
-    if tmp.tmp_config.has_option("DFD", "microservices"):
-        microservices = ast.literal_eval(tmp.tmp_config["DFD"]["microservices"])
+    if tmp.code2dfd_config.has_option("DFD", "microservices"):
+        microservices = ast.literal_eval(tmp.code2dfd_config["DFD"]["microservices"])
     else:
         microservices = dict()
 
@@ -56,7 +56,7 @@ def set_microservices(dfd) -> dict:
                 except:
                     pass
 
-    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+    tmp.code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
 
     return microservices
 
@@ -89,7 +89,7 @@ def parse_properties_file(gradle_path: str):
     # find properties file
     path = os.path.dirname(gradle_path)
 
-    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
+    local_repo_path = tmp.code2dfd_config["Repository"]["local_path"]
 
     dirs = list()
     dirs.append(os.scandir(os.path.join(local_repo_path, path)))
@@ -135,7 +135,7 @@ def detect_microservice(file_path, dfd):
 
     found_gradle = False
 
-    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
+    local_repo_path = tmp.code2dfd_config["Repository"]["local_path"]
 
     dirs = list()
     path = os.path.dirname(file_path)

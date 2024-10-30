@@ -12,8 +12,8 @@ def set_information_flows(dfd):
 
     microservices = tech_sw.get_microservices(dfd)
 
-    if tmp.tmp_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])
+    if tmp.code2dfd_config.has_option("DFD", "information_flows"):
+        information_flows = ast.literal_eval(tmp.code2dfd_config["DFD"]["information_flows"])
     else:
         information_flows = dict()
 
@@ -52,5 +52,5 @@ def set_information_flows(dfd):
 
                 except:
                     pass
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
+    tmp.code2dfd_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
     return information_flows

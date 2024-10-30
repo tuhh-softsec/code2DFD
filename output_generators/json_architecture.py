@@ -13,7 +13,7 @@ def generate_json_architecture(microservices: dict, information_flows: dict, ext
                  "information_flows": list(information_flows.values()),
                  "external_components": list(external_components.values())}
     
-    output_path = tmp.tmp_config["Analysis Settings"]["output_path"]
+    output_path = tmp.code2dfd_config["Analysis Settings"]["output_path"]
     parts = Path(output_path).parts
     filename = f"{parts[-2]}--{parts[-1]}_json_architecture.json"
     output_path = os.path.join(output_path, filename)

@@ -29,16 +29,16 @@ def api_invocation(url: str, commit: str) -> dict:
     logger.info("*** New execution ***")
     logger.debug("Initializing config to tmp file")
     for section in CONFIG_SECTIONS:  # Copying what is needed from default to temp
-        tmp.tmp_config.add_section(section)
+        tmp.code2dfd_config.add_section(section)
         for entry in DEFAULT_CONFIG[section]:
-            tmp.tmp_config.set(section, entry, DEFAULT_CONFIG[section][entry])
+            tmp.code2dfd_config.set(section, entry, DEFAULT_CONFIG[section][entry])
 
     # Overwrite repo_path from config file with the one from the API call
-    tmp.tmp_config.set("Repository", "url", url)
-    tmp.tmp_config.set("Repository", "local_path",
-                       os.path.join(os.getcwd(), "analysed_repositories"))
+    tmp.code2dfd_config.set("Repository", "url", url)
+    tmp.code2dfd_config.set("Repository", "local_path",
+                            os.path.join(os.getcwd(), "analysed_repositories"))
     if commit is not None:
-        tmp.tmp_config.set("Repository", "commit", commit)
+        tmp.code2dfd_config.set("Repository", "commit", commit)
 
     # Call extraction
     codeable_models, traceability = perform_analysis()
@@ -75,36 +75,36 @@ def cli_invocation():
     if args.config_path:
         # Copy config to tmp file
         logger.debug("Copying config file to tmp file")
-        tmp.tmp_config.read(args.config_path)
+        tmp.code2dfd_config.read(args.config_path)
     else:
         # global ini_config
         logger.debug("Initializing tmp file with default config")
         for section in CONFIG_SECTIONS:  # Copying what is needed from default to temp
-            tmp.tmp_config.add_section(section)
+            tmp.code2dfd_config.add_section(section)
             for entry in DEFAULT_CONFIG[section]:
-                tmp.tmp_config.set(section, entry, DEFAULT_CONFIG[section][entry])
+                tmp.code2dfd_config.set(section, entry, DEFAULT_CONFIG[section][entry])
 
     if args.repo_url:
-        tmp.tmp_config.set("Repository", "url", args.repo_url)
+        tmp.code2dfd_config.set("Repository", "url", args.repo_url)
     elif args.github_handle:
-        tmp.tmp_config.set("Repository", "url", f"https://github.com/{args.github_handle.strip('/')}")
-    elif not tmp.tmp_config.has_option("Repository", "url"):
+        tmp.code2dfd_config.set("Repository", "url", f"https://github.com/{args.github_handle.strip('/')}")
+    elif not tmp.code2dfd_config.has_option("Repository", "url"):
         raise AttributeError("Parameter [Repository][url] must be provided either in config file or by --repo_url")
 
     if args.repo_local_path:
-        tmp.tmp_config.set("Repository", "local_path", args.local_path)
-    elif not tmp.tmp_config.has_option("Repository", "local_path"):
-        tmp.tmp_config.set("Repository", "local_path", os.path.join(os.getcwd(), "analysed_repositories"))
+        tmp.code2dfd_config.set("Repository", "local_path", args.local_path)
+    elif not tmp.code2dfd_config.has_option("Repository", "local_path"):
+        tmp.code2dfd_config.set("Repository", "local_path", os.path.join(os.getcwd(), "analysed_repositories"))
 
     if args.development_mode:
-        tmp.tmp_config.set("Analysis Settings", "development_mode", "True")
+        tmp.code2dfd_config.set("Analysis Settings", "development_mode", "True")
 
     if args.commit is not None:
         commit = args.commit[:7]
-        tmp.tmp_config.set("Repository", "commit", commit)
-    elif tmp.tmp_config.has_option("Repository", "commit"):
-        commit = tmp.tmp_config.get("Repository", "commit")[:7]
-        tmp.tmp_config.set("Repository", "commit", commit)
+        tmp.code2dfd_config.set("Repository", "commit", commit)
+    elif tmp.code2dfd_config.has_option("Repository", "commit"):
+        commit = tmp.code2dfd_config.get("Repository", "commit")[:7]
+        tmp.code2dfd_config.set("Repository", "commit", commit)
 
     perform_analysis()
 

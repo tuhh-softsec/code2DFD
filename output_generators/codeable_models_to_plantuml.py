@@ -13,7 +13,7 @@ def convert(codeable_models_path: str) -> str:
 
     global plantuml_new
 
-    output_file_path = tmp.tmp_config["Analysis Settings"]["output_path"]
+    output_file_path = tmp.code2dfd_config["Analysis Settings"]["output_path"]
     parts = Path(output_file_path).parts
     filename = f"{parts[-2]}--{parts[-1]}_uml.txt"
     output_file_path = os.path.join(output_file_path, filename)
