@@ -9,18 +9,18 @@ import technology_specific_extractors.maven.mvn_entry as mvn
 import technology_specific_extractors.rabbitmq.rmq_entry as rmq
 import technology_specific_extractors.resttemplate.rst_entry as rst
 
+CONTAINER_TECH_LIST = {"Maven": mvn, "Gradle": grd, "DockerCompose": dcm}
 COMMUNICATIONS_TECH_LIST = {"RabbitMQ": rmq, "Kafka": kfk, "RestTemplate": rst, "FeignClient": fgn,
                             "Implicit Connections": imp, "Database Connections": dbc, "HTML": html,
                             "Docker-Compose": dcm}
 
 
 def set_microservices(dfd):
-    """Calls get_microservices from correct container technology or returns existing list.
+    """Calls set_microservices from correct container technology or returns existing list.
     """
 
-    mvn.set_microservices(dfd)
-    grd.set_microservices(dfd)
-    dcm.set_microservices(dfd)
+    for func in CONTAINER_TECH_LIST.values():
+        func.set_microservices(dfd)
 
 
 def set_information_flows(dfd) -> dict:
@@ -37,9 +37,7 @@ def detect_microservice(file_path: str, dfd) -> str:
     """Calls detect_microservices from correct microservice detection technology.
     """
 
-    microservice = mvn.detect_microservice(file_path, dfd)
-    if not microservice:
-        microservice = grd.detect_microservice(file_path, dfd)
-    if not microservice:
-        microservice = dcm.detect_microservice(file_path, dfd)
-    return microservice
+    for func in CONTAINER_TECH_LIST.values():
+        microservice = func.detect_microservice(file_path, dfd)
+        if microservice:
+            return microservice
