@@ -2,7 +2,7 @@ import ast
 
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
-import tmp.tmp as tmp
+import core.config as tmp
 import output_generators.traceability as traceability
 
 

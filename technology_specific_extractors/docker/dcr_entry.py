@@ -1,6 +1,6 @@
 import os
 
-import tmp.tmp as tmp
+import core.config as tmp
 
 
 def detect_port(path: str) -> int:

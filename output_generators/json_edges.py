@@ -7,7 +7,7 @@ import json
 import os
 from pathlib import Path
 
-import tmp.tmp as tmp
+import core.config as tmp
 
 
 def generate_json_edges(information_flows: dict):

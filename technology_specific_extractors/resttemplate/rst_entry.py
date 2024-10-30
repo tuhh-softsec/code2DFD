@@ -4,7 +4,7 @@ import core.file_interaction as fi
 import core.technology_switch as tech_sw
 from output_generators.logger import logger
 import output_generators.traceability as traceability
-import tmp.tmp as tmp
+import core.config as tmp
 
 
 def set_information_flows(dfd) -> dict:

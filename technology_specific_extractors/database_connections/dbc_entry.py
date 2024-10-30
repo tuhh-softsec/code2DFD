@@ -2,7 +2,7 @@ import ast
 
 import technology_specific_extractors.environment_variables as env
 import core.technology_switch as tech_sw
-import tmp.tmp as tmp
+import core.config as tmp
 import output_generators.traceability as traceability
 
 

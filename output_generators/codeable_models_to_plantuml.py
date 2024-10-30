@@ -1,7 +1,7 @@
 import os.path
 from pathlib import Path
 
-import tmp.tmp as tmp
+import core.config as tmp
 
 
 plantuml_new = str()

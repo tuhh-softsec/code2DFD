@@ -7,7 +7,7 @@ from pydriller import Repository
 
 import output_generators.codeable_model as codeable_model
 import core.technology_switch as tech_sw
-import tmp.tmp as tmp
+import core.config as tmp
 import output_generators.json_architecture as json_architecture
 import output_generators.json_edges as json_edges
 import output_generators.traceability as traceability

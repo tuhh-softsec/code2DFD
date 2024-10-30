@@ -9,7 +9,7 @@ import argparse
 
 from core.dfd_extraction import perform_analysis
 from output_generators.logger import logger
-import tmp.tmp as tmp
+import core.config as tmp
 
 CONFIG_SECTIONS = ["Analysis Settings", "Repository"]
 DEFAULT_CONFIG = ConfigParser()

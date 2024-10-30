@@ -11,7 +11,7 @@ import technology_specific_extractors.kafka.kfk_entry as kfk
 import technology_specific_extractors.maven.mvn_entry as mvn
 import technology_specific_extractors.rabbitmq.rmq_entry as rmq
 import technology_specific_extractors.resttemplate.rst_entry as rst
-import tmp.tmp as tmp
+import core.config as tmp
 
 COMMUNICATIONS_TECH_LIST = {"RabbitMQ": rmq, "Kafka": kfk, "RestTemplate": rst, "FeignClient": fgn,
                             "Implicit Connections": imp, "Database Connections": dbc, "HTML": html,

@@ -6,7 +6,7 @@ import core.file_interaction as fi
 from output_generators.logger import logger
 import core.parse_files as parse
 import core.technology_switch as tech_sw
-import tmp.tmp as tmp
+import core.config as tmp
 import output_generators.traceability as traceability
 
 

@@ -5,7 +5,7 @@ from pathlib import Path, PurePosixPath
 
 from output_generators.logger import logger
 import core.technology_switch as tech_sw
-import tmp.tmp as tmp
+import core.config as tmp
 
 
 count = 0

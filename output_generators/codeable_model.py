@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-import tmp.tmp as tmp
+import core.config as tmp
 
 
 # the used metamodel is microservice_dfds_metamodel.py

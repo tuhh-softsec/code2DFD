@@ -2,7 +2,7 @@ import json
 import os
 from pathlib import Path
 
-import tmp.tmp as tmp
+import core.config as tmp
 
 
 def generate_json_architecture(microservices: dict, information_flows: dict, external_components: dict):

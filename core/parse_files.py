@@ -4,7 +4,7 @@ import os
 import ruamel.yaml
 
 import core.file_interaction as fi
-import tmp.tmp as tmp
+import core.config as tmp
 from output_generators.logger import logger
 
 

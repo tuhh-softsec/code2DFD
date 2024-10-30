@@ -5,7 +5,7 @@ import core.file_interaction as fi
 from output_generators.logger import logger
 import core.technology_switch as tech_sw
 import technology_specific_extractors.docker_compose.dcm_parser as dcm_parser
-import tmp.tmp as tmp
+import core.config as tmp
 import output_generators.traceability as traceability
 
 docker_compose_content = False
