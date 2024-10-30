@@ -2,7 +2,7 @@ import ast
 
 import technology_specific_extractors.environment_variables as env
 import core.technology_switch as tech_sw
-import core.config as tmp
+from core.config import code2dfd_config
 import output_generators.traceability as traceability
 
 
@@ -10,13 +10,13 @@ def set_information_flows(dfd) -> set:
     """Goes through services and checks if there are connections to databases.
     """
 
-    if tmp.code2dfd_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(tmp.code2dfd_config["DFD"]["information_flows"])
+    if code2dfd_config.has_option("DFD", "information_flows"):
+        information_flows = ast.literal_eval(code2dfd_config["DFD"]["information_flows"])
     else:
         information_flows = dict()
 
-    if tmp.code2dfd_config.has_option("DFD", "external_components"):
-        external_components = ast.literal_eval(tmp.code2dfd_config["DFD"]["external_components"])
+    if code2dfd_config.has_option("DFD", "external_components"):
+        external_components = ast.literal_eval(code2dfd_config["DFD"]["external_components"])
     else:
         external_components = dict()
 
@@ -24,9 +24,9 @@ def set_information_flows(dfd) -> set:
 
     microservices, information_flows, external_components = check_properties(microservices, information_flows, external_components)
 
-    tmp.code2dfd_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
-    tmp.code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
-    tmp.code2dfd_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
+    code2dfd_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
+    code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+    code2dfd_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
     return microservices, information_flows
 
 
@@ -220,7 +220,7 @@ def check_properties(microservices: dict, information_flows: dict, external_comp
                 except:
                     information_flows[id]["tagged_values"] = [("Username", username.strip())]
 
-            tmp.code2dfd_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
+            code2dfd_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
 
             trace = dict()
             trace["item"] = "database-" + str(microservices[m]["name"]) + " -> " + microservices[m]["name"]

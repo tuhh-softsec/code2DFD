@@ -5,7 +5,7 @@ import yaml
 
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
-import core.config as tmp
+from core.config import code2dfd_config
 import output_generators.traceability as traceability
 from output_generators.logger import logger
 
@@ -16,8 +16,8 @@ def set_information_flows(dfd) -> set:
     """Connects incoming endpoints, outgoing endpoints, and routings to information flows
     """
 
-    if tmp.code2dfd_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(tmp.code2dfd_config["DFD"]["information_flows"])
+    if code2dfd_config.has_option("DFD", "information_flows"):
+        information_flows = ast.literal_eval(code2dfd_config["DFD"]["information_flows"])
     else:
         information_flows = dict()
 
@@ -39,7 +39,7 @@ def set_information_flows(dfd) -> set:
 
     information_flows = detect_stream_binders(microservices, information_flows, dfd)
 
-    tmp.code2dfd_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
+    code2dfd_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
 
     return information_flows
 
@@ -184,8 +184,8 @@ def match_incoming_to_outgoing_endpoints(microservices: dict, incoming_endpoints
     # incoming: (topic, microservice, (file, line, span))
     # outgoing: (topic, microservice, asset, (file, line, span))
 
-    if tmp.code2dfd_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(tmp.code2dfd_config["DFD"]["information_flows"])
+    if code2dfd_config.has_option("DFD", "information_flows"):
+        information_flows = ast.literal_eval(code2dfd_config["DFD"]["information_flows"])
     else:
         information_flows = dict()
 

@@ -5,7 +5,7 @@ import yaml
 
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
-import core.config as tmp
+from core.config import code2dfd_config
 import output_generators.traceability as traceability
 from output_generators.logger import logger
 
@@ -17,8 +17,8 @@ def set_information_flows(dfd) -> set:
     if not used_in_application():
         return
 
-    if tmp.code2dfd_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(tmp.code2dfd_config["DFD"]["information_flows"])
+    if code2dfd_config.has_option("DFD", "information_flows"):
+        information_flows = ast.literal_eval(code2dfd_config["DFD"]["information_flows"])
     else:
         information_flows = dict()
 
@@ -37,7 +37,7 @@ def set_information_flows(dfd) -> set:
             id = 0
         information_flows[id] = new_information_flows[ni]
 
-    tmp.code2dfd_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
+    code2dfd_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
     return information_flows
 
 
@@ -155,8 +155,8 @@ def match_incoming_to_outgoing_endpoints(incoming_endpoints: set, outgoing_endpo
     # outgoing: (exchange, routingkey, microservice, (file, line, span))
     # incoming: (queue, microservice, (file, line, span))
 
-    if tmp.code2dfd_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(tmp.code2dfd_config["DFD"]["information_flows"])
+    if code2dfd_config.has_option("DFD", "information_flows"):
+        information_flows = ast.literal_eval(code2dfd_config["DFD"]["information_flows"])
     else:
         information_flows = dict()
 
@@ -304,7 +304,7 @@ def match_incoming_to_outgoing_endpoints(incoming_endpoints: set, outgoing_endpo
 
             traceability.add_trace(trace)
 
-    tmp.code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+    code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
     return information_flows
 
 

@@ -2,7 +2,7 @@ import json
 import os
 from pathlib import Path
 
-import core.config as tmp
+from core.config import code2dfd_config
 
 traceability = dict()
 traceability["nodes"] = dict()
@@ -154,7 +154,7 @@ def write_to_file():
     """Writes tracebility info from dict to json file.
     """
 
-    output_path = tmp.code2dfd_config["Analysis Settings"]["output_path"]
+    output_path = code2dfd_config["Analysis Settings"]["output_path"]
     parts = Path(output_path).parts
     filename = f"{parts[-2]}--{parts[-1]}_traceability.json"
     output_path = os.path.join(output_path, filename)

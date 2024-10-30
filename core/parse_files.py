@@ -4,7 +4,7 @@ import os
 import ruamel.yaml
 
 import core.file_interaction as fi
-import core.config as tmp
+from core.config import code2dfd_config
 from output_generators.logger import logger
 
 
@@ -173,7 +173,7 @@ def parse_yaml_file(file_path: str) -> str:
     """
 
 
-    local_path = tmp.code2dfd_config.get("Repository", "local_path")
+    local_path = code2dfd_config.get("Repository", "local_path")
     file_path = os.path.join(local_path, file_path)
     yaml = ruamel.yaml.YAML()
     yaml.Constructor = MyConstructor

@@ -2,7 +2,7 @@ import os
 
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
-import core.config as tmp
+from core.config import code2dfd_config
 import output_generators.traceability as traceability
 
 
@@ -59,7 +59,7 @@ def detect_connections(microservices: dict, information_flows: dict, dockerfile,
     """Parses config file to find connections to prometheus.
     """
 
-    local_repo_path = tmp.code2dfd_config["Repository"]["local_path"]
+    local_repo_path = code2dfd_config["Repository"]["local_path"]
 
     for line in dockerfile["content"]:
         if "ADD" in line:

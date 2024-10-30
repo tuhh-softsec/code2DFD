@@ -2,7 +2,7 @@ import ast
 
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
-import core.config as tmp
+from core.config import code2dfd_config
 import output_generators.traceability as traceability
 
 
@@ -12,8 +12,8 @@ def set_information_flows(dfd) -> dict:
 
     microservices = tech_sw.get_microservices(dfd)
 
-    if tmp.code2dfd_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(tmp.code2dfd_config["DFD"]["information_flows"])
+    if code2dfd_config.has_option("DFD", "information_flows"):
+        information_flows = ast.literal_eval(code2dfd_config["DFD"]["information_flows"])
     else:
         information_flows = dict()
 
@@ -94,7 +94,7 @@ def set_information_flows(dfd) -> dict:
 
                     traceability.add_trace(trace)
 
-    tmp.code2dfd_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
+    code2dfd_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
     return information_flows
 
 

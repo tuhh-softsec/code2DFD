@@ -8,7 +8,7 @@ import argparse
 
 from core.dfd_extraction import perform_analysis
 from output_generators.logger import logger
-import core.config as tmp
+from core.config import code2dfd_config
 
 
 def api_invocation(url: str, commit: str) -> dict:
@@ -23,11 +23,11 @@ def api_invocation(url: str, commit: str) -> dict:
     logger.debug("Initializing config")
 
     # Overwrite repo_path from config file with the one from the API call
-    tmp.code2dfd_config.set("Repository", "url", url)
-    tmp.code2dfd_config.set("Repository", "local_path",
+    code2dfd_config.set("Repository", "url", url)
+    code2dfd_config.set("Repository", "local_path",
                             os.path.join(os.getcwd(), "analysed_repositories"))
     if commit is not None:
-        tmp.code2dfd_config.set("Repository", "commit", commit)
+        code2dfd_config.set("Repository", "commit", commit)
 
     # Call extraction
     codeable_models, traceability = perform_analysis()
@@ -64,30 +64,30 @@ def cli_invocation():
     if args.config_path:
         # Copy config to tmp file
         logger.debug("Copying config file to internal config")
-        tmp.code2dfd_config.read(args.config_path)
+        code2dfd_config.read(args.config_path)
         # global ini_config
 
     if args.repo_url:
-        tmp.code2dfd_config.set("Repository", "url", args.repo_url)
+        code2dfd_config.set("Repository", "url", args.repo_url)
     elif args.github_handle:
-        tmp.code2dfd_config.set("Repository", "url", f"https://github.com/{args.github_handle.strip('/')}")
-    elif not tmp.code2dfd_config.has_option("Repository", "url"):
+        code2dfd_config.set("Repository", "url", f"https://github.com/{args.github_handle.strip('/')}")
+    elif not code2dfd_config.has_option("Repository", "url"):
         raise AttributeError("Parameter [Repository][url] must be provided either in config file or by --repo_url")
 
     if args.repo_local_path:
-        tmp.code2dfd_config.set("Repository", "local_path", args.local_path)
-    elif not tmp.code2dfd_config.has_option("Repository", "local_path"):
-        tmp.code2dfd_config.set("Repository", "local_path", os.path.join(os.getcwd(), "analysed_repositories"))
+        code2dfd_config.set("Repository", "local_path", args.local_path)
+    elif not code2dfd_config.has_option("Repository", "local_path"):
+        code2dfd_config.set("Repository", "local_path", os.path.join(os.getcwd(), "analysed_repositories"))
 
     if args.development_mode:
-        tmp.code2dfd_config.set("Analysis Settings", "development_mode", "True")
+        code2dfd_config.set("Analysis Settings", "development_mode", "True")
 
     if args.commit is not None:
         commit = args.commit[:7]
-        tmp.code2dfd_config.set("Repository", "commit", commit)
-    elif tmp.code2dfd_config.has_option("Repository", "commit"):
-        commit = tmp.code2dfd_config.get("Repository", "commit")[:7]
-        tmp.code2dfd_config.set("Repository", "commit", commit)
+        code2dfd_config.set("Repository", "commit", commit)
+    elif code2dfd_config.has_option("Repository", "commit"):
+        commit = code2dfd_config.get("Repository", "commit")[:7]
+        code2dfd_config.set("Repository", "commit", commit)
 
     perform_analysis()
 

@@ -4,7 +4,7 @@ import core.file_interaction as fi
 import core.parse_files as parse
 import technology_specific_extractors.environment_variables as env
 import core.technology_switch as tech_sw
-import core.config as tmp
+from core.config import code2dfd_config
 import output_generators.traceability as traceability
 
 
@@ -229,7 +229,7 @@ def parse_config_files(config_server: str, config_file_path: str, config_file_pa
     # external (other github repository) didn't work, look locally
     if config_file_path_local:
 
-        local_path = tmp.code2dfd_config["Repository"]["local_path"]
+        local_path = code2dfd_config["Repository"]["local_path"]
         config_file_path_local = os.path.relpath(config_file_path_local, start=local_path)
 
         new_contents = fi.get_repo_contents_local(config_file_path_local)

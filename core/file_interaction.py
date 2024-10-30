@@ -5,7 +5,7 @@ from pathlib import Path, PurePosixPath
 
 from output_generators.logger import logger
 import core.technology_switch as tech_sw
-import core.config as tmp
+from core.config import code2dfd_config
 
 
 count = 0
@@ -61,7 +61,7 @@ def search_keywords(keywords: str):
     """Searches keywords locally using grep.
     """
 
-    repo_folder = tmp.code2dfd_config["Repository"]["local_path"]
+    repo_folder = code2dfd_config["Repository"]["local_path"]
 
     results = dict()
 
@@ -171,7 +171,7 @@ def file_as_lines(path):
     """Downloads and splits raw file into lines.
     """
 
-    local_path = tmp.code2dfd_config.get("Repository", "local_path")
+    local_path = code2dfd_config.get("Repository", "local_path")
     local_path = os.path.join(local_path, path)
 
     with open(local_path, "r") as file:
@@ -329,7 +329,7 @@ def resolve_url(url: str, microservice: str, dfd) -> str:
 def check_dockerfile(build_path: str):
     """Checks if under the service's build-path there is a dockerfile. If yes, returns it.
     """
-    local_repo_path = tmp.code2dfd_config["Repository"]["local_path"]
+    local_repo_path = code2dfd_config["Repository"]["local_path"]
 
     # find docker-compose path, since build-path is relative to that
     raw_files = get_file_as_lines("docker-compose.yml")
@@ -368,7 +368,7 @@ def file_exists(file_name: str) -> bool:
     """Checks if a file exists in the repository.
     """
 
-    local_repo_path = tmp.code2dfd_config["Repository"]["local_path"]
+    local_repo_path = code2dfd_config["Repository"]["local_path"]
 
     dirs = list()
     dirs.append(os.scandir(local_repo_path))
@@ -391,7 +391,7 @@ def get_repo_contents_local(path: str) -> set:
 
     repo = set()
 
-    local_repo_path = tmp.code2dfd_config["Repository"]["local_path"]
+    local_repo_path = code2dfd_config["Repository"]["local_path"]
     to_crawl = local_repo_path
 
     if path:
@@ -414,7 +414,7 @@ def get_file_as_yaml(filename: str) -> dict:
 
     files = dict()
 
-    local_path = tmp.code2dfd_config["Repository"]["local_path"]
+    local_path = code2dfd_config["Repository"]["local_path"]
     out = subprocess.Popen(['find', local_path, '-name', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = out.communicate()
 
@@ -437,7 +437,7 @@ def get_file_as_lines(filename: str) -> dict:
 
     files = dict()
 
-    local_path = tmp.code2dfd_config["Repository"]["local_path"]
+    local_path = code2dfd_config["Repository"]["local_path"]
     out = subprocess.Popen(['find', local_path, '-name', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = out.communicate()
 

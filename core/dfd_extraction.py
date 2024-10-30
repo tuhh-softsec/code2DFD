@@ -7,7 +7,7 @@ from pydriller import Repository
 
 import output_generators.codeable_model as codeable_model
 import core.technology_switch as tech_sw
-import core.config as tmp
+from core.config import code2dfd_config
 import output_generators.json_architecture as json_architecture
 import output_generators.json_edges as json_edges
 import output_generators.traceability as traceability
@@ -55,21 +55,21 @@ def perform_analysis():
     """
     Entrypoint for the DFD extraction that initializes the repository
     """
-    local_path = tmp.code2dfd_config.get("Repository", "local_path")
-    url_path = tmp.code2dfd_config.get("Repository", "url")
-    tmp.code2dfd_config.add_section("DFD")
+    local_path = code2dfd_config.get("Repository", "local_path")
+    url_path = code2dfd_config.get("Repository", "url")
+    code2dfd_config.add_section("DFD")
 
     os.makedirs(local_path, exist_ok=True)
     repository = Repository(path_to_repo=url_path, clone_repo_to=local_path)
     with repository._prep_repo(url_path) as git_repo:
-        tmp.code2dfd_config.set("Repository", "local_path", str(git_repo.path))
+        code2dfd_config.set("Repository", "local_path", str(git_repo.path))
         head = git_repo.get_head().hash[:7]
-        if tmp.code2dfd_config.has_option("Repository", "commit"):
-            commit = tmp.code2dfd_config.get("Repository", "commit")
+        if code2dfd_config.has_option("Repository", "commit"):
+            commit = code2dfd_config.get("Repository", "commit")
         else:
             commit = head
         repo_name = git_repo.project_name
-        tmp.code2dfd_config.set("Analysis Settings", "output_path", os.path.join(os.getcwd(), "code2DFD_output", repo_name.replace("/", "--"), commit))
+        code2dfd_config.set("Analysis Settings", "output_path", os.path.join(os.getcwd(), "code2DFD_output", repo_name.replace("/", "--"), commit))
         git_repo.checkout(commit)
         print(f"\nStart extraction of DFD for {repo_name} on commit {commit} at {datetime.now().strftime('%H:%M:%S')}")
         codeable_models, traceability_content = DFD_extraction()
@@ -104,13 +104,13 @@ def DFD_extraction():
 
     # Check authentication information of services
     microservices = detect_authentication_scopes(microservices, dfd)
-    tmp.code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+    code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
 
     # Get information flows
-    tmp.code2dfd_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
+    code2dfd_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
 
     new_information_flows = tech_sw.get_information_flows(dfd)
-    external_components = ast.literal_eval(tmp.code2dfd_config["DFD"]["external_components"])
+    external_components = ast.literal_eval(code2dfd_config["DFD"]["external_components"])
 
     # Merge old and new
     for new_flow in new_information_flows.keys():
@@ -147,9 +147,9 @@ def DFD_extraction():
     print("\nFinished extraction")
 
     # Saving
-    tmp.code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
-    tmp.code2dfd_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
-    tmp.code2dfd_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
+    code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+    code2dfd_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
+    code2dfd_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
 
     plaintext.write_plaintext(microservices, information_flows, external_components)
     codeable_models, codeable_models_path = codeable_model.output_codeable_model(microservices, information_flows, external_components)
@@ -171,7 +171,7 @@ def classify_brokers(microservices: dict) -> dict:
 
     microservices = detect_rabbitmq_server(microservices)
     microservices = detect_kafka_server(microservices)
-    tmp.code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+    code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
     return microservices
 
 

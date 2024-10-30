@@ -1,6 +1,6 @@
 import os
 
-import core.config as tmp
+from core.config import code2dfd_config
 
 
 def detect_port(path: str) -> int:
@@ -8,7 +8,7 @@ def detect_port(path: str) -> int:
     """
 
     port = False
-    local_repo_path = tmp.code2dfd_config["Repository"]["local_path"]
+    local_repo_path = code2dfd_config["Repository"]["local_path"]
 
     dirs = list()
     dirs.append(os.scandir(os.path.join(local_repo_path, os.path.dirname(path))))

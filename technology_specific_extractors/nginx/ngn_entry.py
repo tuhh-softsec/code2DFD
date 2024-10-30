@@ -4,7 +4,7 @@ import os
 import core.external_components as ext
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
-import core.config as tmp
+from core.config import code2dfd_config
 import output_generators.traceability as traceability
 
 
@@ -101,7 +101,7 @@ def detect_nginx(microservices: dict, information_flows: dict, external_componen
                     id = 0
                 microservices[id] = dict()
 
-                local_repo_path = tmp.code2dfd_config["Repository"]["local_path"]
+                local_repo_path = code2dfd_config["Repository"]["local_path"]
                 docker_path = os.path.dirname(results[r]["path"])
                 if docker_path and local_repo_path:
                     docker_path = os.path.relpath(docker_path, start=local_repo_path)
