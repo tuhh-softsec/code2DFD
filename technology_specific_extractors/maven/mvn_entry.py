@@ -1,4 +1,3 @@
-import ast
 import os
 import re
 
@@ -23,10 +22,7 @@ def set_microservices(dfd) -> dict:
     """Extracts the list of services from pom.xml files and sets the variable in the tmp-file.
     """
 
-    if code2dfd_config.has_option("DFD", "microservices"):
-        microservices = ast.literal_eval(code2dfd_config["DFD"]["microservices"])
-    else:
-        microservices = dict()
+    microservices = dfd["microservices"]
     microservices_set = set()
 
     pom_files = fi.get_file_as_lines("pom.xml")
@@ -71,9 +67,7 @@ def set_microservices(dfd) -> dict:
     nested_microservices = check_nested_modules(module_dict)
     microservices_set.update(nested_microservices)
 
-    code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))   # Need to escape single percentage signs for ConfigParser
-
-    return microservices
+    dfd["microservices"] = microservices
 
 
 def extract_dependencies(properties: set, pom_file) -> set:

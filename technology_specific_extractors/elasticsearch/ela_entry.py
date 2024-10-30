@@ -1,9 +1,12 @@
 import output_generators.traceability as traceability
 
 
-def detect_elasticsearch(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_elasticsearch(dfd):
     """Detects elasticsearch services.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
 
     elasticsearch = False
     for m in microservices.keys():
@@ -52,4 +55,5 @@ def detect_elasticsearch(microservices: dict, information_flows: dict, dfd) -> d
                     information_flows.pop(p)
 
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows

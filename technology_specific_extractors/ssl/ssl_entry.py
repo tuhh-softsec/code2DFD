@@ -1,8 +1,9 @@
 
-def detect_ssl_services(microservices: dict) -> dict:
+def detect_ssl_services(dfd: dict):
     """Checks if services have ssl enabled.
     """
 
+    microservices = dfd["microservices"]
     for m in microservices.keys():
         for prop in microservices[m]["properties"]:
             if prop[0] == "ssl_enabled":
@@ -23,4 +24,4 @@ def detect_ssl_services(microservices: dict) -> dict:
                 except:
                     microservices[m]["tagged_values"] = [("SSL Protocol", prop[1])]
 
-    return microservices
+    dfd["microservices"] = microservices

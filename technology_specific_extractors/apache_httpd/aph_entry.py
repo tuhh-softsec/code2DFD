@@ -7,14 +7,20 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_apachehttpd_webserver(microservices: dict, information_flows: dict, external_components: dict, dfd) -> dict:
+def detect_apachehttpd_webserver(dfd):
     """Detects apachehttpd webservers and routes if possible.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
+    external_components = dfd["external_components"]
 
     microservices, information_flows, external_components = detect_via_docker(microservices, information_flows, external_components, dfd)
     microservices, information_flows, external_components = detect_via_proxypass(microservices, information_flows, external_components, dfd)
 
-    return microservices, information_flows, external_components
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
+    dfd["external_components"] = external_components
 
 
 def detect_via_docker(microservices: dict, information_flows: dict, external_components: dict, dfd):

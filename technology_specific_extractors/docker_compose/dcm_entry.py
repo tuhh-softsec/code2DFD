@@ -1,4 +1,3 @@
-import ast
 import os
 
 import core.file_interaction as fi
@@ -27,23 +26,23 @@ def set_microservices(dfd) -> None:
         if len(raw_files) == 0:
             raw_files = fi.get_file_as_yaml("docker-compose*")
         if len(raw_files) == 0:
-            microservices = tech_sw.get_microservices(dfd)
+            microservices = dfd["microservices"]
             microservices = clean_pom_names(microservices)
-            code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+            dfd["microservices"] = microservices
             return
         docker_compose_content = raw_files[0]["content"]
 
-    microservices_set, properties_dict = dcm_parser.extract_microservices(docker_compose_content, raw_files[0]["path"])
+    microservices_set, properties_dict = dcm_parser.extract_microservices(docker_compose_content, raw_files[0]["path"], dfd)
 
     if not microservices_set:
-        microservices = tech_sw.get_microservices(dfd)
+        microservices = dfd["microservices"]
         microservices = clean_pom_names(microservices)
-        code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+        dfd["microservices"] = microservices
         return
-    microservices = dictionarify(microservices_set, properties_dict)
+    microservices = dictionarify(microservices_set, properties_dict, dfd["microservices"])
     microservices = clean_pom_names(microservices)
 
-    code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+    dfd["microservices"] = microservices
 
 
 def clean_pom_names(microservices: dict) -> dict:
@@ -56,14 +55,9 @@ def clean_pom_names(microservices: dict) -> dict:
     return microservices
 
 
-def dictionarify(elements_set: set, properties_dict: dict) -> dict:
+def dictionarify(elements_set: set, properties_dict: dict, microservices: dict) -> dict:
     """Turns set of services into dictionary.
     """
-
-    if code2dfd_config.has_option("DFD", "microservices"):
-        elements = ast.literal_eval(code2dfd_config["DFD"]["microservices"])
-    else:
-        elements = dict()
 
     for e in elements_set:
         try:
@@ -87,17 +81,17 @@ def dictionarify(elements_set: set, properties_dict: dict) -> dict:
             trace["span"] = e[3][3]
             traceability.add_trace(trace)
         try:
-            id = max(elements.keys()) + 1
+            id = max(microservices.keys()) + 1
         except:
             id = 0
-        elements[id] = dict()
+        microservices[id] = dict()
 
-        elements[id]["name"] = e[0]
-        elements[id]["image"] = e[1]
-        elements[id]["type"] = e[2]
-        elements[id]["properties"] = properties
-        elements[id]["stereotype_instances"] = stereotypes
-        elements[id]["tagged_values"] = tagged_values
+        microservices[id]["name"] = e[0]
+        microservices[id]["image"] = e[1]
+        microservices[id]["type"] = e[2]
+        microservices[id]["properties"] = properties
+        microservices[id]["stereotype_instances"] = stereotypes
+        microservices[id]["tagged_values"] = tagged_values
 
         trace = dict()
         trace["item"] = e[0]#.replace("pom_", "")
@@ -106,7 +100,7 @@ def dictionarify(elements_set: set, properties_dict: dict) -> dict:
         trace["span"] = e[4][2]
         traceability.add_trace(trace)
 
-    return elements
+    return microservices
 
 
 def set_information_flows(dfd):
@@ -115,12 +109,8 @@ def set_information_flows(dfd):
 
     global docker_compose_content
 
-    if code2dfd_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(code2dfd_config["DFD"]["information_flows"])
-    else:
-        information_flows = dict()
-
     microservices = tech_sw.get_microservices(dfd)
+    information_flows = dfd["information_flows"]
 
     # Download docker-compose file
     if not docker_compose_content:
@@ -134,9 +124,7 @@ def set_information_flows(dfd):
         docker_compose_content = raw_files[0]["content"]
 
     information_flows = dcm_parser.extract_information_flows(docker_compose_content, microservices, information_flows)
-
-    code2dfd_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
-    return information_flows
+    dfd["information_flows"] = information_flows
 
 
 def get_environment_variables(docker_compose_file_URL: str) -> set:

@@ -8,17 +8,21 @@ from core.config import code2dfd_config
 import output_generators.traceability as traceability
 
 
-def detect_spring_config(microservices: dict, information_flows: dict, external_components: dict, dfd) -> dict:
+def detect_spring_config(dfd: dict):
     """Detects Spring Cloud Config server and connections to it. And parses config files.
     """
-
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
+    external_components = dfd["external_components"]
     config_server, config_path = False, False
     microservices, config_server, config_path, config_file_path, config_repo_uri, config_server_ports, config_file_path_local = detect_config_server(microservices, dfd)
     if config_file_path or config_repo_uri or config_file_path_local:
         microservices, information_flows, external_components = parse_config_files(config_server, config_file_path, config_file_path_local, config_repo_uri, microservices, information_flows, external_components)
     microservices, information_flows = detect_config_clients(microservices, information_flows, config_server, config_server_ports)
 
-    return microservices, information_flows, external_components
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
+    dfd["external_components"] = external_components
 
 
 def detect_config_server(microservices: dict, dfd):

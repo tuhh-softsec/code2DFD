@@ -1,6 +1,7 @@
 import output_generators.traceability as traceability
 
-def classify_internal_infrastructural(microservices: dict) -> dict:
+
+def classify_internal_infrastructural(dfd: dict):
     """Classifies processes as either internal or infrastructural.
     The latter if they are marked as one of the known infrastructural technologies.
     """
@@ -25,6 +26,8 @@ def classify_internal_infrastructural(microservices: dict) -> dict:
                                     "search_engine",
                                     "proxy"
                                     ]
+
+    microservices = dfd["microservices"]
 
     for m in microservices.keys():
         infrastructural = False
@@ -60,5 +63,4 @@ def classify_internal_infrastructural(microservices: dict) -> dict:
                 trace["span"] = "heuristic"
                 traceability.add_trace(trace)
 
-
-    return microservices
+    dfd["microservices"] = microservices

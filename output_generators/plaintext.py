@@ -4,7 +4,11 @@ from pathlib import Path
 from core.config import code2dfd_config
 
 
-def write_plaintext(microservices, information_flows, external_components):
+def write_plaintext(dfd):
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
+    external_components = dfd["external_components"]
+
     output_path = code2dfd_config["Analysis Settings"]["output_path"]
     parts = Path(output_path).parts
     filename = f"{parts[-2]}--{parts[-1]}_results.txt"

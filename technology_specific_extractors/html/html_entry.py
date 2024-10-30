@@ -1,9 +1,6 @@
-import ast
-
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
-from core.config import code2dfd_config
 
 
 def set_information_flows(dfd):
@@ -11,11 +8,7 @@ def set_information_flows(dfd):
     """
 
     microservices = tech_sw.get_microservices(dfd)
-
-    if code2dfd_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(code2dfd_config["DFD"]["information_flows"])
-    else:
-        information_flows = dict()
+    information_flows = dfd["information_flows"]
 
     results = fi.search_keywords("href")
     for r in results.keys():
@@ -52,5 +45,4 @@ def set_information_flows(dfd):
 
                 except:
                     pass
-    code2dfd_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
-    return information_flows
+    dfd["information_flows"] = information_flows

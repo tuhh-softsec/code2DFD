@@ -1,21 +1,15 @@
-import ast
-
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
-from core.config import code2dfd_config
 import output_generators.traceability as traceability
 
 
-def set_information_flows(dfd) -> dict:
+def set_information_flows(dfd):
     """Detects uses of Feign Client in the code.
     """
 
     microservices = tech_sw.get_microservices(dfd)
 
-    if code2dfd_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(code2dfd_config["DFD"]["information_flows"])
-    else:
-        information_flows = dict()
+    information_flows = dfd["information_flows"]
 
     # check for circuit breaker
     results = fi.search_keywords("@EnableFeignClients")     # content, name, path
@@ -94,8 +88,7 @@ def set_information_flows(dfd) -> dict:
 
                     traceability.add_trace(trace)
 
-    code2dfd_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
-    return information_flows
+    dfd["information_flows"] = information_flows
 
 
 def is_microservice(service: str, dfd) -> bool:
@@ -111,8 +104,3 @@ def is_microservice(service: str, dfd) -> bool:
             is_microservice = True
 
     return is_microservice
-
-
-
-
-#

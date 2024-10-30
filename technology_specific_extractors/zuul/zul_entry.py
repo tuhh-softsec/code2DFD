@@ -1,17 +1,20 @@
 import core.external_components as ext
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
-import core.config as tmp
 import output_generators.traceability as traceability
 
 
-def detect_zuul(microservices: dict, information_flows: dict, external_components: dict, dfd) -> dict:
+def detect_zuul(dfd):
     """Detects Zuul gateway if there is one.
     """
 
     # Server (/microservice classification)
     results = fi.search_keywords("@EnableZuulServer")
     new_results = fi.search_keywords("@EnableZuulProxy")
+
+    microservices = tech_sw.get_microservices(dfd)
+    information_flows = dfd["information_flows"]
+    external_components = dfd["external_components"]
 
     for r in new_results.keys():
         try:
@@ -112,5 +115,6 @@ def detect_zuul(microservices: dict, information_flows: dict, external_component
                                 except:
                                     information_flows[id]["tagged_values"] = [("Load Balancer", load_balancer)]
 
-    tmp.code2dfd_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
-    return microservices, information_flows, external_components
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
+    dfd["external_components"] = external_components

@@ -3,9 +3,12 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_grafana(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_grafana(dfd):
     """Detects grafana server and connections.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
 
     grafana_server = str()
     results = fi.search_keywords("grafana/grafana")
@@ -31,4 +34,5 @@ def detect_grafana(microservices: dict, information_flows: dict, dfd) -> dict:
                 trace["span"] = results[r]["span"]
                 traceability.add_trace(trace)
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows

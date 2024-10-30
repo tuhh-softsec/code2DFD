@@ -1,5 +1,3 @@
-import ast
-
 from output_generators.logger import logger
 import technology_specific_extractors.database_connections.dbc_entry as dbc
 import technology_specific_extractors.docker_compose.dcm_entry as dcm
@@ -11,7 +9,6 @@ import technology_specific_extractors.kafka.kfk_entry as kfk
 import technology_specific_extractors.maven.mvn_entry as mvn
 import technology_specific_extractors.rabbitmq.rmq_entry as rmq
 import technology_specific_extractors.resttemplate.rst_entry as rst
-from core.config import code2dfd_config
 
 COMMUNICATIONS_TECH_LIST = {"RabbitMQ": rmq, "Kafka": kfk, "RestTemplate": rst, "FeignClient": fgn,
                             "Implicit Connections": imp, "Database Connections": dbc, "HTML": html,
@@ -22,31 +19,29 @@ def get_microservices(dfd) -> dict:
     """Calls get_microservices from correct container technology or returns existing list.
     """
 
-    if code2dfd_config.has_option("DFD", "microservices"):
-        return ast.literal_eval(code2dfd_config["DFD"]["microservices"])
+    if len(dfd["microservices"]) > 0:
+        return dfd["microservices"]
     else:
         logger.info("Microservices not set yet, start extraction")
 
         mvn.set_microservices(dfd)
         grd.set_microservices(dfd)
         dcm.set_microservices(dfd)
-        if code2dfd_config.has_option("DFD", "microservices"):
-            return ast.literal_eval(code2dfd_config["DFD"]["microservices"])
+        return dfd["microservices"]
 
 
 def get_information_flows(dfd) -> dict:
     """Calls get_information_flows from correct communication technology.
     """
 
-    if code2dfd_config.has_option("DFD", "information_flows"):
-        return ast.literal_eval(code2dfd_config["DFD"]["information_flows"])
+    if len(dfd["information_flows"]) > 0:
+        return dfd["information_flows"]
     else:
         logger.info("Information flows not set yet, start extraction")
         for func in COMMUNICATIONS_TECH_LIST.values():
             func.set_information_flows(dfd)
 
-        if code2dfd_config.has_option("DFD", "information_flows"):
-            return ast.literal_eval(code2dfd_config["DFD"]["information_flows"])
+        return dfd["information_flows"]
 
 
 def detect_microservice(file_path: str, dfd) -> str:

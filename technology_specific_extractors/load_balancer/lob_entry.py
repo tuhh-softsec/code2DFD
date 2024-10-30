@@ -3,9 +3,12 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_load_balancers(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_load_balancers(dfd):
     """Find load balancers.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
 
     results = fi.search_keywords("@LoadBalanced")     # content, name, path
     for r in results.keys():
@@ -50,4 +53,5 @@ def detect_load_balancers(microservices: dict, information_flows: dict, dfd) -> 
                         else:
                             information_flows[i]["tagged_values"] = [('Load Balancer', "Spring Cloud")]
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows

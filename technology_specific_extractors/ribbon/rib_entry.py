@@ -2,13 +2,15 @@ import core.file_interaction as fi
 import core.technology_switch as tech_sw
 
 
-def detect_ribbon_load_balancers(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_ribbon_load_balancers(dfd):
     """Detects load balancing via Ribbon.
     """
 
+    microservices = dfd["microservices"]
+
     microservices = detect_client_side(microservices, dfd)
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
 
 
 def detect_client_side(microservices: dict, dfd) -> dict:

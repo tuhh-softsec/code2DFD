@@ -5,9 +5,13 @@ from pathlib import Path
 from core.config import code2dfd_config
 
 
-def generate_json_architecture(microservices: dict, information_flows: dict, external_components: dict):
+def generate_json_architecture(dfd):
     """Creates JSON file that contains the complete extracted architecture.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
+    external_components = dfd["external_components"]
 
     full_dict = {"microservices": list(microservices.values()),
                  "information_flows": list(information_flows.values()),

@@ -1,6 +1,4 @@
-import ast
 import os
-from pathlib import Path
 
 import core.file_interaction as fi
 from output_generators.logger import logger
@@ -17,10 +15,7 @@ def set_microservices(dfd) -> dict:
     if not used_in_application():
         return False
 
-    if code2dfd_config.has_option("DFD", "microservices"):
-        microservices = ast.literal_eval(code2dfd_config["DFD"]["microservices"])
-    else:
-        microservices = dict()
+    microservices = dfd["microservices"]
 
     gradle_files = fi.get_file_as_lines("build.gradle")
     for gf in gradle_files.keys():
@@ -56,9 +51,7 @@ def set_microservices(dfd) -> dict:
                 except:
                     pass
 
-    code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
-
-    return microservices
+    dfd["microservices"] = microservices
 
 
 def used_in_application() -> bool:

@@ -1,11 +1,12 @@
-
 import output_generators.traceability as traceability
 import technology_specific_extractors.environment_variables as env
 
 
-def set_plaintext_credentials(microservices: dict) -> dict:
+def set_plaintext_credentials(dfd: dict):
     """Goes through properties and sets stereotype and tagged values, if plaintext credentials are found.
     """
+
+    microservices = dfd["microservices"]
 
     for m in microservices.keys():
         plaintext_credentials = False
@@ -63,4 +64,4 @@ def set_plaintext_credentials(microservices: dict) -> dict:
             else:
                 microservices[m]["tagged_values"] = tagged_values
 
-    return microservices
+    dfd["microservices"] = microservices

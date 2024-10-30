@@ -3,9 +3,12 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_spring_admin_server(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_spring_admin_server(dfd):
     """Detects Spring Admin Servers.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
 
     results = fi.search_keywords("@EnableAdminServer")
     admin_server = False
@@ -141,5 +144,5 @@ def detect_spring_admin_server(microservices: dict, information_flows: dict, dfd
 
                 traceability.add_trace(trace)
 
-
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows

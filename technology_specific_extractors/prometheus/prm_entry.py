@@ -6,13 +6,17 @@ from core.config import code2dfd_config
 import output_generators.traceability as traceability
 
 
-def detect_prometheus_server(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_prometheus_server(dfd):
     """Detects prometheus server and adds information flows.
     """
 
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
+
     microservices, information_flows = detect_server_docker(microservices, information_flows, dfd)
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
 
 
 def detect_server_docker(microservices: dict, information_flows: dict, dfd) -> dict:

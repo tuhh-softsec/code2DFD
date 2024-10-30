@@ -6,8 +6,12 @@ from core.config import code2dfd_config
 
 # the used metamodel is microservice_dfds_metamodel.py
 
-def output_codeable_model(microservices, information_flows, external_components):
+def output_codeable_model(dfd):
     """Entry function to creation of codeable models. Calls all necessary helper functions and outputs the codeable model"""
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
+    external_components = dfd["external_components"]
 
     parts = Path(code2dfd_config["Analysis Settings"]["output_path"]).parts
     model_name = f"{parts[-2]}_{parts[-1]}"

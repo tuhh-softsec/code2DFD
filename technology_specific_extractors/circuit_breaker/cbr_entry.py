@@ -2,9 +2,12 @@ import core.file_interaction as fi
 import core.technology_switch as tech_sw
 
 
-def detect_circuit_breakers(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_circuit_breakers(dfd):
     """Find circuit breakers.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
 
     results = fi.search_keywords("@EnableCircuitBreaker")     # content, name, path
     for r in results.keys():
@@ -50,11 +53,5 @@ def detect_circuit_breakers(microservices: dict, information_flows: dict, dfd) -
                                 else:
                                     information_flows[i]["tagged_values"] = [circuit_breaker_tuple]
 
-    return microservices, information_flows
-
-
-def detect_circuit_breaker_tech(path):
-
-    circuit_breaker_tuple = False
-
-    return circuit_breaker_tuple
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows

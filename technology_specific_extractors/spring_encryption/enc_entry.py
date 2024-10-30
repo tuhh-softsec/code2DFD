@@ -2,15 +2,19 @@ import core.file_interaction as fi
 import core.technology_switch as tech_sw
 
 
-def detect_spring_encryption(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_spring_encryption(dfd):
     """Detects use of Spring's crypto module encryption functions.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
 
     microservices = detect_passwordEncoder(microservices, dfd)
     microservices = detect_bytesEncryptor(microservices, dfd)
     microservices = detect_keyGenerator(microservices, dfd)
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
 
 
 def detect_passwordEncoder(microservices: dict, dfd) -> dict:

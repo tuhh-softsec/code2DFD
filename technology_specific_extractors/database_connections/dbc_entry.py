@@ -1,40 +1,21 @@
-import ast
-
 import technology_specific_extractors.environment_variables as env
 import core.technology_switch as tech_sw
 from core.config import code2dfd_config
 import output_generators.traceability as traceability
 
 
-def set_information_flows(dfd) -> set:
+def set_information_flows(dfd):
     """Goes through services and checks if there are connections to databases.
     """
-
-    if code2dfd_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(code2dfd_config["DFD"]["information_flows"])
-    else:
-        information_flows = dict()
-
-    if code2dfd_config.has_option("DFD", "external_components"):
-        external_components = ast.literal_eval(code2dfd_config["DFD"]["external_components"])
-    else:
-        external_components = dict()
-
     microservices = tech_sw.get_microservices(dfd)
+    information_flows = dfd["information_flows"]
+    external_components = dfd["external_components"]
 
     microservices, information_flows, external_components = check_properties(microservices, information_flows, external_components)
 
-    code2dfd_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
-    code2dfd_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
-    code2dfd_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
-    return microservices, information_flows
-
-
-def get_information_flows(microservices: dict, information_flows: dict, external_components: dict) -> dict:
-
-    microservices, information_flows, external_components = check_properties(microservices, information_flows, external_components)
-
-    return microservices, information_flows, external_components
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
+    dfd["external_components"] = external_components
 
 
 def check_properties(microservices: dict, information_flows: dict, external_components: dict) -> dict:
@@ -220,8 +201,6 @@ def check_properties(microservices: dict, information_flows: dict, external_comp
                 except:
                     information_flows[id]["tagged_values"] = [("Username", username.strip())]
 
-            code2dfd_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
-
             trace = dict()
             trace["item"] = "database-" + str(microservices[m]["name"]) + " -> " + microservices[m]["name"]
             trace["file"] = trace_info[0]
@@ -233,9 +212,12 @@ def check_properties(microservices: dict, information_flows: dict, external_comp
     return microservices, information_flows, external_components
 
 
-def clean_database_connections(microservices: dict, information_flows: dict):
+def clean_database_connections(dfd: dict):
     """Removes database connections in wrong direction, which can occur from docker compose.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
 
     for microservice in microservices.values():
         if microservice["type"] == "database_component":
@@ -245,3 +227,6 @@ def clean_database_connections(microservices: dict, information_flows: dict):
                     to_purge.add(i)
             for p in to_purge:
                 del information_flows[p]
+
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows

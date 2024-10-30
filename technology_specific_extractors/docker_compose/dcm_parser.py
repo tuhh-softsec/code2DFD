@@ -1,10 +1,8 @@
-import ast
 import re
 from pathlib import Path
 
 import ruamel.yaml
 
-import output_generators.traceability as traceability
 import technology_specific_extractors.environment_variables as env
 from core.config import code2dfd_config
 
@@ -55,7 +53,7 @@ class MyConstructor(ruamel.yaml.constructor.RoundTripConstructor):
 # end of external code
 
 
-def extract_microservices(file_content, file_name) -> set:
+def extract_microservices(file_content, file_name, dfd) -> set:
     """ Extracts the list of microservices from the docker-compose file autonomously,
     i.e. without asking for user-input in case of errors.
     """
@@ -67,10 +65,7 @@ def extract_microservices(file_content, file_name) -> set:
 
     image = False
     build = False
-    if code2dfd_config.has_option("DFD", "microservices"):
-        microservices_dict =  ast.literal_eval(code2dfd_config["DFD"]["microservices"])
-    else:
-        microservices_dict= dict()
+    microservices_dict = dfd["microservices"]
     microservices_set = set()
     properties_dict = dict()
 
@@ -621,7 +616,7 @@ def extract_microservices(file_content, file_name) -> set:
                 else:
                     microservices_dict[correct_id]["properties"] = properties
 
-    code2dfd_config.set("DFD", "microservices", str(microservices_dict).replace("%", "%%"))
+    dfd["microservices"] = microservices_dict
     return microservices_set, properties_dict
 
 

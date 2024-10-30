@@ -10,9 +10,10 @@ from pathlib import Path
 from core.config import code2dfd_config
 
 
-def generate_json_edges(information_flows: dict):
+def generate_json_edges(dfd: dict):
     """Creates JSON file that contains a list of plain information flows, without annotations.
     """
+    information_flows = dfd["information_flows"]
 
     edges_list = list()
     for i in information_flows.keys():

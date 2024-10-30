@@ -4,16 +4,20 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_spring_oauth(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_spring_oauth(dfd):
     """Detect Spring OAuth Server and connections to it.
     """
+
+    microservices = tech_sw.get_microservices(dfd)
+    information_flows = dfd["information_flows"]
 
     microservices = detect_authorization_server(microservices, dfd)
     microservices = detect_resource_servers(microservices, dfd)
     microservices, information_flows = detect_token_server(microservices, information_flows, dfd)
     microservices = detect_preauthorized_methods(microservices, dfd)
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
 
 
 def detect_authorization_server(microservices: dict, dfd) -> dict:

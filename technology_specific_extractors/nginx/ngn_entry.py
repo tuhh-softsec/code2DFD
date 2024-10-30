@@ -54,9 +54,13 @@ class MyConstructor(ruamel.yaml.constructor.RoundTripConstructor):
 # end of external code
 
 
-def detect_nginx(microservices: dict, information_flows: dict, external_components: dict, dfd) -> dict:
+def detect_nginx(dfd):
     """Detects nginx web applications.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
+    external_components = dfd["external_components"]
 
     web_app = False
     port = False
@@ -279,4 +283,6 @@ def detect_nginx(microservices: dict, information_flows: dict, external_componen
                 # Add flows between web_app and user
                 information_flows = ext.add_user_connections(information_flows, web_app)
 
-    return microservices, information_flows, external_components
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
+    dfd["external_components"] = external_components
