@@ -64,8 +64,8 @@ def perform_analysis():
     with repository._prep_repo(url_path) as git_repo:
         tmp.tmp_config.set("Repository", "local_path", str(git_repo.path))
         head = git_repo.get_head().hash[:7]
-        if tmp.tmp_config.has_option("Analysis Settings", "commit"):
-            commit = tmp.tmp_config.get("Analysis Settings", "commit")
+        if tmp.tmp_config.has_option("Repository", "commit"):
+            commit = tmp.tmp_config.get("Repository", "commit")
         else:
             commit = head
         repo_name = git_repo.project_name

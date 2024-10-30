@@ -43,7 +43,7 @@ def api_invocation(url: str, commit: str) -> dict:
     tmp.tmp_config.set("Repository", "local_path",
                        os.path.join(os.getcwd(), "analysed_repositories"))
     if commit is not None:
-        tmp.tmp_config.set("Analysis Settings", "commit", commit)
+        tmp.tmp_config.set("Repository", "commit", commit)
 
     # Call extraction
     codeable_models, traceability = perform_analysis()
@@ -69,8 +69,8 @@ def cli_invocation():
     repository.add_argument("--repo_url", type=str, help="URL to clone the repository from (might be local path)")
     repository.add_argument("--repo_local_path", type=str, help="Location to clone repository to (default: 'analysed_repositories' in CWD)")
     repository.add_argument("--github_handle", type=str, help="Handle of a GitHub repository containing the application to be analyzed")
+    repository.add_argument("--commit", type=str, help="Analyze repository at this commit")
     settings = parser.add_argument_group("Analysis Settings", "Parameters for additional analysis settings")
-    settings.add_argument("--commit", type=str, help="Analyze repository at this commit")
     settings.add_argument("--development_mode", action='store_true', help="Switch on development mode")
 
     args = parser.parse_args()
@@ -106,10 +106,10 @@ def cli_invocation():
 
     if args.commit is not None:
         commit = args.commit[:7]
-        tmp.tmp_config.set("Analysis Settings", "commit", commit)
-    elif tmp.tmp_config.has_option("Analysis Settings", "commit"):
-        commit = tmp.tmp_config.get("Analysis Settings", "commit")[:7]
-        tmp.tmp_config.set("Analysis Settings", "commit", commit)
+        tmp.tmp_config.set("Repository", "commit", commit)
+    elif tmp.tmp_config.has_option("Repository", "commit"):
+        commit = tmp.tmp_config.get("Repository", "commit")[:7]
+        tmp.tmp_config.set("Repository", "commit", commit)
 
     perform_analysis()
 

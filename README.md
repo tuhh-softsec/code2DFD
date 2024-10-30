@@ -39,10 +39,10 @@ The config file needs to specify the following sections and parameters:
   - `path`: `organization/repository` part of GitHub URL
   - `url`: the full URL of the repository to clone from (may be local path)
   - `local_path`: local directory to clone the repository to (without the repository name itself)
+  - `commit`: hash of the commit to checkout and analyze; repository will be returned to the same commit it was in before analysis; if commit not provided, attempts to checkout `HEAD`
 - Technology profiles: same as in [example config](config/config.ini)
 - Analysis Settings (optional)
   - `development_mode`: boolean, turns on development mode
-  - `commit`: hash of the commit to checkout and analyze; repository will be returned to the same commit it was in before analysis; if commit not provided, attempts to checkout `HEAD`
   
 It is possible to provide these parameters also by command line, see `python3 code2DFD.py --help` for exact usage
 
