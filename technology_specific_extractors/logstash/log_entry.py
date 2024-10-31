@@ -1,9 +1,13 @@
 import output_generators.traceability as traceability
 
 
-def detect_logstash(microservices: dict, information_flows: dict, external_components: dict, dfd) -> dict:
+def detect_logstash(dfd):
     """Detects logstash services.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
+    external_components = dfd["external_components"]
 
     # Service
     logstash = False
@@ -155,4 +159,6 @@ def detect_logstash(microservices: dict, information_flows: dict, external_compo
 
                         traceability.add_trace(trace)
 
-    return microservices, information_flows, external_components
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
+    dfd["external_components"] = external_components

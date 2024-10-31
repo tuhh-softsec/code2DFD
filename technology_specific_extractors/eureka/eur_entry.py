@@ -3,13 +3,15 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_eureka(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_eureka(dfd):
     """Detects Eureka servers if there are any.
     """
 
     # Server (/microservice classification)
     results = fi.search_keywords("@EnableEurekaServer")
 
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
     eureka_server = False
     for r in results.keys():
         eureka_server = tech_sw.detect_microservice(results[r]["path"], dfd)
@@ -78,7 +80,8 @@ def detect_eureka(microservices: dict, information_flows: dict, dfd) -> dict:
 
                 traceability.add_trace(trace)
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
 
 
 def is_eureka(microservice: tuple) -> bool:
@@ -95,8 +98,9 @@ def is_eureka(microservice: tuple) -> bool:
     return False
 
 
-def detect_eureka_server_only(microservices: dict, dfd):
+def detect_eureka_server_only(dfd: dict):
 
+    microservices = dfd["microservices"]
     results = fi.search_keywords("@EnableEurekaServer")
     eureka_servers = set()
     for r in results.keys():
@@ -114,4 +118,4 @@ def detect_eureka_server_only(microservices: dict, dfd):
                 except:
                     microservices[m]["tagged_values"] = ("Service Discovery", "Eureka")
 
-    return microservices
+    dfd["microservices"] = microservices

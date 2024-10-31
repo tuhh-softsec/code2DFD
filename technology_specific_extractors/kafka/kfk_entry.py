@@ -5,43 +5,36 @@ import yaml
 
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
-import tmp.tmp as tmp
 import output_generators.traceability as traceability
 from output_generators.logger import logger
 
 kafka_server = str()
 
 
-def set_information_flows(dfd) -> set:
+def set_information_flows(dfd):
     """Connects incoming endpoints, outgoing endpoints, and routings to information flows
     """
 
-    if tmp.tmp_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])
-    else:
-        information_flows = dict()
-
-
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
 
     incoming_endpoints = get_incoming_endpoints(dfd)
     outgoing_endpoints = get_outgoing_endpoints(dfd)
 
-    new_information_flows = match_incoming_to_outgoing_endpoints(microservices, incoming_endpoints, outgoing_endpoints)
+    new_information_flows = match_incoming_to_outgoing_endpoints(microservices, information_flows, incoming_endpoints, outgoing_endpoints)
 
     # merge old and new flows
-    for ni in new_information_flows.keys():
-        try:
-            id = max(information_flows.keys()) + 1
-        except:
-            id = 0
-        information_flows[id] = new_information_flows[ni]
+    if new_information_flows is not information_flows:
+        for ni in new_information_flows.keys():
+            try:
+                id = max(information_flows.keys()) + 1
+            except:
+                id = 0
+            information_flows[id] = new_information_flows[ni]
 
     information_flows = detect_stream_binders(microservices, information_flows, dfd)
 
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
-
-    return information_flows
+    dfd["information_flows"] = information_flows
 
 
 def get_incoming_endpoints(dfd) -> set:
@@ -178,16 +171,11 @@ def asset_is_input(variable: str, file, line_nr: int) -> bool:
     return False
 
 
-def match_incoming_to_outgoing_endpoints(microservices: dict, incoming_endpoints: set, outgoing_endpoints: set) -> dict:
+def match_incoming_to_outgoing_endpoints(microservices: dict, information_flows: dict, incoming_endpoints: set, outgoing_endpoints: set) -> dict:
     """Finds information flows by regexing routing keys of outgoing endpoints to queues of incoming endpoints.
     """
     # incoming: (topic, microservice, (file, line, span))
     # outgoing: (topic, microservice, asset, (file, line, span))
-
-    if tmp.tmp_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])
-    else:
-        information_flows = dict()
 
     kafka_server = False
     for id in microservices.keys():
@@ -310,12 +298,13 @@ def match_incoming_to_outgoing_endpoints(microservices: dict, incoming_endpoints
     return information_flows
 
 
-def detect_kafka_server(microservices: dict) -> dict:
+def detect_kafka_server(dfd: dict) -> dict:
     """Detects and marks kafka server.
     """
 
     global kafka_server
 
+    microservices = dfd["microservices"]
     raw_files = fi.get_file_as_yaml("docker-compose.yml")
     if len(raw_files) == 0:
         raw_files = fi.get_file_as_yaml("docker-compose.yaml")
@@ -379,7 +368,7 @@ def detect_kafka_server(microservices: dict) -> dict:
                             traceability.add_trace(trace)
             except:
                 pass
-    return microservices
+    dfd["microservices"] = microservices
 
 
 def detect_stream_binders(microservices: dict, information_flows: dict, dfd) -> dict:

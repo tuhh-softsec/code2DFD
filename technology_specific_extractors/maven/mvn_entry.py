@@ -1,13 +1,11 @@
-import ast
 import os
 import re
 
 import core.file_interaction as fi
 from output_generators.logger import logger
 import core.parse_files as parse
-import core.technology_switch as tech_sw
 import technology_specific_extractors.docker.dcr_entry as dcr
-import tmp.tmp as tmp
+from core.config import code2dfd_config
 import output_generators.traceability as traceability
 
 try:
@@ -23,10 +21,7 @@ def set_microservices(dfd) -> dict:
     """Extracts the list of services from pom.xml files and sets the variable in the tmp-file.
     """
 
-    if tmp.tmp_config.has_option("DFD", "microservices"):
-        microservices = ast.literal_eval(tmp.tmp_config["DFD"]["microservices"])
-    else:
-        microservices = dict()
+    microservices = dfd["microservices"]
     microservices_set = set()
 
     pom_files = fi.get_file_as_lines("pom.xml")
@@ -71,9 +66,7 @@ def set_microservices(dfd) -> dict:
     nested_microservices = check_nested_modules(module_dict)
     microservices_set.update(nested_microservices)
 
-    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))   # Need to escape single percentage signs for ConfigParser
-
-    return microservices
+    dfd["microservices"] = microservices
 
 
 def extract_dependencies(properties: set, pom_file) -> set:
@@ -81,7 +74,7 @@ def extract_dependencies(properties: set, pom_file) -> set:
     """
 
     file_name = pom_file["path"]
-    pom_path = os.path.join(tmp.tmp_config.get("Repository", "local_path"), file_name)
+    pom_path = os.path.join(code2dfd_config.get("Repository", "local_path"), file_name)
     tree = etree.parse(pom_path)
     root = tree.getroot()
 
@@ -100,7 +93,7 @@ def extract_modules(pom_file: dict) -> list:
     """
 
     file_name = pom_file["path"]
-    pom_path = os.path.join(tmp.tmp_config.get("Repository", "local_path"), file_name)
+    pom_path = os.path.join(code2dfd_config.get("Repository", "local_path"), file_name)
     tree = etree.parse(pom_path)
     root = tree.getroot()
 
@@ -146,7 +139,7 @@ def parse_properties_file(pom_path: str):
     # find properties file
     path = os.path.dirname(pom_path)
 
-    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
+    local_repo_path = code2dfd_config["Repository"]["local_path"]
 
     dirs = list()
     dirs.append(os.scandir(os.path.join(local_repo_path, path)))
@@ -185,7 +178,7 @@ def extract_servicename_pom_file(pom_file) -> str:
 
     microservice = [False, False]
     file_name = pom_file["path"]
-    pom_path = os.path.join(tmp.tmp_config.get("Repository", "local_path"), file_name)
+    pom_path = os.path.join(code2dfd_config.get("Repository", "local_path"), file_name)
     tree = etree.parse(pom_path)
     root = tree.getroot()
 
@@ -219,12 +212,12 @@ def detect_microservice(file_path, dfd):
     """
 
     microservice = [False, False]
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
 
     path = file_path
     found_pom = False
 
-    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
+    local_repo_path = code2dfd_config["Repository"]["local_path"]
 
     dirs = list()
     path = os.path.dirname(path)

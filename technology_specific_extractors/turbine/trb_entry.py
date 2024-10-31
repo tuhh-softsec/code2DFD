@@ -2,19 +2,22 @@ import os
 
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
-import tmp.tmp as tmp
+from core.config import code2dfd_config
 import output_generators.traceability as traceability
 
 
-def detect_turbine(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_turbine(dfd):
     """Detects turbine server.
     """
 
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
     microservices = detect_turbine_server(microservices, dfd)
     microservices, information_flows = detect_turbineamqp(microservices, information_flows, dfd)
     microservices, information_flows = detect_turbine_stream(microservices, information_flows, dfd)
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
 
 
 def detect_turbine_server(microservices: dict, dfd) -> dict:
@@ -155,7 +158,7 @@ def detect_turbine_stream(microservices: dict, information_flows: dict, dfd) -> 
 
                         found_pom = False
 
-                        local_repo_path = tmp.tmp_config["Repository"]["local_path"]
+                        local_repo_path = code2dfd_config["Repository"]["local_path"]
 
                         dirs = list()
 

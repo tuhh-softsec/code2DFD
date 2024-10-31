@@ -2,9 +2,11 @@ import core.file_interaction as fi
 import core.technology_switch as tech_sw
 
 
-def detect_endpoints(microservices: dict, dfd) -> dict:
+def detect_endpoints(dfd):
     """Detects endpoints offered via @RepositoryRestResource
     """
+
+    microservices = dfd["microservices"]
 
     results = fi.search_keywords("@RepositoryRestResource")
     for r in results.keys():
@@ -22,4 +24,4 @@ def detect_endpoints(microservices: dict, dfd) -> dict:
                                 microservices[m]["tagged_values"].append(("Endpoints", list(endpoints)))
                             except:
                                 microservices[m]["tagged_values"] = [("Endpoints", list(endpoints))]
-    return microservices
+    dfd["microservices"] = microservices

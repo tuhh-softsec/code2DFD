@@ -1,10 +1,12 @@
 import core.file_interaction as fi
 import output_generators.traceability as traceability
 
-def detect_databases(microservices: dict) -> dict:
+
+def detect_databases(dfd: dict):
     """Detects databases.
     """
 
+    microservices = dfd["microservices"]
     for m in microservices.keys():
         database = False
         if "image" in microservices[m]:
@@ -34,7 +36,7 @@ def detect_databases(microservices: dict) -> dict:
         else:
             microservices = detect_via_docker(microservices, m)
 
-    return microservices
+    dfd["microservices"] = microservices
 
 
 def detect_via_docker(microservices: dict, m: int) -> dict:

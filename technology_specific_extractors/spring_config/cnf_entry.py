@@ -4,21 +4,25 @@ import core.file_interaction as fi
 import core.parse_files as parse
 import technology_specific_extractors.environment_variables as env
 import core.technology_switch as tech_sw
-import tmp.tmp as tmp
+from core.config import code2dfd_config
 import output_generators.traceability as traceability
 
 
-def detect_spring_config(microservices: dict, information_flows: dict, external_components: dict, dfd) -> dict:
+def detect_spring_config(dfd: dict):
     """Detects Spring Cloud Config server and connections to it. And parses config files.
     """
-
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
+    external_components = dfd["external_components"]
     config_server, config_path = False, False
     microservices, config_server, config_path, config_file_path, config_repo_uri, config_server_ports, config_file_path_local = detect_config_server(microservices, dfd)
     if config_file_path or config_repo_uri or config_file_path_local:
         microservices, information_flows, external_components = parse_config_files(config_server, config_file_path, config_file_path_local, config_repo_uri, microservices, information_flows, external_components)
     microservices, information_flows = detect_config_clients(microservices, information_flows, config_server, config_server_ports)
 
-    return microservices, information_flows, external_components
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
+    dfd["external_components"] = external_components
 
 
 def detect_config_server(microservices: dict, dfd):
@@ -229,7 +233,7 @@ def parse_config_files(config_server: str, config_file_path: str, config_file_pa
     # external (other github repository) didn't work, look locally
     if config_file_path_local:
 
-        local_path = tmp.tmp_config["Repository"]["local_path"]
+        local_path = code2dfd_config["Repository"]["local_path"]
         config_file_path_local = os.path.relpath(config_file_path_local, start=local_path)
 
         new_contents = fi.get_repo_contents_local(config_file_path_local)

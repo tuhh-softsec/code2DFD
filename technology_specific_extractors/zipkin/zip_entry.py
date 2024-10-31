@@ -1,9 +1,12 @@
 import output_generators.traceability as traceability
 
 
-def detect_zipkin_server(microservices: dict, information_flows: dict, iterative=False) -> dict:
+def detect_zipkin_server(dfd: dict, iterative=False):
     """Detects zipkin server and connections to it.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
 
     zipkin_server_exists, connections_exist = False, False
 
@@ -98,8 +101,10 @@ def detect_zipkin_server(microservices: dict, information_flows: dict, iterative
         microservices[id_]["stereotype_instances"] = ["tracing_server"]
         microservices[id_]["tagged_values"] = [("Tracing Server", "Zipkin")]
 
-
+        dfd["microservices"] = microservices
+        dfd["information_flows"] = information_flows
         if not iterative:
-            microservices, information_flows = detect_zipkin_server(microservices, information_flows, True)
+            detect_zipkin_server(dfd, True)
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows

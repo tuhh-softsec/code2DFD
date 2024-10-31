@@ -1,11 +1,9 @@
-import ast
 import re
 
 import yaml
 
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
-import tmp.tmp as tmp
 import output_generators.traceability as traceability
 from output_generators.logger import logger
 
@@ -17,28 +15,24 @@ def set_information_flows(dfd) -> set:
     if not used_in_application():
         return
 
-    if tmp.tmp_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])
-    else:
-        information_flows = dict()
-
+    information_flows = dfd["information_flows"]
     new_information_flows = dict()
 
     routings = get_routings()
     incoming_endpoints = get_incoming_endpoints(dfd)
     outgoing_endpoints = get_outgoing_endpoints(routings, dfd)
-    new_information_flows = match_incoming_to_outgoing_endpoints(incoming_endpoints, outgoing_endpoints, dfd)
+    new_information_flows = match_incoming_to_outgoing_endpoints(information_flows, incoming_endpoints, outgoing_endpoints, dfd)
 
     # merge old and new flows
-    for ni in new_information_flows.keys():
-        try:
-            id = max(information_flows.keys()) + 1
-        except:
-            id = 0
-        information_flows[id] = new_information_flows[ni]
+    if new_information_flows is not information_flows:
+        for flow in new_information_flows.values():
+            try:
+                id = max(information_flows.keys()) + 1
+            except:
+                id = 0
+            information_flows[id] = flow
 
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
-    return information_flows
+    dfd["information_flows"] = information_flows
 
 
 def used_in_application():
@@ -148,19 +142,14 @@ def get_outgoing_endpoints(routings: set, dfd) -> set:
     return outgoing_endpoints
 
 
-def match_incoming_to_outgoing_endpoints(incoming_endpoints: set, outgoing_endpoints: set, dfd) -> dict:
+def match_incoming_to_outgoing_endpoints(information_flows: dict, incoming_endpoints: set, outgoing_endpoints: set, dfd):
     """Finds information flows by regexing routing keys of outgoing endpoints to queues of incoming endpoints.
     """
 
     # outgoing: (exchange, routingkey, microservice, (file, line, span))
     # incoming: (queue, microservice, (file, line, span))
 
-    if tmp.tmp_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])
-    else:
-        information_flows = dict()
-
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     rabbit_server = False
     for id in microservices.keys():
         if ("Message Broker", "RabbitMQ") in microservices[id]["tagged_values"]:
@@ -304,14 +293,15 @@ def match_incoming_to_outgoing_endpoints(incoming_endpoints: set, outgoing_endpo
 
             traceability.add_trace(trace)
 
-    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+    dfd["microservices"] = microservices
     return information_flows
 
 
-def detect_rabbitmq_server(microservices: dict) -> dict:
+def detect_rabbitmq_server(dfd: dict) -> dict:
     """Detects RabbitMQ server.
     """
 
+    microservices = dfd["microservices"]
     raw_files = fi.get_file_as_yaml("docker-compose.yml")
     if len(raw_files) == 0:
         raw_files = fi.get_file_as_yaml("docker-compose.yaml")
@@ -395,4 +385,4 @@ def detect_rabbitmq_server(microservices: dict) -> dict:
             except:
                 pass
 
-    return microservices
+    dfd["microservices"] = microservices

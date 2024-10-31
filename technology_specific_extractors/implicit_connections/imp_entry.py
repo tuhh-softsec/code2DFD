@@ -1,25 +1,18 @@
-import ast
 import os
 
 import yaml
 
 import core.file_interaction as fi
 from output_generators.logger import logger
-import core.technology_switch as tech_sw
-import tmp.tmp as tmp
 import output_generators.traceability as traceability
 
 
-def set_information_flows(dfd) -> dict:
+def set_information_flows(dfd):
     """Adds connections based on parsed config files.
     """
 
-    if tmp.tmp_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])
-    else:
-        information_flows = dict()
-
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
 
     # Weavescope
     new_information_flows = weavescope(microservices)
@@ -40,8 +33,7 @@ def set_information_flows(dfd) -> dict:
             id = 0
         information_flows[id] = new_information_flows[ni]
 
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
-    return information_flows
+    dfd["information_flows"] = information_flows
 
 
 def weavescope(microservices):

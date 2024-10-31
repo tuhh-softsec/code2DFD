@@ -4,9 +4,13 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_spring_cloud_gateway(microservices: dict, information_flows: dict, external_components: dict, dfd) -> dict:
+def detect_spring_cloud_gateway(dfd):
     """Detetcs Spring Cloud Gateway.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
+    external_components = dfd["external_components"]
 
     server = False
     results = fi.search_keywords("spring-cloud-starter-gateway")
@@ -84,4 +88,6 @@ def detect_spring_cloud_gateway(microservices: dict, information_flows: dict, ex
                     trace["span"] = prop[2][2]
                     traceability.add_trace(trace)
 
-    return microservices, information_flows, external_components
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
+    dfd["external_components"] = external_components

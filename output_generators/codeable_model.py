@@ -1,15 +1,19 @@
 import os
 from pathlib import Path
 
-import tmp.tmp as tmp
+from core.config import code2dfd_config
 
 
 # the used metamodel is microservice_dfds_metamodel.py
 
-def output_codeable_model(microservices, information_flows, external_components):
+def output_codeable_model(dfd):
     """Entry function to creation of codeable models. Calls all necessary helper functions and outputs the codeable model"""
 
-    parts = Path(tmp.tmp_config["Analysis Settings"]["output_path"]).parts
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
+    external_components = dfd["external_components"]
+
+    parts = Path(code2dfd_config["Analysis Settings"]["output_path"]).parts
     model_name = f"{parts[-2]}_{parts[-1]}"
 
     file_content = header()
@@ -129,7 +133,7 @@ def create_file(model_name: str, content: str):
     """Writes content to file.
     """
     model_name = model_name.replace("-", "_")
-    output_path = tmp.tmp_config["Analysis Settings"]["output_path"]
+    output_path = code2dfd_config["Analysis Settings"]["output_path"]
     filename = f"{model_name}.py"
     output_path = os.path.join(output_path, filename)
 

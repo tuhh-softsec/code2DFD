@@ -1,21 +1,14 @@
-import ast
-
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
-import tmp.tmp as tmp
 
 
 def set_information_flows(dfd):
     """Looks for connections between services via html sites / href's.
     """
 
-    microservices = tech_sw.get_microservices(dfd)
-
-    if tmp.tmp_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])
-    else:
-        information_flows = dict()
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
 
     results = fi.search_keywords("href")
     for r in results.keys():
@@ -52,5 +45,4 @@ def set_information_flows(dfd):
 
                 except:
                     pass
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
-    return information_flows
+    dfd["information_flows"] = information_flows

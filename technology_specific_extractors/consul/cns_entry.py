@@ -1,10 +1,12 @@
 import output_generators.traceability as traceability
 
 
-def detect_consul(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_consul(dfd):
     """Detects Consul server and clients (service discover, monitoring, configuration).
     """
 
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
     # Server
     consul_server = set()
     for m in microservices.keys():
@@ -43,4 +45,5 @@ def detect_consul(microservices: dict, information_flows: dict, dfd) -> dict:
 
                             traceability.add_trace(trace)
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows

@@ -4,8 +4,7 @@ import subprocess
 from pathlib import Path, PurePosixPath
 
 from output_generators.logger import logger
-import core.technology_switch as tech_sw
-import tmp.tmp as tmp
+from core.config import code2dfd_config
 
 
 count = 0
@@ -61,7 +60,7 @@ def search_keywords(keywords: str):
     """Searches keywords locally using grep.
     """
 
-    repo_folder = tmp.tmp_config["Repository"]["local_path"]
+    repo_folder = code2dfd_config["Repository"]["local_path"]
 
     results = dict()
 
@@ -171,44 +170,12 @@ def file_as_lines(path):
     """Downloads and splits raw file into lines.
     """
 
-    local_path = tmp.tmp_config.get("Repository", "local_path")
+    local_path = code2dfd_config.get("Repository", "local_path")
     local_path = os.path.join(local_path, path)
 
     with open(local_path, "r") as file:
         file_as_lines = file.readlines()
     return file_as_lines
-
-
-def detect_microservice(file_path, dfd):
-    """Finds microservice that a file belongs to.
-    """
-
-    microservices_set = tech_sw.get_microservices(dfd)
-    microservices = [microservices_set[x]["name"] for x in microservices_set.keys()]
-
-    file_path_parts = Path(file_path).parts
-    count = 0
-    part = 0
-    found = False
-
-    while part < len(file_path_parts) and not found:
-        for m in microservices:
-            if m == file_path_parts[part]:
-                microservice = m
-                count += 1
-        if count > 0:
-            found = True
-        part += 1
-    if count == 1:
-        return microservice
-    else:
-        print("\tFound " + str(count) + " microservices for file " + str(file_path) +". \
-        \n\tPlease choose microservice that the file belongs to: ")
-        i = 1
-        for m in microservices:
-            print("\t[" + str(i) + "] " + str(m))
-            i += 1
-        return microservices[int(input("\n\t > ")) - 1]
 
 
 def find_variable(parameter: str, file) -> str:
@@ -287,7 +254,7 @@ def resolve_url(url: str, microservice: str, dfd) -> str:
     """Tries to resolve a url into one of the microserices.
     """
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     target_service = False
 
     if "http" in url:
@@ -329,7 +296,7 @@ def resolve_url(url: str, microservice: str, dfd) -> str:
 def check_dockerfile(build_path: str):
     """Checks if under the service's build-path there is a dockerfile. If yes, returns it.
     """
-    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
+    local_repo_path = code2dfd_config["Repository"]["local_path"]
 
     # find docker-compose path, since build-path is relative to that
     raw_files = get_file_as_lines("docker-compose.yml")
@@ -368,7 +335,7 @@ def file_exists(file_name: str) -> bool:
     """Checks if a file exists in the repository.
     """
 
-    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
+    local_repo_path = code2dfd_config["Repository"]["local_path"]
 
     dirs = list()
     dirs.append(os.scandir(local_repo_path))
@@ -391,7 +358,7 @@ def get_repo_contents_local(path: str) -> set:
 
     repo = set()
 
-    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
+    local_repo_path = code2dfd_config["Repository"]["local_path"]
     to_crawl = local_repo_path
 
     if path:
@@ -414,7 +381,7 @@ def get_file_as_yaml(filename: str) -> dict:
 
     files = dict()
 
-    local_path = tmp.tmp_config["Repository"]["local_path"]
+    local_path = code2dfd_config["Repository"]["local_path"]
     out = subprocess.Popen(['find', local_path, '-name', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = out.communicate()
 
@@ -437,7 +404,7 @@ def get_file_as_lines(filename: str) -> dict:
 
     files = dict()
 
-    local_path = tmp.tmp_config["Repository"]["local_path"]
+    local_path = code2dfd_config["Repository"]["local_path"]
     out = subprocess.Popen(['find', local_path, '-name', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = out.communicate()
 

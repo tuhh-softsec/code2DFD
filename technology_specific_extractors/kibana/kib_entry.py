@@ -1,8 +1,12 @@
 import output_generators.traceability as traceability
 
-def detect_kibana(microservices: dict, information_flows: dict, dfd) -> dict:
+
+def detect_kibana(dfd):
     """Detects logstash services.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
 
     for m in microservices.keys():
         if "kibana:" in microservices[m]["image"]:
@@ -22,4 +26,5 @@ def detect_kibana(microservices: dict, information_flows: dict, dfd) -> dict:
             trace["span"] = "heuristic, based on image"
             traceability.add_trace(trace)
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows

@@ -2,17 +2,21 @@ import os
 
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
-import tmp.tmp as tmp
+from core.config import code2dfd_config
 import output_generators.traceability as traceability
 
 
-def detect_prometheus_server(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_prometheus_server(dfd):
     """Detects prometheus server and adds information flows.
     """
 
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
+
     microservices, information_flows = detect_server_docker(microservices, information_flows, dfd)
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
 
 
 def detect_server_docker(microservices: dict, information_flows: dict, dfd) -> dict:
@@ -59,7 +63,7 @@ def detect_connections(microservices: dict, information_flows: dict, dockerfile,
     """Parses config file to find connections to prometheus.
     """
 
-    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
+    local_repo_path = code2dfd_config["Repository"]["local_path"]
 
     for line in dockerfile["content"]:
         if "ADD" in line:

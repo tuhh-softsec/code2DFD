@@ -1,9 +1,9 @@
-import output_generators.traceability as traceability
-
-
-def detect_zookeeper(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_zookeeper(dfd):
     """Detects ZooKeeper config services.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
 
     zookeeper_service = False
 
@@ -45,4 +45,5 @@ def detect_zookeeper(microservices: dict, information_flows: dict, dfd) -> dict:
             for p in to_purge:
                 information_flows.pop(p)
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows

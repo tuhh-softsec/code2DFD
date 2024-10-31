@@ -1,10 +1,7 @@
-import ast
-
 import core.file_interaction as fi
 import core.technology_switch as tech_sw
 from output_generators.logger import logger
 import output_generators.traceability as traceability
-import tmp.tmp as tmp
 
 
 def set_information_flows(dfd) -> dict:
@@ -14,10 +11,7 @@ def set_information_flows(dfd) -> dict:
     if not used_in_application():
         return
 
-    if tmp.tmp_config.has_option("DFD", "information_flows"):
-        information_flows = ast.literal_eval(tmp.tmp_config["DFD"]["information_flows"])
-    else:
-        information_flows = dict()
+    information_flows = dfd["information_flows"]
 
     incoming_endpoints = get_incoming_endpoints(dfd)
     add_endpoints_tagged_values(incoming_endpoints, dfd)
@@ -31,8 +25,7 @@ def set_information_flows(dfd) -> dict:
             id = 0
         information_flows[id] = new_information_flows[ni]
 
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
-    return information_flows
+    dfd["information_flows"] = information_flows
 
 
 def used_in_application():
@@ -91,7 +84,6 @@ def get_incoming_endpoints(dfd) -> list:
 
                 bracket_count = adjust_bracket_count(bracket_count, line)
 
-    tmp.tmp_config.set("DFD", "endpoints", str(endpoints))
     return endpoints
 
 
@@ -119,7 +111,7 @@ def add_endpoints_tagged_values(endpoint_tuples: list, dfd):
     """Adds tagged values containing the endpoitns to the microservices.
     """
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     ordered_endpoints = dict()
 
     for endpoint_tuple in endpoint_tuples:
@@ -135,14 +127,14 @@ def add_endpoints_tagged_values(endpoint_tuples: list, dfd):
                     microservices[m]["tagged_values"].append(('Endpoints', list(ordered_endpoints[endpoint])))
                 else:
                     microservices[m]["tagged_values"] = [('Endpoints', list(ordered_endpoints[endpoint]))]
-    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+    dfd["microservices"] = microservices
 
 
 def get_outgoing_endpoints(information_flows: dict, dfd) -> set:
     """Finds API calls from one service to another if restTemplate.exchange() is used in the application.
     """
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
 
     if microservices != None:
         microservices = [microservices[x]["name"] for x in microservices.keys()]
@@ -186,7 +178,7 @@ def get_outgoing_endpoints(information_flows: dict, dfd) -> set:
 def find_rst_variable(parameter: str, file: dict, line_nr: int, information_flows: dict, microservice: str, dfd, count=0):
 
     # check if service name in parameter, if yes, add flow directly
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     for m in microservices.keys():
         if microservices[m]["name"] in parameter:
             try:
@@ -311,7 +303,7 @@ def match_incoming_to_outgoing_endpoints(incoming_endpoints: list, outgoing_endp
     """ Find information flows by matching incomgin to outgoing endpoints. Returns list of flows.
     """
 
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
     information_flows_set = set()
     information_flows = dict()
     for o in outgoing_endpoints:

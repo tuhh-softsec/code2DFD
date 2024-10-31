@@ -1,4 +1,3 @@
-import ast
 from datetime import datetime
 from itertools import combinations
 import os
@@ -7,7 +6,7 @@ from pydriller import Repository
 
 import output_generators.codeable_model as codeable_model
 import core.technology_switch as tech_sw
-import tmp.tmp as tmp
+from core.config import code2dfd_config
 import output_generators.json_architecture as json_architecture
 import output_generators.json_edges as json_edges
 import output_generators.traceability as traceability
@@ -48,27 +47,25 @@ from technology_specific_extractors.zipkin.zip_entry import detect_zipkin_server
 from technology_specific_extractors.zookeeper.zoo_entry import detect_zookeeper
 from technology_specific_extractors.zuul.zul_entry import detect_zuul
 
-from core.DFD import CDFD
-
 
 def perform_analysis():
     """
     Entrypoint for the DFD extraction that initializes the repository
     """
-    local_path = tmp.tmp_config.get("Repository", "local_path")
-    url_path = tmp.tmp_config.get("Repository", "url")
+    local_path = code2dfd_config.get("Repository", "local_path")
+    url_path = code2dfd_config.get("Repository", "url")
 
     os.makedirs(local_path, exist_ok=True)
     repository = Repository(path_to_repo=url_path, clone_repo_to=local_path)
     with repository._prep_repo(url_path) as git_repo:
-        tmp.tmp_config.set("Repository", "local_path", str(git_repo.path))
+        code2dfd_config.set("Repository", "local_path", str(git_repo.path))
         head = git_repo.get_head().hash[:7]
-        if tmp.tmp_config.has_option("Analysis Settings", "commit"):
-            commit = tmp.tmp_config.get("Analysis Settings", "commit")
+        if code2dfd_config.has_option("Repository", "commit"):
+            commit = code2dfd_config.get("Repository", "commit")
         else:
             commit = head
         repo_name = git_repo.project_name
-        tmp.tmp_config.set("Analysis Settings", "output_path", os.path.join(os.getcwd(), "code2DFD_output", repo_name.replace("/", "--"), commit))
+        code2dfd_config.set("Analysis Settings", "output_path", os.path.join(os.getcwd(), "code2DFD_output", repo_name.replace("/", "--"), commit))
         git_repo.checkout(commit)
         print(f"\nStart extraction of DFD for {repo_name} on commit {commit} at {datetime.now().strftime('%H:%M:%S')}")
         codeable_models, traceability_content = DFD_extraction()
@@ -82,57 +79,48 @@ def perform_analysis():
 def DFD_extraction():
     """Main function for the extraction, calling all technology-specific extractors, managing output etc.
     """
-    dfd = CDFD("TestDFD")
+    dfd = {
+        "microservices": dict(),
+        "information_flows": dict(),
+        "external_components": dict()
+    }
 
-    microservices, information_flows, external_components = dict(), dict(), dict()
-
-    microservices = tech_sw.get_microservices(dfd)
+    print("Extracting microservices")
+    tech_sw.set_microservices(dfd)
     
-    microservices = detect_databases(microservices)
-    microservices = overwrite_port(microservices)
-    microservices = detect_ssl_services(microservices)
+    detect_databases(dfd)
+    overwrite_port(dfd)
+    detect_ssl_services(dfd)
     print("Extracted services from build- and IaC-files")
 
     # Parse internal and external configuration files
-    microservices, information_flows, external_components = detect_spring_config(microservices, information_flows, external_components, dfd)
-    microservices = detect_eureka_server_only(microservices, dfd)
-    microservices = overwrite_port(microservices)
+    detect_spring_config(dfd)
+    detect_eureka_server_only(dfd)
+    overwrite_port(dfd)
 
     # Classify brokers (needed for information flows)
-    microservices = classify_brokers(microservices)
+    classify_brokers(dfd)
 
     # Check authentication information of services
-    microservices = detect_authentication_scopes(microservices, dfd)
-    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
+    detect_authentication_scopes(dfd)
 
     # Get information flows
-    tmp.tmp_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
+    print("Extracting information flows")
+    tech_sw.set_information_flows(dfd)
 
-    new_information_flows = tech_sw.get_information_flows(dfd)
-    external_components = ast.literal_eval(tmp.tmp_config["DFD"]["external_components"])
-
-    # Merge old and new
-    for new_flow in new_information_flows.keys():
-        try:
-            id = max(information_flows.keys()) + 1
-        except:
-            id = 0
-        information_flows[id] = dict()
-        information_flows[id] = new_information_flows[new_flow]
     print("Extracted information flows from API-calls, message brokers, and database connections")
 
     # Detect everything else / execute all technology implementations
     print("Classifying all services")
-    microservices = tech_sw.get_microservices(dfd)
-    microservices, information_flows, external_components = classify_microservices(microservices, information_flows, external_components, dfd)
+    classify_microservices(dfd)
 
     # Merging
     print("Merging duplicate items")
 
-    merge_duplicate_flows(information_flows)
+    information_flows = merge_duplicate_flows(dfd["information_flows"])
 
-    merge_duplicate_nodes(microservices)
-    merge_duplicate_nodes(external_components)
+    microservices = merge_duplicate_nodes(dfd["microservices"])
+    external_components = merge_duplicate_nodes(dfd["external_components"])
 
     merge_duplicate_annotations(microservices)
     merge_duplicate_annotations(information_flows)
@@ -140,79 +128,75 @@ def DFD_extraction():
 
     print("Cleaning database connections")
 
-    clean_database_connections(microservices, information_flows)
+    dfd = {
+        "microservices": microservices,
+        "information_flows": information_flows,
+        "external_components": external_components
+    }
+
+    clean_database_connections(dfd)
 
     # Printing
     print("\nFinished extraction")
 
     # Saving
-    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
-    tmp.tmp_config.set("DFD", "information_flows", str(information_flows).replace("%", "%%"))
-    tmp.tmp_config.set("DFD", "external_components", str(external_components).replace("%", "%%"))
-
-    plaintext.write_plaintext(microservices, information_flows, external_components)
-    codeable_models, codeable_models_path = codeable_model.output_codeable_model(microservices, information_flows, external_components)
+    plaintext.write_plaintext(dfd)
+    codeable_models, codeable_models_path = codeable_model.output_codeable_model(dfd)
     traceability_content = traceability.output_traceability()
     visualizer.output_png(codeable_models_path)
-    json_edges.generate_json_edges(information_flows)
-    json_architecture.generate_json_architecture(microservices, information_flows, external_components)
-
-    #calculate_metrics.calculate_single_system(repo_path)
-
-    #check_traceability.check_traceability(microservices, information_flows, external_components, traceability_content)
+    json_edges.generate_json_edges(dfd)
+    json_architecture.generate_json_architecture(dfd)
 
     return codeable_models, traceability_content
 
 
-def classify_brokers(microservices: dict) -> dict:
+def classify_brokers(dfd: dict):
     """Classifies kafka and rabbitmq servers, because they are needed for the information flows.
     """
 
-    microservices = detect_rabbitmq_server(microservices)
-    microservices = detect_kafka_server(microservices)
-    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
-    return microservices
+    detect_rabbitmq_server(dfd)
+    detect_kafka_server(dfd)
 
 
-def classify_microservices(microservices: dict, information_flows: dict, external_components: dict, dfd) -> tuple[dict, dict, dict]:
+def classify_microservices(dfd):
     """Tries to determine the microservice's funcitonality.
     """
 
-    microservices, information_flows = detect_eureka(microservices, information_flows, dfd)
-    microservices, information_flows, external_components = detect_zuul(microservices, information_flows, external_components, dfd)
-    microservices, information_flows, external_components = detect_spring_cloud_gateway(microservices, information_flows, external_components, dfd)
-    microservices, information_flows = detect_spring_oauth(microservices, information_flows, dfd)
-    microservices, information_flows = detect_consul(microservices, information_flows, dfd)
-    microservices, information_flows = detect_hystrix_dashboard(microservices, information_flows, dfd)
-    microservices, information_flows = detect_turbine(microservices, information_flows, dfd)
-    microservices, information_flows = detect_local_logging(microservices, information_flows, dfd)
-    microservices, information_flows = detect_zipkin_server(microservices, information_flows, dfd)
-    microservices, information_flows = detect_spring_admin_server(microservices, information_flows, dfd)
-    microservices, information_flows = detect_prometheus_server(microservices, information_flows, dfd)
-    microservices, information_flows = detect_circuit_breakers(microservices, information_flows, dfd)
-    microservices, information_flows = detect_load_balancers(microservices, information_flows, dfd)
-    microservices, information_flows = detect_ribbon_load_balancers(microservices, information_flows, dfd)
-    microservices, information_flows = detect_hystrix_circuit_breakers(microservices, information_flows, dfd)
-    microservices, information_flows = detect_zookeeper(microservices, information_flows, dfd)
-    microservices, information_flows = detect_kibana(microservices, information_flows, dfd)
-    microservices, information_flows = detect_elasticsearch(microservices, information_flows, dfd)
-    microservices, information_flows, external_components = detect_logstash(microservices, information_flows, external_components, dfd)
-    microservices, information_flows, external_components = detect_nginx(microservices, information_flows, external_components, dfd)
-    microservices, information_flows = detect_grafana(microservices, information_flows, dfd)
-    microservices, information_flows = detect_spring_encryption(microservices, information_flows, dfd)
-    microservices = detect_endpoints(microservices, dfd)
+    detect_eureka(dfd)
+    detect_zuul(dfd)
+    detect_spring_cloud_gateway(dfd)
+    detect_spring_oauth(dfd)
+    detect_consul(dfd)
+    detect_hystrix_dashboard(dfd)
+    detect_turbine(dfd)
+    detect_local_logging(dfd)
+    detect_zipkin_server(dfd)
+    detect_spring_admin_server(dfd)
+    detect_prometheus_server(dfd)
+    detect_circuit_breakers(dfd)
+    detect_load_balancers(dfd)
+    detect_ribbon_load_balancers(dfd)
+    detect_hystrix_circuit_breakers(dfd)
+    detect_zookeeper(dfd)
+    detect_kibana(dfd)
+    detect_elasticsearch(dfd)
+    detect_logstash(dfd)
+    detect_nginx(dfd)
+    detect_grafana(dfd)
+    detect_spring_encryption(dfd)
+    detect_endpoints(dfd)
 
-    microservices, information_flows, external_components = detect_miscellaneous(microservices, information_flows, external_components)
-    microservices, information_flows, external_components = detect_apachehttpd_webserver(microservices, information_flows, external_components, dfd)
-    microservices = classify_internal_infrastructural(microservices)
-    microservices = set_plaintext_credentials(microservices)
-
-    return microservices, information_flows, external_components
+    detect_miscellaneous(dfd)
+    detect_apachehttpd_webserver(dfd)
+    classify_internal_infrastructural(dfd)
+    set_plaintext_credentials(dfd)
 
 
-def overwrite_port(microservices: dict) -> dict:
+def overwrite_port(dfd: dict):
     """Writes port from properties to tagged vallues.
     """
+
+    microservices = dfd["microservices"]
 
     for microservice in microservices.values():
         for prop in microservice.get("properties", []):
@@ -240,12 +224,16 @@ def overwrite_port(microservices: dict) -> dict:
                     traceability.add_trace(trace)
                     microservice["tagged_values"] = microservice.get("tagged_values", list()) + [("Port", port)]
 
-    return microservices
+    dfd["microservices"] = microservices
 
 
-def detect_miscellaneous(microservices: dict, information_flows: dict, external_components: dict) -> tuple[dict, dict, dict]:
+def detect_miscellaneous(dfd: dict):
     """Goes through properties extracted for each service to check for some things that don't fit anywhere else (mail servers, external websites, etc.).
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
+    external_components = dfd["external_components"]
 
     for microservice in microservices.values():
         for prop in microservice.get("properties", []):
@@ -393,7 +381,9 @@ def detect_miscellaneous(microservices: dict, information_flows: dict, external_
 
                             traceability.add_trace(trace)
 
-    return microservices, information_flows, external_components
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
+    dfd["external_components"] = external_components
 
 
 def merge_duplicate_flows(information_flows: dict):
@@ -431,6 +421,8 @@ def merge_duplicate_flows(information_flows: dict):
     for k in to_delete:
         del information_flows[k]
 
+    return information_flows
+
 
 def merge_duplicate_nodes(nodes: dict):
     """Merge duplicate nodes
@@ -457,6 +449,8 @@ def merge_duplicate_nodes(nodes: dict):
             to_delete.add(j)
     for k in to_delete:
         del nodes[k]
+
+    return nodes
 
 
 def merge_duplicate_annotations(collection: dict):

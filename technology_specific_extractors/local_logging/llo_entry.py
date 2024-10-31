@@ -3,14 +3,18 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_local_logging(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_local_logging(dfd):
     """Detects if a service performs local logging.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
 
     microservices = detect_loggerfactory(microservices, dfd)
     microservices = detect_lombok(microservices, dfd)
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
 
 
 def detect_loggerfactory(microservices: dict, dfd) -> dict:

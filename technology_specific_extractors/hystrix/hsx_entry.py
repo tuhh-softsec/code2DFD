@@ -3,9 +3,12 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_hystrix_dashboard(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_hystrix_dashboard(dfd):
     """Detects hystrix monitoring dashboards .
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
 
     results = fi.search_keywords("@EnableHystrixDashboard")     # content, name, path
     for r in results.keys():
@@ -31,12 +34,16 @@ def detect_hystrix_dashboard(microservices: dict, information_flows: dict, dfd) 
                         trace["span"] = results[r]["span"]
                         traceability.add_trace(trace)
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows
 
 
-def detect_hystrix_circuit_breakers(microservices: dict, information_flows: dict, dfd) -> dict:
+def detect_hystrix_circuit_breakers(dfd):
     """Detects HystrixCommand.
     """
+
+    microservices = dfd["microservices"]
+    information_flows = dfd["information_flows"]
 
     results = fi.search_keywords("@EnableHystrix")     # content, name, path
     for r in results.keys():
@@ -62,4 +69,5 @@ def detect_hystrix_circuit_breakers(microservices: dict, information_flows: dict
                         trace["span"] = results[r]["span"]
                         traceability.add_trace(trace)
 
-    return microservices, information_flows
+    dfd["microservices"] = microservices
+    dfd["information_flows"] = information_flows

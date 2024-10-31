@@ -7,12 +7,13 @@ import json
 import os
 from pathlib import Path
 
-import tmp.tmp as tmp
+from core.config import code2dfd_config
 
 
-def generate_json_edges(information_flows: dict):
+def generate_json_edges(dfd: dict):
     """Creates JSON file that contains a list of plain information flows, without annotations.
     """
+    information_flows = dfd["information_flows"]
 
     edges_list = list()
     for i in information_flows.keys():
@@ -33,7 +34,7 @@ def write_to_file(architecture_dict):
     """Writes json architecture to file.
     """
 
-    output_path = tmp.tmp_config["Analysis Settings"]["output_path"]
+    output_path = code2dfd_config["Analysis Settings"]["output_path"]
     parts = Path(output_path).parts
     filename = f"{parts[-2]}--{parts[-1]}_edges.json"
     output_path = os.path.join(output_path, filename)

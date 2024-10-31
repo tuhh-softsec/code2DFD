@@ -3,14 +3,12 @@ import core.technology_switch as tech_sw
 import output_generators.traceability as traceability
 
 
-def detect_authentication_scopes(microservices: dict, dfd) -> dict:
+def detect_authentication_scopes(dfd: dict):
     """Detects authentication scopes via HttpSecurity configurations.
     """
 
     configuration_tuples = detect_configurations(dfd)
-    microservices = interpret_configurations(microservices, configuration_tuples)
-
-    return microservices
+    interpret_configurations(dfd, configuration_tuples)
 
 
 def detect_configurations(dfd):
@@ -64,10 +62,11 @@ def detect_configurations(dfd):
     return configuration_tuples
 
 
-def interpret_configurations(microservices: dict, configuration_tuples: list) -> dict:
+def interpret_configurations(dfd: dict, configuration_tuples: list) -> dict:
     """Translates configurations into stereotypes and tagged values.
     """
 
+    microservices = dfd["microservices"]
     for configuration_tuple in configuration_tuples:
         stereotypes, tagged_values = list(), list()
         # create stereotypes and tagged_values
@@ -140,4 +139,4 @@ def interpret_configurations(microservices: dict, configuration_tuples: list) ->
                 except:
                     microservices[m]["tagged_values"] = tagged_values
 
-    return microservices
+    dfd["microservices"] = microservices

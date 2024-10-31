@@ -1,12 +1,9 @@
-import ast
 import os
-from pathlib import Path
 
 import core.file_interaction as fi
 from output_generators.logger import logger
 import core.parse_files as parse
-import core.technology_switch as tech_sw
-import tmp.tmp as tmp
+from core.config import code2dfd_config
 import output_generators.traceability as traceability
 
 
@@ -17,10 +14,7 @@ def set_microservices(dfd) -> dict:
     if not used_in_application():
         return False
 
-    if tmp.tmp_config.has_option("DFD", "microservices"):
-        microservices = ast.literal_eval(tmp.tmp_config["DFD"]["microservices"])
-    else:
-        microservices = dict()
+    microservices = dfd["microservices"]
 
     gradle_files = fi.get_file_as_lines("build.gradle")
     for gf in gradle_files.keys():
@@ -56,9 +50,7 @@ def set_microservices(dfd) -> dict:
                 except:
                     pass
 
-    tmp.tmp_config.set("DFD", "microservices", str(microservices).replace("%", "%%"))
-
-    return microservices
+    dfd["microservices"] = microservices
 
 
 def used_in_application() -> bool:
@@ -89,7 +81,7 @@ def parse_properties_file(gradle_path: str):
     # find properties file
     path = os.path.dirname(gradle_path)
 
-    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
+    local_repo_path = code2dfd_config["Repository"]["local_path"]
 
     dirs = list()
     dirs.append(os.scandir(os.path.join(local_repo_path, path)))
@@ -130,12 +122,12 @@ def detect_microservice(file_path, dfd):
         return False
 
     microservice = [False, False]
-    microservices = tech_sw.get_microservices(dfd)
+    microservices = dfd["microservices"]
 
 
     found_gradle = False
 
-    local_repo_path = tmp.tmp_config["Repository"]["local_path"]
+    local_repo_path = code2dfd_config["Repository"]["local_path"]
 
     dirs = list()
     path = os.path.dirname(file_path)
